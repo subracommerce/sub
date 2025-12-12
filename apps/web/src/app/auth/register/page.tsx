@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/api-client";
 import { useAuthStore } from "@/store/auth";
 import Link from "next/link";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { ConnectWalletButton } from "@/components/connect-wallet-button";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -112,7 +112,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="flex justify-center">
-            <WalletMultiButton className="!bg-primary hover:!bg-primary/90" />
+            <ConnectWalletButton />
           </div>
 
           <div className="text-center text-sm">

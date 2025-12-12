@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bot, Zap, ShieldCheck, Wallet } from "lucide-react";
 import Link from "next/link";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { ConnectWalletButton } from "@/components/connect-wallet-button";
 
 export default function HomePage() {
   return (
@@ -27,7 +27,7 @@ export default function HomePage() {
             </span>
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-            <WalletMultiButton className="!bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 !text-lg !py-6 !px-8 !rounded-lg" />
+            <ConnectWalletButton />
             <Link href="/dashboard">
               <Button size="lg" variant="outline" className="text-lg border-purple-500 text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-950">
                 View Dashboard
