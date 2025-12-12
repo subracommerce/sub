@@ -9,7 +9,7 @@ import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Bot, Plus, LogOut } from "lucide-react";
 import Link from "next/link";
-import { SubraLogo } from "@/components/subra-logo";
+import { SubraLogoText } from "@/components/subra-logo";
 import { ConnectWalletButton } from "@/components/connect-wallet-button";
 import { WalletRequiredBanner } from "@/components/wallet-required-banner";
 import { CreateAgentDialog } from "@/components/create-agent-dialog";
@@ -42,7 +42,7 @@ export default function DashboardPage() {
         setAgents(data.data);
       }
     } catch (error) {
-      // Silent fail - API might not be ready
+      // Silent fail
     } finally {
       setIsLoading(false);
     }
@@ -84,10 +84,7 @@ export default function DashboardPage() {
       {/* Header */}
       <header className="relative border-b-2 border-gray-200 bg-white/80 backdrop-blur">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <SubraLogo className="w-10 h-10" />
-            <h1 className="text-2xl font-bold tracking-tight">SUBRA</h1>
-          </div>
+          <SubraLogoText className="scale-90" />
           <div className="flex items-center gap-3">
             <ConnectWalletButton />
             <Button variant="outline" onClick={() => router.push("/")} className="border-2 border-gray-900">

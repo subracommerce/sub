@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Bot, Zap, Shield, TrendingUp } from "lucide-react";
-import { SubraLogo } from "@/components/subra-logo";
+import { SubraLogoTextLarge } from "@/components/subra-logo";
 
 export default function Home() {
   return (
@@ -14,23 +14,20 @@ export default function Home() {
       <div className="relative">
         <div className="container mx-auto px-4 py-28 flex flex-col items-center text-center">
           {/* Animated Badge */}
-          <div className="mb-8 inline-flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-gray-900 bg-white shadow-lg animate-fade-in backdrop-blur-sm">
+          <div className="mb-10 inline-flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-gray-900 bg-white shadow-lg animate-fade-in backdrop-blur-sm">
             <div className="w-2 h-2 rounded-full bg-gray-900 animate-pulse" />
             <span className="text-sm font-semibold tracking-wide text-gray-900">
               INTELLIGENT AUTONOMOUS AGENTS
             </span>
           </div>
           
-          {/* Logo + Brand */}
-          <div className="relative mb-8 flex items-center gap-6 animate-slide-up">
-            <SubraLogo className="w-24 h-24 md:w-32 md:h-32" />
-            <h1 className="text-8xl md:text-9xl font-bold tracking-tighter">
-              UBRA
-            </h1>
+          {/* Logo + Brand Combined */}
+          <div className="relative mb-8 animate-slide-up">
+            <SubraLogoTextLarge />
           </div>
           
           {/* Animated underline */}
-          <div className="w-32 h-1 bg-gray-900 animate-expand-width mb-8" />
+          <div className="w-32 h-1 bg-gray-900 animate-expand-width mb-10" />
           
           {/* Subheading with Sequential Animation */}
           <div className="mb-12 max-w-3xl space-y-2">
@@ -131,10 +128,6 @@ export default function Home() {
 
       {/* Footer */}
       <div className="relative container mx-auto px-4 py-16 text-center border-t-2 border-gray-200">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <SubraLogo className="w-6 h-6" />
-          <span className="text-sm text-gray-900 font-bold tracking-wide">SUBRA</span>
-        </div>
         <div className="flex items-center justify-center gap-6 text-xs text-gray-500 font-medium">
           <span>Solana Native</span>
           <span>•</span>
