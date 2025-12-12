@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,13 +14,14 @@ import Link from "next/link";
 import bs58 from "bs58";
 
 export default function WalletAuthPage() {
-  const { publicKey, signMessage, disconnect, connected } = useWallet();
-  const { setVisible } = useWalletModal();
+  const { publicKey, signMessage, disconnect, connect, select, wallets, wallet } = useWallet();
   const router = useRouter();
   const { toast } = useToast();
   const { setAuth, isAuthenticated } = useAuthStore();
   const [isSigning, setIsSigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showWalletList, setShowWalletList] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -29,31 +29,59 @@ export default function WalletAuthPage() {
     }
   }, [isAuthenticated, router]);
 
-  // Force disconnect any cached connections on page load
+  // Force disconnect any cached connections
   useEffect(() => {
-    if (connected && !isAuthenticated) {
-      console.log("Clearing cached connection from previous session...");
+    if (publicKey && !isAuthenticated) {
       disconnect();
     }
   }, []);
 
-  // Prevent false connections
-  useEffect(() => {
-    if (connected && !publicKey) {
-      console.warn("False connection detected, disconnecting...");
-      disconnect();
-    }
-  }, [connected, publicKey, disconnect]);
+  const handleSelectWallet = async (walletName: string) => {
+    setIsConnecting(true);
+    setError(null);
+    
+    try {
+      // First, make sure we're disconnected
+      if (wallet) {
+        await disconnect();
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
 
-  const handleConnect = () => {
-    // Clear any old connections first
-    if (connected) {
-      disconnect();
-      setTimeout(() => {
-        setVisible(true);
-      }, 100);
-    } else {
-      setVisible(true);
+      // Find and select the wallet
+      const selectedWallet = wallets.find(w => w.adapter.name === walletName);
+      if (!selectedWallet) {
+        throw new Error("Wallet not found");
+      }
+
+      // Select the wallet adapter
+      select(selectedWallet.adapter.name);
+      
+      // Give it time to register
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Now connect - this WILL trigger Phantom popup
+      await connect();
+      
+      setShowWalletList(false);
+      
+      toast({
+        title: "Wallet Connected!",
+        description: "Now sign the message to authenticate",
+      });
+    } catch (err: any) {
+      console.error("Connection error:", err);
+      if (err.message?.includes("User rejected")) {
+        setError("You declined the connection request");
+      } else {
+        setError(err.message || "Failed to connect wallet");
+      }
+      toast({
+        title: "Connection Failed",
+        description: err.message || "Failed to connect wallet",
+        variant: "destructive",
+      });
+    } finally {
+      setIsConnecting(false);
     }
   };
 
@@ -85,9 +113,12 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
 
       console.log("🔐 Requesting signature from Phantom...");
       
+      toast({
+        title: "Check Phantom",
+        description: "A popup should appear in your Phantom wallet",
+      });
+
       const messageBytes = new TextEncoder().encode(message);
-      
-      // This MUST trigger Phantom popup
       const signatureBytes = await signMessage(messageBytes);
       
       console.log("✅ Signature received!");
@@ -129,7 +160,7 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
 
       let errorMessage = "Failed to sign message";
 
-      if (error.message?.includes("User rejected") || error.code === 4001 || error.code === "USER_REJECTED") {
+      if (error.message?.includes("User rejected") || error.code === 4001) {
         errorMessage = "You declined the signature request";
       } else if (error.message) {
         errorMessage = error.message;
@@ -145,6 +176,8 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
       setIsSigning(false);
     }
   };
+
+  const installedWallets = wallets.filter(w => w.readyState === "Installed");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -170,23 +203,24 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
             </Alert>
           )}
 
-          {!connected && (
+          {/* Not Connected - Show Wallet Selection */}
+          {!publicKey && !showWalletList && (
             <div className="space-y-4">
               <Alert className="border-blue-500 bg-blue-50 dark:bg-blue-950">
                 <AlertDescription className="text-blue-800 dark:text-blue-200">
-                  <p className="font-semibold mb-2">🔐 Secure Connection Process:</p>
+                  <p className="font-semibold mb-2">🔐 Secure Connection:</p>
                   <ol className="text-sm space-y-1 list-decimal list-inside">
                     <li>Make sure Phantom is unlocked</li>
                     <li>Click "Connect Wallet" below</li>
-                    <li>Phantom popup will appear</li>
-                    <li>Select your wallet and approve</li>
-                    <li>Then sign the authentication message</li>
+                    <li>Choose your wallet from the list</li>
+                    <li>Approve the connection in Phantom popup</li>
+                    <li>Sign the authentication message</li>
                   </ol>
                 </AlertDescription>
               </Alert>
 
               <Button
-                onClick={handleConnect}
+                onClick={() => setShowWalletList(true)}
                 className="w-full"
                 size="lg"
               >
@@ -200,7 +234,63 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
             </div>
           )}
 
-          {connected && publicKey && (
+          {/* Wallet Selection List */}
+          {showWalletList && !publicKey && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold">Choose your wallet:</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowWalletList(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+
+              {installedWallets.length > 0 ? (
+                installedWallets.map((w) => (
+                  <Button
+                    key={w.adapter.name}
+                    onClick={() => handleSelectWallet(w.adapter.name)}
+                    disabled={isConnecting}
+                    variant="outline"
+                    className="w-full justify-start h-auto py-3"
+                  >
+                    {w.adapter.icon && (
+                      <img 
+                        src={w.adapter.icon} 
+                        alt={w.adapter.name} 
+                        className="w-8 h-8 mr-3 rounded" 
+                      />
+                    )}
+                    <span className="font-medium">{w.adapter.name}</span>
+                    {isConnecting && <span className="ml-auto text-sm">Connecting...</span>}
+                  </Button>
+                ))
+              ) : (
+                <Alert>
+                  <AlertDescription>
+                    <p className="font-medium mb-2">No wallets detected</p>
+                    <p className="text-sm">
+                      Please install Phantom or another Solana wallet to continue.
+                    </p>
+                    <a 
+                      href="https://phantom.app" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline text-sm block mt-2"
+                    >
+                      Download Phantom →
+                    </a>
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          )}
+
+          {/* Connected - Ready to Sign */}
+          {publicKey && (
             <div className="space-y-4">
               <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
                 <CheckCircle className="h-4 w-4 text-green-600" />
@@ -215,9 +305,9 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
               <Alert>
                 <Shield className="h-4 w-4" />
                 <AlertDescription>
-                  <p className="text-sm font-medium mb-1">Now authenticate with signature</p>
+                  <p className="text-sm font-medium mb-1">Now sign to authenticate</p>
                   <p className="text-xs">
-                    Click below and Phantom will ask you to sign. This proves you own this wallet (free, no gas).
+                    Click below and Phantom will ask you to sign a message. This is free and proves you own this wallet.
                   </p>
                 </AlertDescription>
               </Alert>
@@ -245,6 +335,7 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
                 onClick={() => {
                   disconnect();
                   setError(null);
+                  setShowWalletList(false);
                 }}
                 variant="outline"
                 className="w-full"
@@ -259,7 +350,7 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
                   <AlertDescription className="text-yellow-800 dark:text-yellow-200">
                     <p className="font-bold mb-2">📱 Check Phantom Extension</p>
                     <ul className="text-xs space-y-1 list-disc list-inside">
-                      <li>Look for Phantom icon in browser toolbar</li>
+                      <li>Look for Phantom icon in your browser toolbar</li>
                       <li>A popup should appear with signature request</li>
                       <li>Review the message</li>
                       <li>Click "Sign" or "Approve"</li>
