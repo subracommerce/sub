@@ -10,36 +10,58 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/auth";
 import { ConnectWalletButton } from "@/components/connect-wallet-button";
 import { createAuthMessage, signAuthMessage, verifyWalletAuth, generateNonce } from "@/lib/wallet-auth";
-import { Wallet, Shield, CheckCircle, AlertCircle } from "lucide-react";
+import { Wallet, Shield, CheckCircle, AlertCircle, Lock } from "lucide-react";
 import Link from "next/link";
 
 export default function WalletAuthPage() {
-  const { publicKey, signMessage, connected, disconnect } = useWallet();
+  const wallet = useWallet();
+  const { publicKey, signMessage, connected, connecting, wallet: walletAdapter } = wallet;
   const router = useRouter();
   const { toast } = useToast();
   const { setAuth, isAuthenticated } = useAuthStore();
   const [isSigning, setIsSigning] = useState(false);
   const [step, setStep] = useState<"connect" | "sign" | "success">("connect");
+  const [walletReady, setWalletReady] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
       router.push("/dashboard");
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, router]);
 
+  // Check if wallet is truly ready (unlocked and has public key)
   useEffect(() => {
-    if (connected && publicKey) {
-      setStep("sign");
-    } else {
-      setStep("connect");
-    }
-  }, [connected, publicKey]);
+    const checkWalletReady = async () => {
+      if (connected && publicKey && signMessage) {
+        // Try to get the public key to verify wallet is unlocked
+        try {
+          const key = publicKey.toBase58();
+          if (key && key.length > 0) {
+            setWalletReady(true);
+            setStep("sign");
+          } else {
+            setWalletReady(false);
+            setStep("connect");
+          }
+        } catch (error) {
+          console.error("Wallet not ready:", error);
+          setWalletReady(false);
+          setStep("connect");
+        }
+      } else {
+        setWalletReady(false);
+        setStep("connect");
+      }
+    };
+
+    checkWalletReady();
+  }, [connected, publicKey, signMessage]);
 
   const handleSignIn = async () => {
-    if (!publicKey || !signMessage) {
+    if (!publicKey || !signMessage || !walletReady) {
       toast({
-        title: "Error",
-        description: "Wallet not properly connected",
+        title: "Wallet Not Ready",
+        description: "Please make sure your wallet is unlocked and connected",
         variant: "destructive",
       });
       return;
@@ -54,11 +76,15 @@ export default function WalletAuthPage() {
       // Create message to sign
       const message = createAuthMessage(publicKey.toBase58(), nonce);
 
+      console.log("🔐 Requesting signature from wallet...");
+
       // Request signature (Phantom popup will show)
       const { signature, message: encodedMessage } = await signAuthMessage(
         signMessage,
         message
       );
+
+      console.log("✅ Signature received, verifying...");
 
       // Verify with backend
       const result = await verifyWalletAuth(
@@ -87,7 +113,7 @@ export default function WalletAuthPage() {
         });
       }
     } catch (error: any) {
-      console.error("Sign in error:", error);
+      console.error("❌ Sign in error:", error);
 
       if (
         error.message?.includes("User rejected") ||
@@ -99,10 +125,16 @@ export default function WalletAuthPage() {
           description: "You declined the signature request",
           variant: "destructive",
         });
+      } else if (error.message?.includes("locked")) {
+        toast({
+          title: "Wallet Locked",
+          description: "Please unlock your Phantom wallet first",
+          variant: "destructive",
+        });
       } else {
         toast({
           title: "Error",
-          description: error.message || "Failed to sign message",
+          description: error.message || "Failed to sign message. Make sure your wallet is unlocked.",
           variant: "destructive",
         });
       }
@@ -126,34 +158,69 @@ export default function WalletAuthPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Connection Instructions */}
+          {!connected && !connecting && (
+            <Alert className="border-blue-500 bg-blue-50 dark:bg-blue-950">
+              <Shield className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-800 dark:text-blue-200">
+                <div className="space-y-2">
+                  <p className="font-medium">Before you connect:</p>
+                  <ol className="text-sm space-y-1 list-decimal list-inside">
+                    <li>Make sure Phantom wallet extension is installed</li>
+                    <li>Unlock your wallet with your password</li>
+                    <li>Click "Connect Wallet" below</li>
+                    <li>Approve the connection in Phantom</li>
+                  </ol>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Step 1: Connect Wallet */}
           {step === "connect" && (
             <div className="space-y-4">
-              <Alert>
-                <Shield className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="space-y-2">
-                    <p className="font-medium">Step 1: Connect Your Wallet</p>
-                    <p className="text-sm">
-                      Choose your Solana wallet to continue. We support Phantom,
-                      Solflare, and more.
-                    </p>
-                  </div>
-                </AlertDescription>
-              </Alert>
+              {connecting && (
+                <Alert>
+                  <AlertDescription>
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                      <span>Connecting to wallet...</span>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {!connected && !publicKey && (
+                <Alert>
+                  <Lock className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p className="font-medium">Step 1: Unlock & Connect Your Wallet</p>
+                      <p className="text-sm">
+                        Make sure your Phantom wallet is unlocked, then click below.
+                      </p>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               <ConnectWalletButton />
+              
+              <p className="text-xs text-center text-muted-foreground">
+                Don't have Phantom? <a href="https://phantom.app" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Download here</a>
+              </p>
             </div>
           )}
 
           {/* Step 2: Sign Message */}
-          {step === "sign" && connected && publicKey && (
+          {step === "sign" && walletReady && publicKey && (
             <div className="space-y-4">
               <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800 dark:text-green-200">
                   <div className="space-y-2">
-                    <p className="font-medium">✅ Wallet Connected</p>
-                    <p className="text-sm">
+                    <p className="font-medium">✅ Wallet Connected & Unlocked</p>
+                    <p className="text-sm font-mono">
                       {publicKey.toBase58().slice(0, 8)}...
                       {publicKey.toBase58().slice(-8)}
                     </p>
@@ -167,8 +234,7 @@ export default function WalletAuthPage() {
                   <div className="space-y-2">
                     <p className="font-medium">Step 2: Sign to Authenticate</p>
                     <p className="text-sm">
-                      You'll be asked to sign a message to prove you own this
-                      wallet. This is free and won't cost any gas.
+                      Click below and Phantom will ask you to sign a message. This proves you own this wallet and costs no gas fees.
                     </p>
                   </div>
                 </AlertDescription>
@@ -184,13 +250,28 @@ export default function WalletAuthPage() {
               </Button>
 
               <Button
-                onClick={() => disconnect()}
+                onClick={() => wallet.disconnect()}
                 variant="outline"
                 className="w-full"
               >
                 Use Different Wallet
               </Button>
             </div>
+          )}
+
+          {/* Wallet Connected but Not Ready */}
+          {connected && !walletReady && step === "connect" && (
+            <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
+              <AlertCircle className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+                <div className="space-y-2">
+                  <p className="font-medium">Wallet appears locked or not ready</p>
+                  <p className="text-sm">
+                    Please unlock your Phantom wallet and refresh this page.
+                  </p>
+                </div>
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Step 3: Success */}
@@ -230,4 +311,3 @@ export default function WalletAuthPage() {
     </div>
   );
 }
-
