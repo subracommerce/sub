@@ -9,14 +9,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/auth";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import { ConnectWalletButton } from "@/components/connect-wallet-button";
 import { Wallet, Mail, Plus } from "lucide-react";
-
-// Dynamically import wallet button with no SSR
-const ConnectWalletButton = dynamic(
-  () => import("@/components/connect-wallet-button").then((mod) => ({ default: mod.ConnectWalletButton })),
-  { ssr: false }
-);
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -80,8 +74,7 @@ export default function RegisterPage() {
         setAuth(data.data.user, data.data.token);
         
         // Show wallet credentials to user
-        const walletInfo = `
-🎉 Wallet Created Successfully!
+        const walletInfo = `🎉 Wallet Created Successfully!
 
 📍 Public Address:
 ${data.data.wallet.publicKey}
@@ -89,19 +82,25 @@ ${data.data.wallet.publicKey}
 🔐 Private Key (SAVE THIS!):
 ${data.data.wallet.secretKey}
 
-⚠️ IMPORTANT: Save your private key in a secure location. You'll need it to access your wallet. We don't store this!
-        `;
+⚠️ IMPORTANT: Save your private key in a secure location. You'll need it to access your wallet. We don't store this!`;
 
         // Copy to clipboard
-        navigator.clipboard.writeText(walletInfo);
+        try {
+          await navigator.clipboard.writeText(walletInfo);
+          toast({
+            title: "Wallet Created! 🎉",
+            description: "Your wallet details have been copied to clipboard. Save them securely!",
+            duration: 10000,
+          });
+        } catch (err) {
+          toast({
+            title: "Wallet Created! 🎉",
+            description: "Please save the wallet details shown below!",
+            duration: 10000,
+          });
+        }
 
-        toast({
-          title: "Wallet Created! 🎉",
-          description: "Your wallet details have been copied to clipboard. Save them securely!",
-          duration: 10000,
-        });
-
-        // Also show in alert
+        // Show in alert
         alert(walletInfo);
 
         router.push("/dashboard");
