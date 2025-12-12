@@ -1,28 +1,28 @@
 "use client";
 
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
 import bs58 from "bs58";
 
 export function ConnectWalletButton() {
-  const { publicKey, signMessage, connected, disconnect } = useWallet();
+  const { publicKey, signMessage, connected, disconnect, connecting } = useWallet();
   const { setAuth, isAuthenticated } = useAuthStore();
   const router = useRouter();
   const { toast } = useToast();
+  const hasAuthenticatedRef = useRef(false);
 
-  useEffect(() => {
-    // Only authenticate if connected, has public key, can sign, and not already authenticated
-    if (connected && publicKey && signMessage && !isAuthenticated) {
-      handleWalletAuth();
+  const handleWalletAuth = useCallback(async () => {
+    // Prevent double authentication
+    if (hasAuthenticatedRef.current || !publicKey || !signMessage || isAuthenticated) {
+      return;
     }
-  }, [connected, publicKey, isAuthenticated]);
 
-  const handleWalletAuth = async () => {
-    if (!publicKey || !signMessage) return;
+    hasAuthenticatedRef.current = true;
 
     try {
       // Create message to sign
@@ -62,10 +62,12 @@ export function ConnectWalletButton() {
           description: data.error || "Failed to verify wallet signature",
           variant: "destructive",
         });
+        hasAuthenticatedRef.current = false;
         disconnect();
       }
     } catch (error: any) {
       console.error("Wallet auth failed:", error);
+      hasAuthenticatedRef.current = false;
       
       // Only show error if user didn't cancel
       if (error.message && !error.message.includes("User rejected")) {
@@ -78,7 +80,26 @@ export function ConnectWalletButton() {
       
       disconnect();
     }
-  };
+  }, [publicKey, signMessage, isAuthenticated, setAuth, toast, router, disconnect]);
+
+  useEffect(() => {
+    // Only trigger auth flow when wallet successfully connects AND we're not already authenticated
+    if (connected && publicKey && signMessage && !isAuthenticated && !hasAuthenticatedRef.current) {
+      // Small delay to ensure wallet is fully connected
+      const timer = setTimeout(() => {
+        handleWalletAuth();
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [connected, publicKey, signMessage, isAuthenticated, handleWalletAuth]);
+
+  // Reset authentication flag when wallet disconnects
+  useEffect(() => {
+    if (!connected) {
+      hasAuthenticatedRef.current = false;
+    }
+  }, [connected]);
 
   return (
     <WalletMultiButton className="!bg-primary hover:!bg-primary/90 !text-primary-foreground !rounded-lg !transition-all hover:!scale-105" />

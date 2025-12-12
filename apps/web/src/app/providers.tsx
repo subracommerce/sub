@@ -32,16 +32,8 @@ export function Providers({ children }: { children: ReactNode }) {
   }, [network]);
 
   // @solana/wallet-adapter-wallets includes all the adapters
-  const wallets = useMemo(
-    () => [
-      new PhantomWalletAdapter(),
-      new SolflareWalletAdapter(),
-      new TorusWalletAdapter(),
-      new LedgerWalletAdapter(),
-    ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [network]
-  );
+  // Use empty array to avoid duplicate adapters (wallet-adapter-wallets provides them automatically)
+  const wallets = useMemo(() => [], []);
 
   return (
     <QueryClientProvider client={queryClient}>
