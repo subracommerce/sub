@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Bot, Zap, Shield, TrendingUp } from "lucide-react";
-import { SubraLogoTextLarge } from "@/components/subra-logo";
 
 export default function Home() {
   return (
@@ -21,9 +20,11 @@ export default function Home() {
             </span>
           </div>
           
-          {/* Logo + Brand Combined */}
+          {/* Main Title */}
           <div className="relative mb-8 animate-slide-up">
-            <SubraLogoTextLarge />
+            <h1 className="text-8xl md:text-9xl lg:text-[12rem] font-bold tracking-tighter text-gray-900">
+              SUBRA
+            </h1>
           </div>
           
           {/* Animated underline */}
@@ -72,17 +73,17 @@ export default function Home() {
             { 
               icon: Bot, 
               title: "AI Shopping Agents", 
-              desc: "Agents that search and compare products across marketplaces"
+              desc: "Search and compare products across marketplaces"
             },
             { 
               icon: Zap, 
               title: "Crypto Payments", 
-              desc: "Pay with SOL, USDC seamlessly on Solana"
+              desc: "Pay with SOL, USDC seamlessly"
             },
             { 
               icon: Shield, 
               title: "ZK Receipts", 
-              desc: "Cryptographic proof of every purchase"
+              desc: "Cryptographic proof of purchases"
             },
             { 
               icon: TrendingUp, 
@@ -116,24 +117,24 @@ export default function Home() {
             {
               step: "01",
               title: "Tell Your Agent",
-              desc: "Describe what you want to buy, set your budget and preferences"
+              desc: "Describe what you want to buy, set budget and preferences"
             },
             {
               step: "02",
               title: "Agent Shops",
-              desc: "Your agent searches products, compares prices, and negotiates the best deals"
+              desc: "Searches products, compares prices, negotiates best deals"
             },
             {
               step: "03",
-              title: "Purchase & Proof",
-              desc: "Agent executes purchase with crypto payment and generates ZK receipt"
+              title: "Purchase & Receipt",
+              desc: "Executes purchase with crypto and generates ZK proof"
             },
           ].map((item, i) => (
             <div key={i} className="text-center animate-fade-in group cursor-pointer" style={{ animationDelay: `${i * 200}ms` }}>
               <div className="text-7xl font-bold text-gray-200 mb-4 transition-all duration-500 group-hover:text-gray-900 group-hover:scale-110">
                 {item.step}
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900">{item.title}</h3>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">{item.label}</h3>
               <p className="text-gray-600 leading-relaxed">{item.desc}</p>
             </div>
           ))}

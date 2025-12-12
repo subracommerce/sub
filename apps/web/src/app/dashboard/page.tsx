@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Bot, Plus, LogOut } from "lucide-react";
+import { Bot, Plus, LogOut, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { SubraLogoText } from "@/components/subra-logo";
 import { ConnectWalletButton } from "@/components/connect-wallet-button";
 import { WalletRequiredBanner } from "@/components/wallet-required-banner";
 import { CreateAgentDialog } from "@/components/create-agent-dialog";
@@ -51,7 +50,7 @@ export default function DashboardPage() {
   const handleAgentCreated = () => {
     setShowCreateDialog(false);
     loadAgents();
-    toast({ title: "Agent deployed" });
+    toast({ title: "Agent created" });
   };
 
   const handleCreateAgentClick = () => {
@@ -84,7 +83,12 @@ export default function DashboardPage() {
       {/* Header */}
       <header className="relative border-b-2 border-gray-200 bg-white/80 backdrop-blur">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <SubraLogoText className="scale-90" />
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">SUBRA</h1>
+          </div>
           <div className="flex items-center gap-3">
             <ConnectWalletButton />
             <Button variant="outline" onClick={() => router.push("/")} className="border-2 border-gray-900">
@@ -102,7 +106,7 @@ export default function DashboardPage() {
 
         <div className="mb-8">
           <h2 className="text-4xl font-bold mb-2">Dashboard</h2>
-          <p className="text-gray-600">Agent command center</p>
+          <p className="text-gray-600">Manage your AI shopping agents</p>
         </div>
 
         {/* Stats */}
@@ -117,7 +121,7 @@ export default function DashboardPage() {
           </Card>
           <Card className="border-2 border-gray-200 hover:border-gray-900 transition-all hover:shadow-xl">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Tasks Executed</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600">Purchases</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold">0</div>
@@ -125,7 +129,7 @@ export default function DashboardPage() {
           </Card>
           <Card className="border-2 border-gray-200 hover:border-gray-900 transition-all hover:shadow-xl">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">On-Chain Volume</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600">Total Spent</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold">$0.00</div>
@@ -136,13 +140,13 @@ export default function DashboardPage() {
         {/* Agents */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold">Deployed Agents</h3>
+            <h3 className="text-2xl font-bold">Your Agents</h3>
             <Button 
               onClick={handleCreateAgentClick}
               className="bg-gray-900 hover:bg-black text-white transition-all hover:scale-105 shadow-lg border-2 border-gray-900"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Deploy Agent
+              Create Agent
             </Button>
           </div>
 
@@ -150,16 +154,16 @@ export default function DashboardPage() {
             <Card className="border-2 border-dashed border-gray-300">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Bot className="w-20 h-20 text-gray-300 mb-4" />
-                <h4 className="text-xl font-semibold mb-2">No agents deployed</h4>
+                <h4 className="text-xl font-semibold mb-2">No agents yet</h4>
                 <p className="text-gray-600 mb-6 text-center max-w-md">
-                  Deploy your first autonomous agent
+                  Create your first AI shopping agent
                 </p>
                 <Button 
                   onClick={handleCreateAgentClick}
                   className="bg-gray-900 hover:bg-black text-white border-2 border-gray-900"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Deploy Agent
+                  Create Agent
                 </Button>
               </CardContent>
             </Card>
@@ -181,7 +185,7 @@ export default function DashboardPage() {
                     <CardTitle className="text-xl">{agent.name}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-gray-600 mb-4">{agent.description || "Autonomous agent"}</p>
+                    <p className="text-sm text-gray-600 mb-4">{agent.description || "Shopping agent"}</p>
                     <div className="flex gap-2">
                       <Link href={`/agent/${agent.id}`} className="flex-1">
                         <Button variant="outline" size="sm" className="w-full border-2 border-gray-900">
@@ -190,7 +194,7 @@ export default function DashboardPage() {
                       </Link>
                       <Link href={`/agent/${agent.id}/chat`} className="flex-1">
                         <Button size="sm" className="w-full bg-gray-900 hover:bg-black">
-                          Interface
+                          Chat
                         </Button>
                       </Link>
                     </div>
