@@ -29,31 +29,34 @@ export default function Home() {
             </span>
           </div>
           
-          {/* Main Title with Gradient S */}
-          <div className="relative mb-8 animate-slide-up">
+          {/* Main Title with Split Green/Blue S */}
+          <div className="relative mb-8 animate-explosive-slide-up">
             <h1 className="text-8xl md:text-9xl lg:text-[12rem] font-bold tracking-tighter text-gray-900">
-              <span className="bg-gradient-to-br from-blue-500 via-teal-400 to-green-500 bg-clip-text text-transparent">S</span>UBRA
+              <span className="relative inline-block">
+                <span className="absolute inset-0 bg-gradient-to-b from-green-500 from-50% to-blue-500 to-50% bg-clip-text text-transparent">S</span>
+                <span className="opacity-0">S</span>
+              </span>UBRA
             </h1>
           </div>
           
-          {/* Animated underline */}
-          <div className="w-32 h-1 bg-gradient-to-r from-blue-500 via-teal-400 to-green-500 animate-expand-width mb-10" />
+          {/* Animated expanding underline - full width */}
+          <div className="w-full max-w-4xl h-1 bg-gray-900 animate-expand-from-center mb-10" />
           
           {/* Subheading with Sequential Animation */}
           <div className="mb-12 max-w-3xl space-y-2">
-            <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed animate-slide-up-delay-1">
+            <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed animate-explosive-fade-1">
               AI agents that shop, compare prices, negotiate deals,
             </p>
-            <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed animate-slide-up-delay-2">
+            <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed animate-explosive-fade-2">
               and purchase products for you autonomously with crypto
             </p>
-            <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed animate-slide-up-delay-3">
+            <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed animate-explosive-fade-3">
               payments, ZK receipts, and agent-to-agent marketplace
             </p>
           </div>
           
           {/* CTA Buttons */}
-          <div className="flex gap-4 animate-fade-in-delay-4">
+          <div className="flex gap-4 animate-explosive-fade-4">
             <Link href="/auth/register">
               <Button 
                 size="lg" 
@@ -107,7 +110,7 @@ export default function Home() {
             >
               <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-gray-900 rounded-tr-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
-              <div className="w-14 h-14 mb-6 rounded-lg bg-gradient-to-br from-blue-500 via-teal-400 to-green-500 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+              <div className="w-14 h-14 mb-6 rounded-lg bg-gray-900 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
                 <feature.icon className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-gray-900">{feature.title}</h3>
@@ -140,7 +143,7 @@ export default function Home() {
             },
           ].map((item, i) => (
             <div key={i} className="text-center animate-fade-in group cursor-pointer" style={{ animationDelay: mounted ? `${i * 200}ms` : '0ms' }}>
-              <div className="text-7xl font-bold text-gray-200 mb-4 transition-all duration-500 group-hover:text-transparent group-hover:bg-gradient-to-br group-hover:from-blue-500 group-hover:via-teal-400 group-hover:to-green-500 group-hover:bg-clip-text group-hover:scale-110">
+              <div className="text-7xl font-bold text-gray-200 mb-4 transition-all duration-500 group-hover:text-gray-900 group-hover:scale-110">
                 {item.step}
               </div>
               <h3 className="text-xl font-bold mb-3 text-gray-900">{item.title}</h3>

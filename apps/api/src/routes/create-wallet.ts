@@ -46,19 +46,10 @@ export const createWalletRoutes: FastifyPluginAsync = async (fastify) => {
           email: `${publicKey.slice(0, 8)}@wallet.subra`,
           walletAddress: publicKey,
           passwordHash: hashedPassword,
-          // Store encrypted keys (we'll add these fields to schema)
+          apiKey: encryptedSecretKey,      // Encrypted secret key
+          apiKeyHash: encryptedMnemonic,   // Encrypted mnemonic for backup
         },
       });
-
-      // Store encrypted wallet separately (more secure)
-      // In production, consider using AWS KMS or similar
-      await prisma.$executeRaw`
-        UPDATE users 
-        SET 
-          api_key = ${encryptedSecretKey},
-          api_key_hash = ${encryptedMnemonic}
-        WHERE id = ${user.id}
-      `;
 
       const token = signJWT(
         { userId: user.id, email: user.email },
