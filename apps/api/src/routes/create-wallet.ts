@@ -7,6 +7,7 @@ import bs58 from "bs58";
 import * as bip39 from "bip39";
 import { derivePath } from "ed25519-hd-key";
 import CryptoJS from "crypto-js";
+import { authenticate } from "../middleware/auth";
 
 const createWalletSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
@@ -96,7 +97,7 @@ export const createWalletRoutes: FastifyPluginAsync = async (fastify) => {
 
   // Endpoint to decrypt and access wallet (for transactions)
   fastify.post("/wallet/decrypt", {
-    onRequest: [fastify.authenticate]
+    onRequest: [authenticate]
   }, async (request, reply) => {
     try {
       const { password } = z.object({
