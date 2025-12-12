@@ -84,10 +84,12 @@ export default function DashboardPage() {
       <header className="relative border-b-2 border-gray-200 bg-white/80 backdrop-blur">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 via-teal-400 to-green-500 flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">SUBRA</h1>
+            <h1 className="text-2xl font-bold tracking-tight">
+              <span className="bg-gradient-to-br from-blue-500 via-teal-400 to-green-500 bg-clip-text text-transparent">S</span>UBRA
+            </h1>
           </div>
           <div className="flex items-center gap-3">
             <ConnectWalletButton />
@@ -116,7 +118,7 @@ export default function DashboardPage() {
               <CardTitle className="text-sm font-medium text-gray-600">Active Agents</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">{agents.length}</div>
+              <div className="text-4xl font-bold bg-gradient-to-br from-blue-500 via-teal-400 to-green-500 bg-clip-text text-transparent">{agents.length}</div>
             </CardContent>
           </Card>
           <Card className="border-2 border-gray-200 hover:border-gray-900 transition-all hover:shadow-xl">
@@ -143,7 +145,7 @@ export default function DashboardPage() {
             <h3 className="text-2xl font-bold">Your Agents</h3>
             <Button 
               onClick={handleCreateAgentClick}
-              className="bg-gray-900 hover:bg-black text-white transition-all hover:scale-105 shadow-lg border-2 border-gray-900"
+              className="bg-gradient-to-br from-blue-500 via-teal-400 to-green-500 hover:opacity-90 text-white transition-all hover:scale-105 shadow-lg border-0"
             >
               <Plus className="w-4 h-4 mr-2" />
               Create Agent
@@ -160,7 +162,7 @@ export default function DashboardPage() {
                 </p>
                 <Button 
                   onClick={handleCreateAgentClick}
-                  className="bg-gray-900 hover:bg-black text-white border-2 border-gray-900"
+                  className="bg-gradient-to-br from-blue-500 via-teal-400 to-green-500 hover:opacity-90 text-white border-0"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Create Agent
@@ -173,7 +175,7 @@ export default function DashboardPage() {
                 <Card key={agent.id} className="border-2 border-gray-200 hover:border-gray-900 transition-all hover:shadow-xl hover:scale-105">
                   <CardHeader>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="w-12 h-12 rounded-lg bg-gray-900 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 via-teal-400 to-green-500 flex items-center justify-center">
                         <Bot className="w-6 h-6 text-white" />
                       </div>
                       <span className={`text-xs px-3 py-1 rounded-full font-semibold ${

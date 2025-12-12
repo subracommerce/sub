@@ -1,8 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Bot, Zap, Shield, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="min-h-screen bg-white text-gray-900 relative overflow-hidden">
       {/* Agentic grid background */}
@@ -20,15 +29,15 @@ export default function Home() {
             </span>
           </div>
           
-          {/* Main Title */}
+          {/* Main Title with Gradient S */}
           <div className="relative mb-8 animate-slide-up">
             <h1 className="text-8xl md:text-9xl lg:text-[12rem] font-bold tracking-tighter text-gray-900">
-              SUBRA
+              <span className="bg-gradient-to-br from-blue-500 via-teal-400 to-green-500 bg-clip-text text-transparent">S</span>UBRA
             </h1>
           </div>
           
           {/* Animated underline */}
-          <div className="w-32 h-1 bg-gray-900 animate-expand-width mb-10" />
+          <div className="w-32 h-1 bg-gradient-to-r from-blue-500 via-teal-400 to-green-500 animate-expand-width mb-10" />
           
           {/* Subheading with Sequential Animation */}
           <div className="mb-12 max-w-3xl space-y-2">
@@ -94,11 +103,11 @@ export default function Home() {
             <div
               key={i}
               className="group relative p-8 rounded-xl bg-white border-2 border-gray-200 hover:border-gray-900 transition-all duration-500 hover:scale-105 hover:shadow-2xl animate-fade-in cursor-pointer"
-              style={{ animationDelay: `${i * 150}ms` }}
+              style={{ animationDelay: mounted ? `${i * 150}ms` : '0ms' }}
             >
               <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-gray-900 rounded-tr-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
-              <div className="w-14 h-14 mb-6 rounded-lg bg-gray-900 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+              <div className="w-14 h-14 mb-6 rounded-lg bg-gradient-to-br from-blue-500 via-teal-400 to-green-500 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
                 <feature.icon className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-gray-900">{feature.title}</h3>
@@ -130,11 +139,11 @@ export default function Home() {
               desc: "Executes purchase with crypto and generates ZK proof"
             },
           ].map((item, i) => (
-            <div key={i} className="text-center animate-fade-in group cursor-pointer" style={{ animationDelay: `${i * 200}ms` }}>
-              <div className="text-7xl font-bold text-gray-200 mb-4 transition-all duration-500 group-hover:text-gray-900 group-hover:scale-110">
+            <div key={i} className="text-center animate-fade-in group cursor-pointer" style={{ animationDelay: mounted ? `${i * 200}ms` : '0ms' }}>
+              <div className="text-7xl font-bold text-gray-200 mb-4 transition-all duration-500 group-hover:text-transparent group-hover:bg-gradient-to-br group-hover:from-blue-500 group-hover:via-teal-400 group-hover:to-green-500 group-hover:bg-clip-text group-hover:scale-110">
                 {item.step}
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900">{item.label}</h3>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">{item.title}</h3>
               <p className="text-gray-600 leading-relaxed">{item.desc}</p>
             </div>
           ))}
