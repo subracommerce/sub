@@ -17,12 +17,12 @@ export default function HomePage() {
           </p>
           <div className="flex gap-4 justify-center pt-6">
             <Link href="/auth/register">
-              <Button size="lg" className="text-lg">
+              <Button size="lg" className="text-lg transition-all hover:scale-105">
                 Get Started
               </Button>
             </Link>
             <Link href="/dashboard">
-              <Button size="lg" variant="outline" className="text-lg">
+              <Button size="lg" variant="outline" className="text-lg transition-all hover:scale-105">
                 Dashboard
               </Button>
             </Link>
@@ -33,7 +33,7 @@ export default function HomePage() {
       {/* Features Section */}
       <section className="container mx-auto px-4 py-20">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
+          <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
             <CardHeader>
               <Bot className="w-10 h-10 mb-2 text-primary" />
               <CardTitle>AI Agents</CardTitle>
@@ -43,7 +43,7 @@ export default function HomePage() {
             </CardHeader>
           </Card>
 
-          <Card>
+          <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
             <CardHeader>
               <Wallet className="w-10 h-10 mb-2 text-primary" />
               <CardTitle>Crypto Payments</CardTitle>
@@ -53,7 +53,7 @@ export default function HomePage() {
             </CardHeader>
           </Card>
 
-          <Card>
+          <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
             <CardHeader>
               <ShieldCheck className="w-10 h-10 mb-2 text-primary" />
               <CardTitle>ZK Receipts</CardTitle>
@@ -63,7 +63,7 @@ export default function HomePage() {
             </CardHeader>
           </Card>
 
-          <Card>
+          <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
             <CardHeader>
               <Zap className="w-10 h-10 mb-2 text-primary" />
               <CardTitle>Agent Marketplace</CardTitle>

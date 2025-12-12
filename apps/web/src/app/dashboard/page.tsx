@@ -93,7 +93,7 @@ export default function DashboardPage() {
 
         {/* Quick Stats */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card>
+          <Card className="transition-all duration-300 hover:shadow-md hover:-translate-y-1">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Active Agents
@@ -103,7 +103,7 @@ export default function DashboardPage() {
               <div className="text-3xl font-bold">{agents.length}</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="transition-all duration-300 hover:shadow-md hover:-translate-y-1">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Total Tasks
@@ -113,7 +113,7 @@ export default function DashboardPage() {
               <div className="text-3xl font-bold">0</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="transition-all duration-300 hover:shadow-md hover:-translate-y-1">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Total Spent
@@ -129,7 +129,7 @@ export default function DashboardPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-2xl font-bold">Your AI Agents</h3>
-            <Button onClick={() => setShowCreateDialog(true)}>
+            <Button onClick={() => setShowCreateDialog(true)} className="transition-all hover:scale-105">
               <Plus className="w-4 h-4 mr-2" />
               Create Agent
             </Button>
@@ -143,7 +143,7 @@ export default function DashboardPage() {
                 <p className="text-muted-foreground mb-4 text-center max-w-md">
                   Create your first AI agent to start shopping autonomously
                 </p>
-                <Button onClick={() => setShowCreateDialog(true)}>
+                <Button onClick={() => setShowCreateDialog(true)} className="transition-all hover:scale-105">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Your First Agent
                 </Button>
@@ -152,12 +152,12 @@ export default function DashboardPage() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {agents.map((agent) => (
-                <Card key={agent.id}>
+                <Card key={agent.id} className="agent-card transition-all duration-300 hover:shadow-lg">
                   <CardHeader>
                     <div className="flex items-center justify-between mb-2">
                       <Bot className="w-8 h-8 text-primary" />
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        agent.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                      <span className={`text-xs px-2 py-1 rounded-full transition-all ${
+                        agent.isActive ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
                       }`}>
                         {agent.isActive ? "Active" : "Inactive"}
                       </span>
@@ -173,12 +173,12 @@ export default function DashboardPage() {
                     </p>
                     <div className="flex gap-2">
                       <Link href={`/agent/${agent.id}`} className="flex-1">
-                        <Button variant="outline" size="sm" className="w-full">
+                        <Button variant="outline" size="sm" className="w-full transition-all hover:scale-105">
                           View Details
                         </Button>
                       </Link>
                       <Link href={`/agent/${agent.id}/chat`} className="flex-1">
-                        <Button size="sm" className="w-full">
+                        <Button size="sm" className="w-full transition-all hover:scale-105">
                           Chat
                         </Button>
                       </Link>
