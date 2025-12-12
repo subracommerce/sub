@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/auth";
 import Link from "next/link";
 import { ConnectWalletButton } from "@/components/connect-wallet-button";
+import { WalletSignButton } from "@/components/wallet-sign-button";
 import { Wallet, Mail, Plus } from "lucide-react";
 
 export default function RegisterPage() {
@@ -138,9 +139,12 @@ ${data.data.wallet.secretKey}
               <Wallet className="w-4 h-4" />
               <span className="text-sm font-medium">Already have a Solana wallet?</span>
             </div>
-            <ConnectWalletButton />
+            <div className="flex flex-col gap-2">
+              <ConnectWalletButton />
+              <WalletSignButton />
+            </div>
             <p className="text-xs text-muted-foreground text-center">
-              Connect Phantom, Solflare, or any Solana wallet
+              Connect wallet, then click "Sign In" to authenticate
             </p>
           </div>
 
