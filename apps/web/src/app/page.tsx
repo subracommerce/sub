@@ -1,135 +1,80 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bot, Zap, ShieldCheck, Wallet } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Bot, Zap, Shield, TrendingUp } from "lucide-react";
 
-export default function HomePage() {
+export default function Home() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white overflow-hidden">
+      {/* Animated background grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+      
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center space-y-6">
-          <h1 className="text-6xl font-bold tracking-tight">
-            Welcome to <span className="text-primary">SUBRA</span>
+      <div className="relative">
+        <div className="container mx-auto px-4 py-24 flex flex-col items-center text-center">
+          <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm animate-fade-in">
+            <Zap className="w-4 h-4 text-primary animate-pulse" />
+            <span className="text-sm font-medium bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+              Autonomous AI Commerce
+            </span>
+          </div>
+          
+          <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-gray-100 to-gray-400 bg-clip-text text-transparent animate-slide-up">
+            SUBRA
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Autonomous AI Commerce Platform with Crypto Payments, ZK Receipts, and Agent-to-Agent Marketplace
+          
+          <p className="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl animate-slide-up-delay">
+            AI agents that shop, negotiate, and transact on Solana
           </p>
-          <div className="flex gap-4 justify-center pt-6">
+          
+          <div className="flex gap-4 animate-fade-in-delay">
             <Link href="/auth/register">
-              <Button size="lg" className="text-lg transition-all hover:scale-105">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-primary via-purple-500 to-primary hover:from-primary/90 hover:via-purple-400 hover:to-primary/90 text-white font-semibold px-8 py-6 text-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(139,92,246,0.3)] animate-bg-shimmer bg-[length:200%_auto]"
+              >
                 Get Started
               </Button>
             </Link>
             <Link href="/dashboard">
-              <Button size="lg" variant="outline" className="text-lg transition-all hover:scale-105">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-primary/30 text-white hover:bg-primary/10 hover:border-primary hover:scale-105 transition-all duration-300 px-8 py-6 text-lg backdrop-blur"
+              >
                 Dashboard
               </Button>
             </Link>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Features Section */}
-      <section className="container mx-auto px-4 py-20">
+      {/* Features Grid */}
+      <div className="relative container mx-auto px-4 py-20">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-            <CardHeader>
-              <Bot className="w-10 h-10 mb-2 text-primary" />
-              <CardTitle>AI Agents</CardTitle>
-              <CardDescription>
-                Create autonomous agents that search, compare, and negotiate purchases
-              </CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-            <CardHeader>
-              <Wallet className="w-10 h-10 mb-2 text-primary" />
-              <CardTitle>Crypto Payments</CardTitle>
-              <CardDescription>
-                Pay with SOL, USDC, or other cryptocurrencies. Seamless conversion to fiat for merchants
-              </CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-            <CardHeader>
-              <ShieldCheck className="w-10 h-10 mb-2 text-primary" />
-              <CardTitle>ZK Receipts</CardTitle>
-              <CardDescription>
-                Cryptographic proof of purchases stored on-chain with privacy
-              </CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-            <CardHeader>
-              <Zap className="w-10 h-10 mb-2 text-primary" />
-              <CardTitle>Agent Marketplace</CardTitle>
-              <CardDescription>
-                Discover and use specialized agents for any shopping need
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          {[
+            { icon: Bot, title: "AI Agents", desc: "Autonomous shopping agents" },
+            { icon: Zap, title: "Instant", desc: "Real-time transactions" },
+            { icon: Shield, title: "Secure", desc: "Encrypted & verified" },
+            { icon: TrendingUp, title: "Smart", desc: "Optimize every purchase" },
+          ].map((feature, i) => (
+            <div
+              key={i}
+              className="group relative p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-black/50 border border-gray-800 hover:border-primary/50 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(139,92,246,0.2)] animate-fade-in"
+              style={{ animationDelay: `${i * 100}ms` }}
+            >
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <feature.icon className="w-10 h-10 mb-4 text-primary group-hover:scale-110 transition-transform duration-300" />
+              <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+              <p className="text-sm text-gray-400">{feature.desc}</p>
+            </div>
+          ))}
         </div>
-      </section>
+      </div>
 
-      {/* How It Works */}
-      <section className="container mx-auto px-4 py-20">
-        <h2 className="text-4xl font-bold text-center mb-12">How It Works</h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto">
-              1
-            </div>
-            <h3 className="text-xl font-semibold">Create or Summon Agents</h3>
-            <p className="text-muted-foreground">
-              Choose from Explorer, Negotiator, Executor, or Tracker agents
-            </p>
-          </div>
-
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto">
-              2
-            </div>
-            <h3 className="text-xl font-semibold">Tell Your Agent What to Buy</h3>
-            <p className="text-muted-foreground">
-              Chat with your agent to find, compare, and negotiate products
-            </p>
-          </div>
-
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto">
-              3
-            </div>
-            <h3 className="text-xl font-semibold">Pay & Get ZK Receipt</h3>
-            <p className="text-muted-foreground">
-              Complete purchase with crypto and receive cryptographic proof
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-20">
-        <Card className="bg-primary text-primary-foreground">
-          <CardHeader className="text-center space-y-4 p-12">
-            <CardTitle className="text-4xl">Ready to Get Started?</CardTitle>
-            <CardDescription className="text-primary-foreground/80 text-lg">
-              Join thousands of users leveraging AI agents for autonomous commerce
-            </CardDescription>
-            <div className="pt-4">
-              <Link href="/auth/register">
-                <Button size="lg" variant="secondary" className="text-lg">
-                  Create Your First Agent
-                </Button>
-              </Link>
-            </div>
-          </CardHeader>
-        </Card>
-      </section>
+      {/* Footer */}
+      <div className="relative container mx-auto px-4 py-12 text-center text-gray-500 text-sm border-t border-gray-800">
+        <p>Built on Solana • Powered by AI</p>
+      </div>
     </div>
   );
 }
-
