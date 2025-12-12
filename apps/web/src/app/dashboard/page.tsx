@@ -1,0 +1,197 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuthStore } from "@/store/auth";
+import { useToast } from "@/hooks/use-toast";
+import { Bot, Plus, Sparkles } from "lucide-react";
+import { CreateAgentDialog } from "@/components/create-agent-dialog";
+import type { Agent } from "@subra/sdk";
+
+export default function DashboardPage() {
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const { isAuthenticated, token } = useAuthStore();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+    loadAgents();
+  }, [isAuthenticated, router]);
+
+  const loadAgents = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/agent`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setAgents(data.data);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load agents",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAgentCreated = () => {
+    setShowCreateDialog(false);
+    loadAgents();
+    toast({
+      title: "Success!",
+      description: "Your AI agent has been created",
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Sparkles className="w-6 h-6 text-primary" />
+            <h1 className="text-2xl font-bold">SUBRA Dashboard</h1>
+          </div>
+          <Button variant="outline" onClick={() => router.push("/")}>
+            Home
+          </Button>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold mb-2">Welcome to Your Dashboard</h2>
+          <p className="text-muted-foreground">
+            Manage your AI agents, view tasks, and track transactions
+          </p>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Active Agents
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{agents.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Tasks
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">0</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Spent
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">$0.00</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Agents Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-2xl font-bold">Your AI Agents</h3>
+            <Button onClick={() => setShowCreateDialog(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Agent
+            </Button>
+          </div>
+
+          {agents.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Bot className="w-16 h-16 text-muted-foreground mb-4" />
+                <h4 className="text-xl font-semibold mb-2">No agents yet</h4>
+                <p className="text-muted-foreground mb-4 text-center max-w-md">
+                  Create your first AI agent to start shopping autonomously
+                </p>
+                <Button onClick={() => setShowCreateDialog(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Your First Agent
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {agents.map((agent) => (
+                <Card key={agent.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <Bot className="w-8 h-8 text-primary" />
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        agent.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                      }`}>
+                        {agent.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                    <CardTitle>{agent.name}</CardTitle>
+                    <CardDescription>
+                      {agent.type.charAt(0).toUpperCase() + agent.type.slice(1)} Agent
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {agent.description || "No description"}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="flex-1">
+                        View Details
+                      </Button>
+                      <Button size="sm" className="flex-1">
+                        Chat
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+
+      <CreateAgentDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onSuccess={handleAgentCreated}
+      />
+    </div>
+  );
+}
+

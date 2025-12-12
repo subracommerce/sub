@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bot, Zap, ShieldCheck, Wallet } from "lucide-react";
 import Link from "next/link";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 export default function HomePage() {
   return (
@@ -9,24 +10,33 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center space-y-6">
+          <div className="inline-block mb-4">
+            <span className="text-purple-500 text-2xl font-bold">🟣 Built on Solana</span>
+          </div>
           <h1 className="text-6xl font-bold tracking-tight">
-            Welcome to <span className="text-primary">SUBRA</span>
+            Autonomous AI Commerce on <br />
+            <span className="bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+              the Fastest Blockchain
+            </span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Autonomous AI Commerce Platform with Crypto Payments, ZK Receipts, and Agent-to-Agent Marketplace
+            Let AI agents shop for you on Solana. 65,000 TPS, $0.00025 per transaction, 400ms blocks.
+            <br />
+            <span className="text-purple-400 font-semibold mt-2 inline-block">
+              Pay with SOL or USDC • Zero gas fees • Instant settlements
+            </span>
           </p>
-          <div className="flex gap-4 justify-center pt-6">
-            <Link href="/auth/register">
-              <Button size="lg" className="text-lg">
-                Get Started
-              </Button>
-            </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
+            <WalletMultiButton className="!bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 !text-lg !py-6 !px-8 !rounded-lg" />
             <Link href="/dashboard">
-              <Button size="lg" variant="outline" className="text-lg">
-                Dashboard
+              <Button size="lg" variant="outline" className="text-lg border-purple-500 text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-950">
+                View Dashboard
               </Button>
             </Link>
           </div>
+          <p className="text-sm text-muted-foreground mt-4">
+            Connect Phantom • Solflare • Torus • or any Solana wallet
+          </p>
         </div>
       </section>
 
@@ -46,9 +56,9 @@ export default function HomePage() {
           <Card>
             <CardHeader>
               <Wallet className="w-10 h-10 mb-2 text-primary" />
-              <CardTitle>Crypto Payments</CardTitle>
+              <CardTitle>Solana Payments</CardTitle>
               <CardDescription>
-                Pay with USDC, SOL, or ETH. Seamlessly convert to fiat for merchants
+                Pay with SOL or USDC on Solana. Fast, cheap, and secure blockchain transactions
               </CardDescription>
             </CardHeader>
           </Card>
@@ -103,9 +113,9 @@ export default function HomePage() {
             <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto">
               3
             </div>
-            <h3 className="text-xl font-semibold">Pay & Get ZK Receipt</h3>
+            <h3 className="text-xl font-semibold">Pay with SOL or USDC</h3>
             <p className="text-muted-foreground">
-              Complete purchase with crypto and receive cryptographic proof
+              Complete purchase on Solana and receive cryptographic proof on-chain
             </p>
           </div>
         </div>

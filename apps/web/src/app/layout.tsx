@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Providers } from "@/components/providers";
+import { Providers } from "@/app/providers";
 import { Toaster } from "@/components/ui/toaster";
+import "@solana/wallet-adapter-react-ui/styles.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SUBRA - Autonomous AI Commerce Platform",
-  description: "AI agents that shop, negotiate, and transact using crypto payments",
+  title: "SUBRA - Autonomous AI Commerce on Solana",
+  description: "AI agents that shop, negotiate, and transact on Solana blockchain",
 };
 
 export default function RootLayout({

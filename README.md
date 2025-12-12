@@ -1,350 +1,429 @@
-# SUBRA - Autonomous AI Commerce Platform
+# 🟣 SUBRA - Autonomous AI Commerce on Solana
 
-![SUBRA Platform](https://img.shields.io/badge/AI-Commerce-blue) ![License](https://img.shields.io/badge/license-MIT-green)
+> **AI agents that shop, negotiate, and transact autonomously on the Solana blockchain.**
 
-**SUBRA** is a full-stack autonomous AI commerce system that enables users to create AI agents that can search, negotiate, and purchase items from online stores using cryptocurrency. The platform features crypto payments (USDC/SOL/ETH), fiat conversion, zero-knowledge receipt proofs, and an agent-to-agent marketplace.
+[![Solana](https://img.shields.io/badge/Solana-Native-9945FF?style=for-the-badge&logo=solana)](https://solana.com)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![Anchor](https://img.shields.io/badge/Anchor-663399?style=for-the-badge)](https://www.anchor-lang.com/)
 
-## 🌟 Features
+---
 
-### 🤖 AI Agents
-- **Explorer Agent**: Product search and comparison across multiple sources
-- **Negotiator Agent**: Price comparison, negotiation, and coupon finding
-- **Executor Agent**: Autonomous purchase execution
-- **Tracker Agent**: Order and shipping tracking
+## ⚡ What is SUBRA?
 
-### 💰 Crypto Payments
-- Support for USDC, SOL, ETH, and other major cryptocurrencies
-- Seamless fiat conversion via MoonPay/Transak
-- Stripe Issuing integration for merchant payments
-- Multi-chain support (Ethereum, Solana, Polygon, Base)
+SUBRA is the **first Solana-native autonomous AI commerce platform**. Create AI agents that:
 
-### 🔐 Zero-Knowledge Proofs
-- Privacy-preserving purchase receipts
-- On-chain verification without revealing sensitive data
-- Compliance-ready proof of spending
-- Built with Noir (Aztec)
+- 🔍 **Search** for products across the internet
+- 💰 **Negotiate** prices and find the best deals
+- ✅ **Execute** purchases using SOL or USDC
+- 📦 **Track** orders and deliveries
+- 🔐 **Verify** purchases with zero-knowledge proofs
 
-### 🏪 Agent Marketplace
-- Discover and deploy specialized agents
-- Staking and reputation system
-- Premium tier agents
-- Community-driven agent development
+All powered by **Solana** blockchain for speed, security, and low-cost transactions.
 
-## 🏗️ Architecture
+---
 
-```
-SUBRA/
-├── apps/
-│   ├── web/              # Next.js 15 frontend
-│   ├── api/              # Fastify backend
-│   ├── agents/           # AI agent runtime
-│   ├── contracts/        # Solidity smart contracts
-│   └── circuits/         # ZK circuits (Noir)
-├── packages/
-│   ├── config/           # Shared configuration
-│   ├── utils/            # Utility functions
-│   ├── sdk/              # TypeScript SDK
-│   └── ui/               # Shared UI components
-└── docker-compose.yml    # Development environment
-```
+## 🌟 Why Solana?
+
+|  | Solana | Ethereum |
+|---|---|---|
+| **Speed** | 65,000 TPS | 15 TPS |
+| **Cost** | $0.00025/tx | $50+/tx |
+| **Block Time** | 400ms | 12 seconds |
+| **Perfect for AI** | ✅ | ❌ |
+
+**AI agents need to make hundreds of transactions**. Solana makes it possible.
+
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 18+ 
 - pnpm 8+
-- Docker & Docker Compose
-- PostgreSQL 16
-- Redis 7
+- PostgreSQL 15+
+- Redis 7+
+- Solana CLI
+- Anchor CLI
+- Rust (for Solana programs)
 
-### Installation
+### 1. Install Solana & Anchor
 
-1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/subra.git
-cd subra
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Install Solana CLI
+sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+
+# Install Anchor
+cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+avm install latest
+avm use latest
+
+# Create Solana wallet
+solana-keygen new --outfile ~/.config/solana/id.json
+
+# Get devnet SOL
+solana config set --url devnet
+solana airdrop 2
 ```
 
-2. **Install dependencies**
+### 2. Clone & Install
+
 ```bash
+git clone https://github.com/subracommerce/sub.git
+cd sub
 pnpm install
 ```
 
-3. **Setup environment variables**
+### 3. Setup Environment
+
 ```bash
-cp .env.example .env
-# Edit .env with your configuration
+cp .env.template .env
+
+# Edit .env with your values:
+# - DATABASE_URL (PostgreSQL)
+# - REDIS_URL (Redis)
+# - OPENAI_API_KEY (OpenAI)
+# - SOLANA_RPC_URL (Helius/QuickNode recommended)
 ```
 
-4. **Start infrastructure with Docker**
-```bash
-docker-compose up -d postgres redis
-```
+### 4. Setup Database
 
-5. **Setup database**
 ```bash
+# Start PostgreSQL & Redis
+brew services start postgresql@15
+brew services start redis
+
+# Push database schema
 cd apps/api
 pnpm db:push
-pnpm db:generate
 ```
 
-6. **Start development servers**
+### 5. Deploy Solana Programs
+
 ```bash
-# Terminal 1 - API
+cd apps/solana-programs
+
+# Build programs
+anchor build
+
+# Deploy to devnet
+anchor deploy
+
+# Save the program IDs displayed
+```
+
+### 6. Start Development Servers
+
+```bash
+# Terminal 1: API Server
 cd apps/api
 pnpm dev
 
-# Terminal 2 - Web
+# Terminal 2: Web App
 cd apps/web
 pnpm dev
 
-# Terminal 3 - Agents
+# Terminal 3: AI Agents
 cd apps/agents
 pnpm dev
 ```
 
-7. **Access the application**
-- Frontend: http://localhost:3000
-- API: http://localhost:4000
-- API Health: http://localhost:4000/health
+### 7. Open Your Browser
 
-## 📦 Tech Stack
-
-### Frontend
-- **Framework**: Next.js 15 (App Router)
-- **Styling**: TailwindCSS + Shadcn UI
-- **State**: Zustand
-- **Web3**: Wagmi + RainbowKit
-- **API Client**: Custom SDK with Axios
-
-### Backend
-- **Runtime**: Node.js 20
-- **Framework**: Fastify
-- **Validation**: Zod
-- **Database**: PostgreSQL + Prisma ORM
-- **Cache**: Redis
-- **Queue**: BullMQ
-- **Auth**: JWT + API Keys
-
-### AI Agents
-- **LLM**: OpenAI GPT-4
-- **Runtime**: Node.js with TypeScript
-- **Queue**: BullMQ
-- **Communication**: Redis Pub/Sub
-
-### Blockchain
-- **Smart Contracts**: Solidity 0.8.23
-- **Framework**: Foundry
-- **Libraries**: OpenZeppelin
-- **Chains**: Ethereum, Polygon, Base, Arbitrum
-
-### Zero-Knowledge
-- **Framework**: Noir (Aztec)
-- **Proofs**: PLONK
-- **Integration**: Barretenberg backend
-
-## 🔧 Development
-
-### Monorepo Structure
-
-This project uses pnpm workspaces and Turborepo for monorepo management.
-
-**Available Scripts:**
-```bash
-pnpm dev          # Start all apps in development mode
-pnpm build        # Build all apps
-pnpm test         # Run all tests
-pnpm lint         # Lint all packages
-pnpm format       # Format code with Prettier
+```
+http://localhost:3000
 ```
 
-### Database Management
-
-```bash
-# Generate Prisma client
-pnpm db:generate
-
-# Push schema changes
-pnpm db:push
-
-# Create migration
-pnpm db:migrate
-
-# Open Prisma Studio
-pnpm db:studio
-```
-
-### Smart Contract Development
-
-```bash
-cd apps/contracts
-
-# Install Foundry
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
-
-# Install dependencies
-forge install
-
-# Build contracts
-forge build
-
-# Run tests
-forge test
-
-# Deploy contracts
-forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast
-```
-
-### ZK Circuit Development
-
-```bash
-cd apps/circuits
-
-# Install Noir
-curl -L https://raw.githubusercontent.com/noir-lang/noirup/main/install | bash
-noirup
-
-# Compile circuits
-nargo compile
-
-# Run tests
-nargo test
-
-# Generate proof
-nargo prove
-```
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-pnpm test
-
-# Run API tests
-cd apps/api && pnpm test
-
-# Run smart contract tests
-cd apps/contracts && forge test
-
-# Run ZK circuit tests
-cd apps/circuits && nargo test
-```
-
-## 📚 Documentation
-
-- [API Documentation](./apps/api/README.md)
-- [Smart Contracts](./apps/contracts/README.md)
-- [ZK Circuits](./apps/circuits/README.md)
-- [Agent System](./apps/agents/README.md)
-- [SDK Usage](./packages/sdk/README.md)
-
-## 🔐 Security
-
-### Key Security Features
-
-1. **Authentication**
-   - JWT with secure secret rotation
-   - API key authentication
-   - Rate limiting
-   - HTTPS-only cookies
-
-2. **Cryptography**
-   - AES-256-GCM encryption for sensitive data
-   - Secure key management
-   - MPC key shares for agent wallets
-
-3. **Smart Contracts**
-   - OpenZeppelin security standards
-   - Spending limits and controls
-   - Multi-sig support
-   - Emergency withdrawal
-
-4. **Zero-Knowledge**
-   - Privacy-preserving proofs
-   - No sensitive data disclosure
-   - On-chain verification
-
-### Reporting Security Issues
-
-Please report security vulnerabilities to security@subra.app
-
-## 🚢 Deployment
-
-### Production Deployment
-
-```bash
-# Build for production
-pnpm build
-
-# Start with Docker Compose
-docker-compose up -d
-
-# Or deploy individually
-cd apps/api && pnpm start
-cd apps/web && pnpm start
-cd apps/agents && pnpm start
-```
-
-### Environment Variables
-
-See `.env.example` for required environment variables.
-
-**Critical Variables:**
-- `DATABASE_URL`: PostgreSQL connection string
-- `REDIS_URL`: Redis connection string
-- `JWT_SECRET`: Secret for JWT signing (min 32 chars)
-- `OPENAI_API_KEY`: OpenAI API key for agents
-- `MOONPAY_API_KEY`: MoonPay for fiat on-ramp
-- `STRIPE_SECRET_KEY`: Stripe for merchant payments
-
-## 🤝 Contributing
-
-We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- OpenAI for GPT-4 API
-- Aztec for Noir ZK framework
-- Foundry for smart contract development
-- OpenZeppelin for secure contract libraries
-- The entire crypto and AI community
-
-## 📧 Contact
-
-- Website: https://subra.app
-- Email: hello@subra.app
-- Twitter: [@SubraPlatform](https://twitter.com/SubraPlatform)
-- Discord: [Join our community](https://discord.gg/subra)
-
-## 🗺️ Roadmap
-
-- [x] Core platform infrastructure
-- [x] AI agent system
-- [x] Crypto payment integration
-- [x] ZK receipt proofs
-- [ ] Multi-language agent support
-- [ ] Mobile app (React Native)
-- [ ] Advanced negotiation strategies
-- [ ] Cross-chain bridge integration
-- [ ] Agent-to-agent communication
-- [ ] DAO governance
+Connect your **Phantom** or **Solflare** wallet and create your first AI agent!
 
 ---
 
-Built with ❤️ by the SUBRA team
+## 📁 Project Structure
 
+```
+subra/
+├── apps/
+│   ├── web/                  # Next.js 15 frontend (Solana wallets)
+│   ├── api/                  # Fastify backend API
+│   ├── agents/               # AI agent runtime (Python/Node)
+│   ├── solana-programs/      # Anchor programs (Rust)
+│   │   ├── programs/
+│   │   │   ├── agent-wallet/     # Secure agent wallets
+│   │   │   ├── marketplace/      # Agent staking & reputation
+│   │   │   ├── spend-intent/     # Transaction approval
+│   │   │   └── zk-receipt/       # Privacy-preserving receipts
+│   └── circuits/             # Noir ZK circuits
+├── packages/
+│   ├── sdk/                  # TypeScript SDK (Solana integration)
+│   ├── config/               # Shared configuration
+│   └── utils/                # Shared utilities
+└── docs/                     # Documentation
+```
 
+---
+
+## 🔧 Tech Stack
+
+### Frontend
+- **Next.js 15** (App Router, React Server Components)
+- **Solana Wallet Adapter** (Phantom, Solflare, Torus)
+- **TailwindCSS** + **Shadcn UI**
+- **Zustand** (State management)
+- **React Query** (Data fetching)
+
+### Backend
+- **Fastify** (High-performance API)
+- **PostgreSQL** (Prisma ORM)
+- **Redis** (Cache & queues)
+- **BullMQ** (Job processing)
+
+### Blockchain (Solana)
+- **Anchor** (Solana program framework)
+- **Rust** (Smart contract language)
+- **SPL Tokens** (SOL, USDC, custom tokens)
+- **Web3.js** (Solana interaction)
+
+### AI
+- **OpenAI GPT-5.1** (Primary model)
+- **LangChain** (Agent orchestration)
+- **Vector Store** (RAG for memory)
+
+### ZK Privacy
+- **Noir** (Zero-knowledge circuits)
+- **zkSNARKs** (Privacy-preserving proofs)
+
+---
+
+## 🎯 Features
+
+### For Users
+
+- ✅ **Connect Solana Wallet** (Phantom, Solflare, Torus, Ledger)
+- ✅ **Create AI Agents** (Explorer, Negotiator, Executor, Tracker)
+- ✅ **Natural Language** ("Find me the cheapest iPhone 15")
+- ✅ **Pay with SOL or USDC** (SPL tokens)
+- ✅ **Track Orders** (Real-time updates)
+- ✅ **Privacy First** (ZK proofs for purchases)
+
+### For Developers
+
+- ✅ **Complete SDK** (TypeScript + Rust)
+- ✅ **Anchor Programs** (Open source smart contracts)
+- ✅ **REST API** (20+ endpoints)
+- ✅ **Agent Skills System** (Extend agent capabilities)
+- ✅ **Comprehensive Docs** (Get started in minutes)
+
+### For Businesses
+
+- ✅ **Agent Marketplace** (List your AI agents)
+- ✅ **Staking & Reputation** (Build trust)
+- ✅ **Transaction Fees** (Monetization built-in)
+- ✅ **White Label** (Deploy your own platform)
+
+---
+
+## 🔐 Solana Programs
+
+### 1. Agent Wallet
+```rust
+// Secure wallets for AI agents with spending limits
+pub fn create_spend_intent(
+    ctx: Context<CreateSpendIntent>,
+    amount: u64,
+    recipient: Pubkey,
+) -> Result<()>
+```
+
+- Daily spending limits
+- Per-transaction caps
+- Multi-signature support
+- Automatic cooldowns
+
+### 2. Marketplace
+```rust
+// Agent staking and reputation system
+pub fn list_agent(
+    ctx: Context<ListAgent>,
+    stake_amount: u64,
+) -> Result<()>
+```
+
+- Token staking (100-10,000 $SUBRA)
+- Reputation tracking (0-500 scale)
+- Success rate monitoring
+- Premium tiers
+
+### 3. Spend Intent
+```rust
+// Time-locked transaction approvals
+pub fn execute_spend_intent(
+    ctx: Context<ExecuteSpendIntent>,
+) -> Result<()>
+```
+
+- Time-delayed execution
+- Cancellation window
+- Event logging
+- Multi-party approval
+
+### 4. ZK Receipt
+```rust
+// Privacy-preserving purchase verification
+pub fn verify_purchase(
+    ctx: Context<VerifyPurchase>,
+    proof: Vec<u8>,
+) -> Result<()>
+```
+
+- Zero-knowledge proofs
+- Purchase verification without revealing details
+- On-chain registry
+
+---
+
+## 🚢 Deployment
+
+### Devnet (Testing)
+
+```bash
+# Already configured!
+solana config set --url devnet
+cd apps/solana-programs
+anchor build && anchor deploy
+```
+
+### Mainnet (Production)
+
+```bash
+# ⚠️ GET SECURITY AUDIT FIRST!
+
+# Switch to mainnet
+solana config set --url mainnet-beta
+
+# Ensure you have SOL (~15 SOL = ~$3000)
+solana balance
+
+# Deploy
+cd apps/solana-programs
+anchor build
+anchor deploy
+
+# SAVE YOUR PROGRAM IDs!
+```
+
+**Recommended RPC Providers:**
+- Helius: https://helius.dev (best for Solana)
+- QuickNode: https://quicknode.com
+- Alchemy: https://alchemy.com/solana
+
+---
+
+## 💰 Monetization
+
+### Transaction Fees
+- 1-2% fee on all purchases
+- Paid in SOL or USDC
+- Distributed to treasury
+
+### Agent Staking
+- Agents stake $SUBRA tokens to list
+- Platform earns yield on staked tokens
+- Tiers: Basic (100), Pro (1000), Enterprise (10000)
+
+### Premium Features
+- Priority execution: 0.5 SOL/month
+- Advanced analytics: 1 SOL/month
+- API access: 2 SOL/month
+
+**Revenue Potential:** $10k-100k/month at scale
+
+---
+
+## 📚 Documentation
+
+- [**Quick Start**](QUICKSTART.md) - Get running in 10 minutes
+- [**Solana Setup**](SOLANA_SETUP.md) - Complete Solana guide
+- [**Production Roadmap**](PRODUCTION_ROADMAP.md) - Path to launch
+- [**API Documentation**](docs/API.md) - REST API reference
+- [**Contributing**](CONTRIBUTING.md) - How to contribute
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+```bash
+# Fork the repo
+git clone https://github.com/YOUR_USERNAME/sub.git
+
+# Create a branch
+git checkout -b feature/amazing-feature
+
+# Make your changes
+git commit -m "Add amazing feature"
+
+# Push and create PR
+git push origin feature/amazing-feature
+```
+
+---
+
+## 🛣️ Roadmap
+
+- [x] ✅ Complete Solana integration
+- [x] ✅ Anchor programs (4 programs)
+- [x] ✅ Wallet adapter (Phantom, Solflare)
+- [x] ✅ SPL token support (SOL, USDC)
+- [ ] 🚧 Deploy to devnet (Week 1)
+- [ ] 🚧 Real API integrations (Week 2)
+- [ ] 📅 Deploy to mainnet (Month 2)
+- [ ] 📅 Mobile app (Month 3)
+- [ ] 📅 Multi-chain support (Year 2)
+
+---
+
+## 🌐 Community
+
+- **Twitter**: [@subracommerce](https://twitter.com/subracommerce)
+- **Discord**: [Join Server](https://discord.gg/subra)
+- **Telegram**: [Join Group](https://t.me/subracommerce)
+- **Email**: hello@subra.app
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## 🙏 Acknowledgments
+
+Built with:
+- [Solana](https://solana.com/) - The blockchain for builders
+- [Anchor](https://www.anchor-lang.com/) - Solana's framework
+- [OpenAI](https://openai.com/) - AI models
+- [Next.js](https://nextjs.org/) - The React framework
+- [Phantom](https://phantom.app/) - Solana wallet
+
+---
+
+## ⚠️ Disclaimer
+
+SUBRA is experimental software. Use at your own risk. This is not financial advice.
+
+---
+
+<div align="center">
+
+**Built with 💜 on Solana**
+
+[![Star on GitHub](https://img.shields.io/github/stars/subracommerce/sub?style=social)](https://github.com/subracommerce/sub)
+
+</div>
