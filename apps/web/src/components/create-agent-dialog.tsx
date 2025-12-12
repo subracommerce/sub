@@ -80,64 +80,49 @@ export function CreateAgentDialog({ open, onOpenChange, onSuccess }: CreateAgent
           </DialogDescription>
         </DialogHeader>
 
-        {/* Wallet Required Check */}
-        {!connected && (
-          <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
-            <AlertCircle className="h-4 w-4 text-yellow-600" />
-            <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-              <div className="space-y-3">
-                <p className="font-medium">Wallet required to create agents</p>
-                <p className="text-sm">
-                  Agents need a Solana wallet to execute transactions on your behalf.
-                </p>
-                <ConnectWalletButton />
-              </div>
-            </AlertDescription>
-          </Alert>
-        )}
+        <WalletGate>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Agent Name</Label>
+              <Input
+                id="name"
+                placeholder="My Shopping Assistant"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Agent Name</Label>
-            <Input
-              id="name"
-              placeholder="My Shopping Assistant"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="type">Agent Type</Label>
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select agent type" />
-              </SelectTrigger>
-              <SelectContent>
-                {agentTypes.map((agentType) => (
-                  <SelectItem key={agentType.value} value={agentType.value}>
-                    <div>
-                      <div className="font-medium">{agentType.label}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {agentType.description}
+            <div className="space-y-2">
+              <Label htmlFor="type">Agent Type</Label>
+              <Select value={type} onValueChange={setType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select agent type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {agentTypes.map((agentType) => (
+                    <SelectItem key={agentType.value} value={agentType.value}>
+                      <div>
+                        <div className="font-medium">{agentType.label}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {agentType.description}
+                        </div>
                       </div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description (Optional)</Label>
-            <Input
-              id="description"
-              placeholder="Describe what this agent will do..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description (Optional)</Label>
+              <Input
+                id="description"
+                placeholder="Describe what this agent will do..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
 
             <div className="flex gap-3 pt-4">
               <Button
@@ -158,4 +143,3 @@ export function CreateAgentDialog({ open, onOpenChange, onSuccess }: CreateAgent
     </Dialog>
   );
 }
-
