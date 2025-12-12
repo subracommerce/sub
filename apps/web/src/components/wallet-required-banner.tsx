@@ -2,8 +2,9 @@
 
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
-import { ConnectWalletButton } from "./connect-wallet-button";
+import Link from "next/link";
 
 export function WalletRequiredBanner() {
   const { connected } = useWallet();
@@ -19,10 +20,13 @@ export function WalletRequiredBanner() {
       <AlertDescription className="text-yellow-800 dark:text-yellow-200 mt-2">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <span>
-            You need a Solana wallet to create agents, shop, and use the
-            marketplace.
+            You need a Solana wallet to create agents, shop, and use the marketplace.
           </span>
-          <ConnectWalletButton />
+          <Link href="/auth/wallet">
+            <Button variant="default" className="transition-all hover:scale-105">
+              Connect Wallet
+            </Button>
+          </Link>
         </div>
       </AlertDescription>
     </Alert>

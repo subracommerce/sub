@@ -53,7 +53,10 @@ export const walletAuthRoutes: FastifyPluginAsync = async (fastify) => {
         });
       }
 
-      const token = signJWT({ userId: user.id });
+      const token = signJWT(
+        { userId: user.id, email: user.email },
+        process.env.JWT_SECRET!
+      );
 
       return reply.send({
         success: true,

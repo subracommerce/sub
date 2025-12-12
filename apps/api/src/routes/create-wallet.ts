@@ -1,7 +1,8 @@
 import { FastifyPluginAsync } from "fastify";
 import { Keypair } from "@solana/web3.js";
 import { prisma } from "../lib/prisma";
-import { signJWT, hashPassword } from "@subra/utils";
+import { signJWT } from "@subra/utils";
+import { hashPassword } from "@subra/utils/auth";
 import bs58 from "bs58";
 import crypto from "crypto";
 
@@ -27,7 +28,10 @@ export const createWalletRoutes: FastifyPluginAsync = async (fastify) => {
         },
       });
 
-      const token = signJWT({ userId: user.id });
+      const token = signJWT(
+        { userId: user.id, email: user.email },
+        process.env.JWT_SECRET!
+      );
 
       // Return user, token, and wallet details
       // WARNING: In production, encrypt the secret key and store securely!

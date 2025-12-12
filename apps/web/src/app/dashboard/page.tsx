@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuthStore } from "@/store/auth";
@@ -18,6 +19,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const { isAuthenticated, token } = useAuthStore();
+  const { connected } = useWallet();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -56,6 +58,18 @@ export default function DashboardPage() {
       title: "Success!",
       description: "Your AI agent has been created",
     });
+  };
+
+  const handleCreateAgentClick = () => {
+    if (!connected) {
+      toast({
+        title: "Wallet Required",
+        description: "Please connect your Solana wallet first to create agents",
+        variant: "destructive",
+      });
+      return;
+    }
+    setShowCreateDialog(true);
   };
 
   if (isLoading) {
@@ -137,7 +151,10 @@ export default function DashboardPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-2xl font-bold">Your AI Agents</h3>
-            <Button onClick={() => setShowCreateDialog(true)} className="transition-all hover:scale-105">
+            <Button 
+              onClick={handleCreateAgentClick}
+              className="transition-all hover:scale-105"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Create Agent
             </Button>
@@ -151,7 +168,10 @@ export default function DashboardPage() {
                 <p className="text-muted-foreground mb-4 text-center max-w-md">
                   Create your first AI agent to start shopping autonomously
                 </p>
-                <Button onClick={() => setShowCreateDialog(true)} className="transition-all hover:scale-105">
+                <Button 
+                  onClick={handleCreateAgentClick}
+                  className="transition-all hover:scale-105"
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Create Your First Agent
                 </Button>
@@ -207,4 +227,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
