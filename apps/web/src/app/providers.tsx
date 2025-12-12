@@ -1,50 +1,38 @@
 "use client";
 
-import { useMemo, ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  ConnectionProvider,
-  WalletProvider,
-} from "@solana/wallet-adapter-react";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import React, { useMemo } from "react";
+import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import {
-  PhantomWalletAdapter,
-  SolflareWalletAdapter,
-  TorusWalletAdapter,
-  LedgerWalletAdapter,
-} from "@solana/wallet-adapter-wallets";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
-import { Toaster } from "@/components/ui/toaster";
 
-const queryClient = new QueryClient();
+// Default styles that can be overridden by your app
+import "@solana/wallet-adapter-react-ui/styles.css";
 
-export function Providers({ children }: { children: ReactNode }) {
-  // Network can be 'devnet', 'testnet', or 'mainnet-beta'
+export function Providers({ children }: { children: React.ReactNode }) {
   const network = WalletAdapterNetwork.Devnet;
+  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
-  // You can also provide a custom RPC endpoint
-  const endpoint = useMemo(() => {
-    if (process.env.NEXT_PUBLIC_SOLANA_RPC_URL) {
-      return process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
-    }
-    return clusterApiUrl(network);
-  }, [network]);
-
-  // @solana/wallet-adapter-wallets includes all the adapters
-  // Use empty array to avoid duplicate adapters (wallet-adapter-wallets provides them automatically)
+  // Empty wallets array - let WalletModalProvider discover available wallets
   const wallets = useMemo(() => [], []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ConnectionProvider endpoint={endpoint}>
-        <WalletProvider wallets={wallets} autoConnect={false}>
-          <WalletModalProvider>
-            {children}
-            <Toaster />
-          </WalletModalProvider>
-        </WalletProvider>
-      </ConnectionProvider>
-    </QueryClientProvider>
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider 
+        wallets={wallets} 
+        autoConnect={false}
+        onError={(error) => {
+          console.error("Wallet error:", error);
+          // Don't auto-retry if wallet is locked
+          if (error.message?.includes("locked") || error.message?.includes("User rejected")) {
+            console.warn("Wallet is locked or user rejected connection");
+          }
+        }}
+      >
+        <WalletModalProvider>
+          {children}
+        </WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
   );
 }

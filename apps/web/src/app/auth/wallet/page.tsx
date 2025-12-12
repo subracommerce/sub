@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,13 +15,14 @@ import Link from "next/link";
 
 export default function WalletAuthPage() {
   const wallet = useWallet();
-  const { publicKey, signMessage, connected, connecting, wallet: walletAdapter } = wallet;
+  const { publicKey, signMessage, disconnect, select, wallets } = wallet;
   const router = useRouter();
   const { toast } = useToast();
   const { setAuth, isAuthenticated } = useAuthStore();
   const [isSigning, setIsSigning] = useState(false);
   const [step, setStep] = useState<"connect" | "sign" | "success">("connect");
-  const [walletReady, setWalletReady] = useState(false);
+  const [isTestingWallet, setIsTestingWallet] = useState(false);
+  const [walletError, setWalletError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -29,39 +30,74 @@ export default function WalletAuthPage() {
     }
   }, [isAuthenticated, router]);
 
-  // Check if wallet is truly ready (unlocked and has public key)
+  // Test if wallet is actually unlocked and accessible
+  const testWalletAccess = useCallback(async () => {
+    if (!publicKey || !signMessage) {
+      setWalletError("Wallet not ready");
+      return false;
+    }
+
+    setIsTestingWallet(true);
+    setWalletError(null);
+
+    try {
+      // Try to access the public key - this will fail if wallet is locked
+      const pubKeyString = publicKey.toBase58();
+      
+      if (!pubKeyString || pubKeyString.length < 32) {
+        throw new Error("Invalid public key");
+      }
+
+      console.log("✅ Wallet is unlocked and accessible:", pubKeyString.slice(0, 8) + "...");
+      setIsTestingWallet(false);
+      return true;
+    } catch (error: any) {
+      console.error("❌ Wallet access test failed:", error);
+      setWalletError("Wallet appears to be locked. Please unlock Phantom and try again.");
+      
+      // Disconnect the false connection
+      setTimeout(() => {
+        disconnect();
+      }, 100);
+      
+      setIsTestingWallet(false);
+      return false;
+    }
+  }, [publicKey, signMessage, disconnect]);
+
+  // When publicKey appears, test if wallet is truly accessible
   useEffect(() => {
-    const checkWalletReady = async () => {
-      if (connected && publicKey && signMessage) {
-        // Try to get the public key to verify wallet is unlocked
-        try {
-          const key = publicKey.toBase58();
-          if (key && key.length > 0) {
-            setWalletReady(true);
-            setStep("sign");
-          } else {
-            setWalletReady(false);
-            setStep("connect");
-          }
-        } catch (error) {
-          console.error("Wallet not ready:", error);
-          setWalletReady(false);
+    if (publicKey && signMessage) {
+      console.log("🔍 Wallet connected, testing accessibility...");
+      testWalletAccess().then((isReady) => {
+        if (isReady) {
+          setStep("sign");
+        } else {
           setStep("connect");
         }
-      } else {
-        setWalletReady(false);
-        setStep("connect");
-      }
-    };
-
-    checkWalletReady();
-  }, [connected, publicKey, signMessage]);
+      });
+    } else {
+      setStep("connect");
+      setWalletError(null);
+    }
+  }, [publicKey, signMessage, testWalletAccess]);
 
   const handleSignIn = async () => {
-    if (!publicKey || !signMessage || !walletReady) {
+    if (!publicKey || !signMessage) {
       toast({
         title: "Wallet Not Ready",
-        description: "Please make sure your wallet is unlocked and connected",
+        description: "Please connect and unlock your wallet first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Test wallet access before attempting to sign
+    const isAccessible = await testWalletAccess();
+    if (!isAccessible) {
+      toast({
+        title: "Wallet Locked",
+        description: "Please unlock your Phantom wallet and reconnect",
         variant: "destructive",
       });
       return;
@@ -70,15 +106,11 @@ export default function WalletAuthPage() {
     setIsSigning(true);
 
     try {
-      // Generate nonce for security
       const nonce = generateNonce();
-      
-      // Create message to sign
       const message = createAuthMessage(publicKey.toBase58(), nonce);
 
       console.log("🔐 Requesting signature from wallet...");
 
-      // Request signature (Phantom popup will show)
       const { signature, message: encodedMessage } = await signAuthMessage(
         signMessage,
         message
@@ -86,7 +118,6 @@ export default function WalletAuthPage() {
 
       console.log("✅ Signature received, verifying...");
 
-      // Verify with backend
       const result = await verifyWalletAuth(
         publicKey.toBase58(),
         signature,
@@ -131,6 +162,7 @@ export default function WalletAuthPage() {
           description: "Please unlock your Phantom wallet first",
           variant: "destructive",
         });
+        disconnect();
       } else {
         toast({
           title: "Error",
@@ -158,51 +190,79 @@ export default function WalletAuthPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Connection Instructions */}
-          {!connected && !connecting && (
+          {/* Important Instructions */}
+          {step === "connect" && (
             <Alert className="border-blue-500 bg-blue-50 dark:bg-blue-950">
               <Shield className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-blue-800 dark:text-blue-200">
+                <div className="space-y-3">
+                  <p className="font-bold text-lg">⚠️ IMPORTANT: Unlock First!</p>
+                  <ol className="text-sm space-y-2 list-decimal list-inside">
+                    <li className="font-medium">
+                      Click the Phantom extension in your browser
+                    </li>
+                    <li className="font-medium">
+                      Enter your password to UNLOCK it
+                    </li>
+                    <li className="font-medium">
+                      Then come back here and click "Connect Wallet"
+                    </li>
+                  </ol>
+                  <p className="text-xs mt-2 pt-2 border-t border-blue-300">
+                    ❌ Do NOT connect while Phantom is locked - it won't work!
+                  </p>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Wallet Error */}
+          {walletError && (
+            <Alert className="border-red-500 bg-red-50 dark:bg-red-950">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertDescription className="text-red-800 dark:text-red-200">
                 <div className="space-y-2">
-                  <p className="font-medium">Before you connect:</p>
-                  <ol className="text-sm space-y-1 list-decimal list-inside">
-                    <li>Make sure Phantom wallet extension is installed</li>
-                    <li>Unlock your wallet with your password</li>
-                    <li>Click "Connect Wallet" below</li>
-                    <li>Approve the connection in Phantom</li>
+                  <p className="font-medium">🔒 {walletError}</p>
+                  <p className="text-sm">
+                    Steps to fix:
+                  </p>
+                  <ol className="text-sm list-decimal list-inside space-y-1">
+                    <li>Close any wallet connection</li>
+                    <li>Open Phantom extension</li>
+                    <li>Unlock with your password</li>
+                    <li>Try connecting again</li>
                   </ol>
                 </div>
               </AlertDescription>
             </Alert>
           )}
 
+          {/* Testing Wallet */}
+          {isTestingWallet && (
+            <Alert>
+              <AlertDescription>
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <span>Verifying wallet is unlocked...</span>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Step 1: Connect Wallet */}
-          {step === "connect" && (
+          {step === "connect" && !isTestingWallet && (
             <div className="space-y-4">
-              {connecting && (
-                <Alert>
-                  <AlertDescription>
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                      <span>Connecting to wallet...</span>
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              )}
-              
-              {!connected && !publicKey && (
-                <Alert>
-                  <Lock className="h-4 w-4" />
-                  <AlertDescription>
-                    <div className="space-y-2">
-                      <p className="font-medium">Step 1: Unlock & Connect Your Wallet</p>
-                      <p className="text-sm">
-                        Make sure your Phantom wallet is unlocked, then click below.
-                      </p>
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              )}
+              <Alert>
+                <Lock className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="space-y-2">
+                    <p className="font-medium">Step 1: Connect Your Wallet</p>
+                    <p className="text-sm">
+                      Make sure Phantom is unlocked first!
+                    </p>
+                  </div>
+                </AlertDescription>
+              </Alert>
               
               <ConnectWalletButton />
               
@@ -213,13 +273,13 @@ export default function WalletAuthPage() {
           )}
 
           {/* Step 2: Sign Message */}
-          {step === "sign" && walletReady && publicKey && (
+          {step === "sign" && publicKey && !isTestingWallet && (
             <div className="space-y-4">
               <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800 dark:text-green-200">
                   <div className="space-y-2">
-                    <p className="font-medium">✅ Wallet Connected & Unlocked</p>
+                    <p className="font-medium">✅ Wallet Connected & Verified!</p>
                     <p className="text-sm font-mono">
                       {publicKey.toBase58().slice(0, 8)}...
                       {publicKey.toBase58().slice(-8)}
@@ -250,28 +310,16 @@ export default function WalletAuthPage() {
               </Button>
 
               <Button
-                onClick={() => wallet.disconnect()}
+                onClick={() => {
+                  disconnect();
+                  setStep("connect");
+                }}
                 variant="outline"
                 className="w-full"
               >
                 Use Different Wallet
               </Button>
             </div>
-          )}
-
-          {/* Wallet Connected but Not Ready */}
-          {connected && !walletReady && step === "connect" && (
-            <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
-              <AlertCircle className="h-4 w-4 text-yellow-600" />
-              <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-                <div className="space-y-2">
-                  <p className="font-medium">Wallet appears locked or not ready</p>
-                  <p className="text-sm">
-                    Please unlock your Phantom wallet and refresh this page.
-                  </p>
-                </div>
-              </AlertDescription>
-            </Alert>
           )}
 
           {/* Step 3: Success */}
