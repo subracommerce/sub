@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Bot, Plus, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { CreateAgentDialog } from "@/components/create-agent-dialog";
 import type { Agent } from "@subra/sdk";
 
@@ -171,12 +172,16 @@ export default function DashboardPage() {
                       {agent.description || "No description"}
                     </p>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
-                        View Details
-                      </Button>
-                      <Button size="sm" className="flex-1">
-                        Chat
-                      </Button>
+                      <Link href={`/agent/${agent.id}`} className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full">
+                          View Details
+                        </Button>
+                      </Link>
+                      <Link href={`/agent/${agent.id}/chat`} className="flex-1">
+                        <Button size="sm" className="w-full">
+                          Chat
+                        </Button>
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>
