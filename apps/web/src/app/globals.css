@@ -10,8 +10,8 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
@@ -22,30 +22,8 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 262.1 83.3% 57.8%;
+    --ring: 0 0% 9%;
     --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 263.4 70% 50.4%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 263.4 70% 50.4%;
   }
 }
 
@@ -58,42 +36,35 @@
   }
 }
 
-/* Advanced Text Animations */
+/* Advanced Agentic Animations */
 @keyframes fade-in {
   from { 
     opacity: 0;
+    transform: translateY(10px);
   }
   to { 
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
 @keyframes slide-up {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(40px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-@keyframes text-shimmer {
-  0% {
-    background-position: 200% center;
+@keyframes expand-width {
+  from {
+    width: 0;
   }
-  100% {
-    background-position: -200% center;
-  }
-}
-
-@keyframes pulse-subtle {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
+  to {
+    width: 8rem;
   }
 }
 
@@ -101,35 +72,34 @@
   animation: fade-in 0.8s ease-out;
 }
 
-.animate-fade-in-delay {
-  animation: fade-in 1s ease-out 0.3s both;
+.animate-fade-in-delay-3 {
+  animation: fade-in 1.2s ease-out 0.6s both;
 }
 
 .animate-slide-up {
-  animation: slide-up 0.8s ease-out;
+  animation: slide-up 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.animate-slide-up-delay {
-  animation: slide-up 1s ease-out 0.2s both;
+.animate-slide-up-delay-1 {
+  animation: slide-up 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
 }
 
-.animate-text-shimmer {
-  animation: text-shimmer 4s ease-in-out infinite;
+.animate-slide-up-delay-2 {
+  animation: slide-up 1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
 }
 
-.animate-pulse-subtle {
-  animation: pulse-subtle 3s ease-in-out infinite;
+.animate-expand-width {
+  animation: expand-width 1s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both;
 }
 
-/* Smooth transitions for all interactive elements */
-button, a, input, select {
-  transition: all 0.2s ease;
+/* Smooth transitions */
+button, a {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
 }
 
 ::-webkit-scrollbar-track {
@@ -137,10 +107,10 @@ button, a, input, select {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.5);
 }

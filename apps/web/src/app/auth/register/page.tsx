@@ -33,25 +33,23 @@ export default function RegisterPage() {
       const data = await response.json();
       if (data.success) {
         setAuth(data.data.user, data.data.token);
-        toast({ title: "Account created!" });
+        toast({ title: "Account created" });
         router.push("/dashboard");
       } else {
         toast({ title: "Error", description: data.error, variant: "destructive" });
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to connect to server", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to connect", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCreateNewWallet = () => {
-    setShowCreateWalletModal(true);
-  };
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-white to-purple-50">
-      <Card className="w-full max-w-md border-2 shadow-xl">
+    <div className="flex min-h-screen items-center justify-center bg-white relative overflow-hidden">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:3rem_3rem]" />
+      
+      <Card className="w-full max-w-md border-2 border-gray-900 shadow-2xl relative z-10">
         <CardHeader className="text-center space-y-2">
           <CardTitle className="text-3xl font-bold">Create Account</CardTitle>
           <CardDescription className="text-base">Choose how to get started</CardDescription>
@@ -61,7 +59,7 @@ export default function RegisterPage() {
           <div className="space-y-3 text-center">
             <h3 className="text-base font-semibold">Have a Solana wallet?</h3>
             <Link href="/auth/wallet" passHref>
-              <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white" size="lg">
+              <Button className="w-full bg-gray-900 hover:bg-black text-white border-2 border-gray-900" size="lg">
                 <Wallet className="mr-2 h-5 w-5" /> Connect Wallet
               </Button>
             </Link>
@@ -69,9 +67,9 @@ export default function RegisterPage() {
 
           <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-300" />
+              <span className="w-full border-t-2 border-gray-300" />
             </div>
-            <div className="relative bg-white px-4 text-sm text-gray-500">Or</div>
+            <div className="relative bg-white px-4 text-sm text-gray-500 font-medium">Or</div>
           </div>
 
           {/* Create Wallet */}
@@ -80,7 +78,7 @@ export default function RegisterPage() {
             <Button 
               className="w-full bg-black hover:bg-gray-900 text-white" 
               size="lg" 
-              onClick={handleCreateNewWallet} 
+              onClick={() => setShowCreateWalletModal(true)}
               disabled={isLoading}
             >
               <Plus className="mr-2 h-5 w-5" /> Create New Wallet
@@ -89,9 +87,9 @@ export default function RegisterPage() {
 
           <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-300" />
+              <span className="w-full border-t-2 border-gray-300" />
             </div>
-            <div className="relative bg-white px-4 text-sm text-gray-500">Or</div>
+            <div className="relative bg-white px-4 text-sm text-gray-500 font-medium">Or</div>
           </div>
 
           {/* Email Signup */}
@@ -120,14 +118,14 @@ export default function RegisterPage() {
                 className="border-2"
               />
             </div>
-            <Button type="submit" className="w-full border-2 border-gray-900 bg-white text-gray-900 hover:bg-gray-50" variant="outline" disabled={isLoading}>
-              <Mail className="mr-2 h-5 w-5" /> Sign Up with Email
+            <Button type="submit" className="w-full border-2 border-gray-900 bg-white text-gray-900 hover:bg-gray-900 hover:text-white" variant="outline" disabled={isLoading}>
+              <Mail className="mr-2 h-5 w-5" /> Sign Up
             </Button>
           </form>
 
-          <div className="text-center text-sm text-gray-600 pt-4 border-t">
+          <div className="text-center text-sm text-gray-600 pt-4 border-t-2">
             Already have an account?{" "}
-            <Link href="/auth/login" className="font-medium text-purple-600 hover:text-purple-700">
+            <Link href="/auth/login" className="font-semibold text-gray-900 hover:underline">
               Sign in
             </Link>
           </div>
