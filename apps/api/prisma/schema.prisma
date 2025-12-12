@@ -1,0 +1,201 @@
+// Prisma Schema for SUBRA Platform
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String?
+  walletAddress String?  @unique
+  apiKey        String?  @unique
+  apiKeyHash    String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  agents       Agent[]
+  tasks        AgentTask[]
+  transactions Transaction[]
+  zkReceipts   ZkReceipt[]
+
+  @@index([email])
+  @@index([walletAddress])
+  @@map("users")
+}
+
+// Agent model
+model Agent {
+  id              String   @id @default(uuid())
+  userId          String
+  name            String
+  type            AgentType
+  description     String?
+  walletAddress   String?  @unique
+  encryptedKey    String?  // MPC key share or encrypted private key
+  isActive        Boolean  @default(true)
+  config          Json?    // Agent-specific configuration
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks        AgentTask[]
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([type])
+  @@map("agents")
+}
+
+enum AgentType {
+  explorer   // Product search agent
+  negotiator // Price comparison & negotiation
+  executor   // Purchase execution
+  tracker    // Order tracking
+}
+
+// Agent Task model
+model AgentTask {
+  id        String     @id @default(uuid())
+  agentId   String
+  userId    String
+  type      String     // search, compare, negotiate, purchase, track
+  status    TaskStatus @default(pending)
+  priority  Int        @default(0)
+  input     Json       // Task input parameters
+  output    Json?      // Task result
+  error     String?
+  metadata  Json?
+  startedAt DateTime?
+  completedAt DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([agentId])
+  @@index([userId])
+  @@index([status])
+  @@map("agent_tasks")
+}
+
+enum TaskStatus {
+  pending
+  in_progress
+  completed
+  failed
+  cancelled
+}
+
+// Transaction model
+model Transaction {
+  id          String            @id @default(uuid())
+  userId      String
+  agentId     String?
+  type        TransactionType
+  status      TransactionStatus @default(pending)
+  amount      Decimal           @db.Decimal(18, 6)
+  currency    String            // USDC, SOL, ETH, USD
+  fromAddress String?
+  toAddress   String?
+  txHash      String?           @unique
+  chainId     Int?
+  fiatAmount  Decimal?          @db.Decimal(18, 2) // Converted fiat amount
+  fiatCurrency String?          @default("USD")
+  metadata    Json?             // Purchase details, merchant info, etc.
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent     Agent?      @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  zkReceipt ZkReceipt?
+
+  @@index([userId])
+  @@index([agentId])
+  @@index([status])
+  @@index([txHash])
+  @@map("transactions")
+}
+
+enum TransactionType {
+  deposit
+  withdrawal
+  purchase
+  refund
+  gas_fee
+}
+
+enum TransactionStatus {
+  pending
+  processing
+  completed
+  failed
+  cancelled
+}
+
+// ZK Receipt model
+model ZkReceipt {
+  id              String   @id @default(uuid())
+  transactionId   String   @unique
+  userId          String
+  proof           String   @db.Text // ZK proof data
+  publicInputs    Json     // Public inputs for verification
+  verificationKey String?  @db.Text
+  verified        Boolean  @default(false)
+  onChainTxHash   String?  @unique // Transaction hash when stored on-chain
+  chainId         Int?
+  metadata        Json?    // Additional receipt metadata
+  createdAt       DateTime @default(now())
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([verified])
+  @@index([onChainTxHash])
+  @@map("zk_receipts")
+}
+
+// Marketplace Agent Registry
+model MarketplaceAgent {
+  id          String   @id @default(uuid())
+  agentId     String   @unique
+  name        String
+  description String
+  category    String
+  reputation  Decimal  @default(0) @db.Decimal(5, 2)
+  totalTasks  Int      @default(0)
+  successRate Decimal  @default(0) @db.Decimal(5, 2)
+  isVerified  Boolean  @default(false)
+  isPremium   Boolean  @default(false)
+  stake       Decimal? @db.Decimal(18, 6) // Staked tokens for reputation
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([reputation])
+  @@map("marketplace_agents")
+}
+
+// Session model for JWT refresh tokens
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  refreshToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([refreshToken])
+  @@map("sessions")
+}
+

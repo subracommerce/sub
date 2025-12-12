@@ -1,0 +1,8 @@
+[package]
+name = "subra_circuits"
+type = "bin"
+authors = ["SUBRA Team"]
+compiler_version = ">=0.19.0"
+
+[dependencies]
+
