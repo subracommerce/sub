@@ -1,37 +1,71 @@
 "use client";
 
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { useEffect, useCallback, useRef } from "react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
 import bs58 from "bs58";
 
 export function ConnectWalletButton() {
-  const { publicKey, signMessage, connected, disconnect, connecting } = useWallet();
+  const wallet = useWallet();
+  const { publicKey, signMessage, connected, disconnect, connecting } = wallet;
   const { setAuth, isAuthenticated } = useAuthStore();
   const router = useRouter();
   const { toast } = useToast();
-  const hasAuthenticatedRef = useRef(false);
+  const authInProgressRef = useRef(false);
+  const hasShownSignatureRef = useRef(false);
 
-  const handleWalletAuth = useCallback(async () => {
-    // Prevent double authentication
-    if (hasAuthenticatedRef.current || !publicKey || !signMessage || isAuthenticated) {
+  useEffect(() => {
+    // Only proceed if:
+    // 1. Wallet is connected
+    // 2. We have public key
+    // 3. We can sign messages
+    // 4. Not already authenticated
+    // 5. Not currently authenticating
+    // 6. Haven't shown signature already
+    if (
+      connected &&
+      publicKey &&
+      signMessage &&
+      !isAuthenticated &&
+      !authInProgressRef.current &&
+      !hasShownSignatureRef.current
+    ) {
+      hasShownSignatureRef.current = true;
+      authInProgressRef.current = true;
+      
+      // Show signature popup immediately
+      authenticateWallet();
+    }
+
+    // Reset flags when disconnected
+    if (!connected) {
+      authInProgressRef.current = false;
+      hasShownSignatureRef.current = false;
+    }
+  }, [connected, publicKey, signMessage, isAuthenticated]);
+
+  const authenticateWallet = async () => {
+    if (!publicKey || !signMessage) {
+      authInProgressRef.current = false;
+      hasShownSignatureRef.current = false;
       return;
     }
 
-    hasAuthenticatedRef.current = true;
-
     try {
       // Create message to sign
-      const message = new TextEncoder().encode(
-        `Sign this message to authenticate with SUBRA:\n\nWallet: ${publicKey.toBase58()}\nTimestamp: ${Date.now()}`
-      );
+      const timestamp = Date.now();
+      const messageText = `Sign this message to authenticate with SUBRA\n\nWallet: ${publicKey.toBase58()}\nTimestamp: ${timestamp}`;
+      const message = new TextEncoder().encode(messageText);
 
-      // Request signature from wallet (this will open Phantom popup)
+      console.log("🔐 Requesting signature from wallet...");
+
+      // This WILL show Phantom popup
       const signature = await signMessage(message);
+
+      console.log("✅ Signature received, verifying...");
 
       // Send to backend for verification
       const response = await fetch(
@@ -53,7 +87,7 @@ export function ConnectWalletButton() {
         setAuth(data.data.user, data.data.token);
         toast({
           title: "Wallet Connected! 🎉",
-          description: `Connected as ${publicKey.toBase58().slice(0, 8)}...`,
+          description: `Authenticated as ${publicKey.toBase58().slice(0, 8)}...${publicKey.toBase58().slice(-4)}`,
         });
         router.push("/dashboard");
       } else {
@@ -62,44 +96,37 @@ export function ConnectWalletButton() {
           description: data.error || "Failed to verify wallet signature",
           variant: "destructive",
         });
-        hasAuthenticatedRef.current = false;
+        authInProgressRef.current = false;
+        hasShownSignatureRef.current = false;
         disconnect();
       }
     } catch (error: any) {
-      console.error("Wallet auth failed:", error);
-      hasAuthenticatedRef.current = false;
-      
-      // Only show error if user didn't cancel
-      if (error.message && !error.message.includes("User rejected")) {
+      console.error("❌ Wallet auth error:", error);
+      authInProgressRef.current = false;
+      hasShownSignatureRef.current = false;
+
+      // Check if user rejected the signature
+      if (
+        error.message?.includes("User rejected") ||
+        error.message?.includes("rejected") ||
+        error.code === 4001
+      ) {
+        toast({
+          title: "Signature Rejected",
+          description: "You must sign the message to authenticate",
+          variant: "destructive",
+        });
+      } else {
         toast({
           title: "Connection Failed",
-          description: "Failed to authenticate wallet. Please try again.",
+          description: error.message || "Failed to authenticate wallet",
           variant: "destructive",
         });
       }
-      
+
       disconnect();
     }
-  }, [publicKey, signMessage, isAuthenticated, setAuth, toast, router, disconnect]);
-
-  useEffect(() => {
-    // Only trigger auth flow when wallet successfully connects AND we're not already authenticated
-    if (connected && publicKey && signMessage && !isAuthenticated && !hasAuthenticatedRef.current) {
-      // Small delay to ensure wallet is fully connected
-      const timer = setTimeout(() => {
-        handleWalletAuth();
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [connected, publicKey, signMessage, isAuthenticated, handleWalletAuth]);
-
-  // Reset authentication flag when wallet disconnects
-  useEffect(() => {
-    if (!connected) {
-      hasAuthenticatedRef.current = false;
-    }
-  }, [connected]);
+  };
 
   return (
     <WalletMultiButton className="!bg-primary hover:!bg-primary/90 !text-primary-foreground !rounded-lg !transition-all hover:!scale-105" />
