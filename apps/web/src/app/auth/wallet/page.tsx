@@ -29,15 +29,32 @@ export default function WalletAuthPage() {
     }
   }, [isAuthenticated, router]);
 
-  // Disconnect false connections
+  // Force disconnect any cached connections on page load
+  useEffect(() => {
+    if (connected && !isAuthenticated) {
+      console.log("Clearing cached connection from previous session...");
+      disconnect();
+    }
+  }, []);
+
+  // Prevent false connections
   useEffect(() => {
     if (connected && !publicKey) {
+      console.warn("False connection detected, disconnecting...");
       disconnect();
     }
   }, [connected, publicKey, disconnect]);
 
   const handleConnect = () => {
-    setVisible(true);
+    // Clear any old connections first
+    if (connected) {
+      disconnect();
+      setTimeout(() => {
+        setVisible(true);
+      }, 100);
+    } else {
+      setVisible(true);
+    }
   };
 
   const handleSignIn = async () => {
@@ -66,16 +83,11 @@ Timestamp: ${new Date().toISOString()}
 
 By signing, you agree to our Terms of Service and Privacy Policy.`;
 
-      console.log("🔐 Requesting signature...");
-      toast({
-        title: "Check Phantom",
-        description: "A popup should appear in your Phantom wallet",
-      });
-
+      console.log("🔐 Requesting signature from Phantom...");
+      
       const messageBytes = new TextEncoder().encode(message);
       
-      // THIS WILL TRIGGER PHANTOM POPUP
-      // If Phantom is locked, it will ask user to unlock first
+      // This MUST trigger Phantom popup
       const signatureBytes = await signMessage(messageBytes);
       
       console.log("✅ Signature received!");
@@ -145,7 +157,7 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
             Sign In with Wallet
           </CardTitle>
           <CardDescription className="text-center">
-            Connect your Solana wallet and sign to authenticate
+            Secure authentication using your Solana wallet
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -160,14 +172,15 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
 
           {!connected && (
             <div className="space-y-4">
-              <Alert>
-                <AlertDescription>
-                  <p className="font-medium mb-2">Before connecting:</p>
+              <Alert className="border-blue-500 bg-blue-50 dark:bg-blue-950">
+                <AlertDescription className="text-blue-800 dark:text-blue-200">
+                  <p className="font-semibold mb-2">🔐 Secure Connection Process:</p>
                   <ol className="text-sm space-y-1 list-decimal list-inside">
-                    <li>Make sure Phantom wallet is installed</li>
+                    <li>Make sure Phantom is unlocked</li>
                     <li>Click "Connect Wallet" below</li>
-                    <li>Phantom popup will appear - select your wallet</li>
-                    <li>Click "Connect" in Phantom</li>
+                    <li>Phantom popup will appear</li>
+                    <li>Select your wallet and approve</li>
+                    <li>Then sign the authentication message</li>
                   </ol>
                 </AlertDescription>
               </Alert>
@@ -202,9 +215,9 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
               <Alert>
                 <Shield className="h-4 w-4" />
                 <AlertDescription>
-                  <p className="text-sm font-medium mb-1">Now sign to authenticate</p>
+                  <p className="text-sm font-medium mb-1">Now authenticate with signature</p>
                   <p className="text-xs">
-                    Phantom will ask you to unlock (if locked) and then sign a message. This is free.
+                    Click below and Phantom will ask you to sign. This proves you own this wallet (free, no gas).
                   </p>
                 </AlertDescription>
               </Alert>
@@ -223,7 +236,7 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
                 ) : (
                   <>
                     <Shield className="mr-2 h-4 w-4" />
-                    Sign Message to Continue
+                    Sign to Authenticate
                   </>
                 )}
               </Button>
@@ -237,19 +250,19 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
                 className="w-full"
                 disabled={isSigning}
               >
-                Disconnect
+                Disconnect & Try Again
               </Button>
 
               {isSigning && (
                 <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
                   <AlertCircle className="h-4 w-4 text-yellow-600" />
                   <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-                    <p className="font-bold mb-2">⚠️ Check your Phantom extension!</p>
+                    <p className="font-bold mb-2">📱 Check Phantom Extension</p>
                     <ul className="text-xs space-y-1 list-disc list-inside">
-                      <li>Look for Phantom icon in browser toolbar (top right)</li>
-                      <li>A popup should appear</li>
-                      <li>If Phantom is locked, unlock it first</li>
-                      <li>Then click "Sign" to approve the message</li>
+                      <li>Look for Phantom icon in browser toolbar</li>
+                      <li>A popup should appear with signature request</li>
+                      <li>Review the message</li>
+                      <li>Click "Sign" or "Approve"</li>
                     </ul>
                   </AlertDescription>
                 </Alert>
