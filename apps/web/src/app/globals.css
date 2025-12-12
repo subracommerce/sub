@@ -58,16 +58,20 @@
   }
 }
 
-/* Futuristic animations */
+/* Advanced Text Animations */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { 
+    opacity: 0;
+  }
+  to { 
+    opacity: 1;
+  }
 }
 
 @keyframes slide-up {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -75,52 +79,46 @@
   }
 }
 
-@keyframes shimmer {
-  0% { background-position: 200% center; }
-  100% { background-position: -200% center; }
+@keyframes text-shimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
 }
 
-@keyframes pulse-glow {
+@keyframes pulse-subtle {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+    opacity: 1;
   }
   50% {
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+    opacity: 0.8;
   }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.6s ease-out;
+  animation: fade-in 0.8s ease-out;
 }
 
 .animate-fade-in-delay {
-  animation: fade-in 0.8s ease-out 0.2s both;
+  animation: fade-in 1s ease-out 0.3s both;
 }
 
 .animate-slide-up {
-  animation: slide-up 0.6s ease-out;
+  animation: slide-up 0.8s ease-out;
 }
 
 .animate-slide-up-delay {
-  animation: slide-up 0.8s ease-out 0.2s both;
+  animation: slide-up 1s ease-out 0.2s both;
 }
 
-.animate-bg-shimmer {
-  animation: shimmer 3s linear infinite;
+.animate-text-shimmer {
+  animation: text-shimmer 4s ease-in-out infinite;
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-/* Agent card hover effects */
-.agent-card {
-  transition: all 0.3s ease;
-}
-
-.agent-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
 }
 
 /* Smooth transitions for all interactive elements */
@@ -135,21 +133,14 @@ button, a, input, select {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.5);
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.7);
-}
-
-/* Glass morphism effect */
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
 }

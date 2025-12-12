@@ -5,32 +5,37 @@ import { Bot, Zap, Shield, TrendingUp } from "lucide-react";
 export default function Home() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
-      {/* Subtle grid background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_40%,transparent_100%)] opacity-30" />
-      
       {/* Hero Section */}
       <div className="relative">
-        <div className="container mx-auto px-4 py-24 flex flex-col items-center text-center">
-          <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200">
-            <Zap className="w-4 h-4 text-purple-600 animate-pulse" />
-            <span className="text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Autonomous AI Commerce
+        <div className="container mx-auto px-4 py-32 flex flex-col items-center text-center">
+          {/* Animated Badge */}
+          <div className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 animate-fade-in">
+            <Zap className="w-4 h-4 text-gray-900" />
+            <span className="text-sm font-medium text-gray-900">
+              Autonomous AI Commerce Platform
             </span>
           </div>
           
-          <h1 className="text-7xl md:text-8xl font-bold mb-6 tracking-tight">
+          {/* Main Heading with Animation */}
+          <h1 className="text-7xl md:text-8xl lg:text-9xl font-bold mb-6 tracking-tight animate-slide-up">
             SUBRA
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl font-light">
-            AI agents that shop, negotiate, and transact on Solana
-          </p>
+          {/* Animated Subheading */}
+          <div className="mb-12 max-w-3xl">
+            <p className="text-xl md:text-2xl text-gray-600 font-light leading-relaxed animate-slide-up-delay">
+              <span className="inline-block animate-text-shimmer bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 bg-[length:200%_auto] bg-clip-text text-transparent">
+                Deploy AI agents that shop, negotiate, and execute transactions autonomously on Solana
+              </span>
+            </p>
+          </div>
           
-          <div className="flex gap-4">
+          {/* CTA Buttons */}
+          <div className="flex gap-4 animate-fade-in-delay">
             <Link href="/auth/register">
               <Button 
                 size="lg" 
-                className="bg-black hover:bg-gray-900 text-white font-medium px-8 py-6 text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+                className="bg-black hover:bg-gray-800 text-white font-medium px-8 py-6 text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
               >
                 Get Started
               </Button>
@@ -48,24 +53,72 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Features Grid */}
+      {/* Features Section */}
       <div className="relative container mx-auto px-4 py-20">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { icon: Bot, title: "AI Agents", desc: "Autonomous shopping agents", gradient: "from-purple-500 to-blue-500" },
-            { icon: Zap, title: "Instant", desc: "Real-time transactions", gradient: "from-blue-500 to-cyan-500" },
-            { icon: Shield, title: "Secure", desc: "Encrypted & verified", gradient: "from-cyan-500 to-teal-500" },
-            { icon: TrendingUp, title: "Smart", desc: "Optimize every purchase", gradient: "from-teal-500 to-green-500" },
+            { 
+              icon: Bot, 
+              title: "AI Agents", 
+              desc: "Create autonomous agents that search, compare, and negotiate purchases on your behalf"
+            },
+            { 
+              icon: Zap, 
+              title: "Crypto Payments", 
+              desc: "Pay with SOL, USDC, or other SPL tokens. Seamless Solana integration"
+            },
+            { 
+              icon: Shield, 
+              title: "ZK Receipts", 
+              desc: "Cryptographic proof of purchases stored on-chain with privacy preserved"
+            },
+            { 
+              icon: TrendingUp, 
+              title: "Agent Marketplace", 
+              desc: "Discover and use specialized agents from the community marketplace"
+            },
           ].map((feature, i) => (
             <div
               key={i}
-              className="group relative p-8 rounded-2xl bg-white border-2 border-gray-200 hover:border-gray-900 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+              className="group relative p-8 rounded-2xl bg-white border-2 border-gray-200 hover:border-gray-900 transition-all duration-300 hover:scale-105 hover:shadow-2xl animate-fade-in"
+              style={{ animationDelay: `${i * 100}ms` }}
             >
-              <div className={`w-12 h-12 mb-4 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300`}>
+              <div className="w-12 h-12 mb-4 rounded-xl bg-gray-900 flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
                 <feature.icon className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-lg font-semibold mb-2 text-gray-900">{feature.title}</h3>
-              <p className="text-sm text-gray-600 font-light">{feature.desc}</p>
+              <p className="text-sm text-gray-600 leading-relaxed">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* How It Works */}
+      <div className="relative container mx-auto px-4 py-20 border-t border-gray-200">
+        <h2 className="text-4xl font-bold text-center mb-16">How It Works</h2>
+        
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {[
+            {
+              step: "01",
+              title: "Create Agent",
+              desc: "Deploy an AI agent with specific shopping preferences and budgets"
+            },
+            {
+              step: "02",
+              title: "Agent Executes",
+              desc: "Your agent searches products, compares prices, and negotiates deals"
+            },
+            {
+              step: "03",
+              title: "Transact & Track",
+              desc: "Purchases execute on Solana with ZK receipts. Track everything in real-time"
+            },
+          ].map((item, i) => (
+            <div key={i} className="text-center animate-fade-in" style={{ animationDelay: `${i * 150}ms` }}>
+              <div className="text-5xl font-bold text-gray-200 mb-4">{item.step}</div>
+              <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+              <p className="text-gray-600 leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -73,7 +126,8 @@ export default function Home() {
 
       {/* Footer */}
       <div className="relative container mx-auto px-4 py-12 text-center text-gray-500 text-sm border-t border-gray-200">
-        <p>Built on Solana • Powered by AI</p>
+        <p className="mb-2">Built on Solana • Powered by AI</p>
+        <p className="text-xs">ZK Receipts • Agent-to-Agent Marketplace • Autonomous Commerce</p>
       </div>
     </div>
   );
