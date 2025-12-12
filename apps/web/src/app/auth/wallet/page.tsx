@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,18 +10,18 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/auth";
 import { generateNonce } from "@/lib/wallet-auth";
-import { Wallet, Shield, CheckCircle, AlertCircle, Info } from "lucide-react";
+import { Wallet, Shield, CheckCircle, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import bs58 from "bs58";
 
 export default function WalletAuthPage() {
-  const { publicKey, signMessage, disconnect, connect, select, wallets, wallet } = useWallet();
+  const { publicKey, signMessage, disconnect, connected } = useWallet();
+  const { setVisible } = useWalletModal();
   const router = useRouter();
   const { toast } = useToast();
   const { setAuth, isAuthenticated } = useAuthStore();
   const [isSigning, setIsSigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showWalletSelector, setShowWalletSelector] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -28,23 +29,15 @@ export default function WalletAuthPage() {
     }
   }, [isAuthenticated, router]);
 
-  const handleSelectWallet = async (walletName: string) => {
-    const selectedWallet = wallets.find(w => w.adapter.name === walletName);
-    if (selectedWallet) {
-      select(selectedWallet.adapter.name);
-      setShowWalletSelector(false);
-      
-      try {
-        await connect();
-      } catch (err: any) {
-        console.error("Connection error:", err);
-        toast({
-          title: "Connection Failed",
-          description: err.message || "Failed to connect wallet",
-          variant: "destructive",
-        });
-      }
+  // Disconnect false connections
+  useEffect(() => {
+    if (connected && !publicKey) {
+      disconnect();
     }
+  }, [connected, publicKey, disconnect]);
+
+  const handleConnect = () => {
+    setVisible(true);
   };
 
   const handleSignIn = async () => {
@@ -73,21 +66,23 @@ Timestamp: ${new Date().toISOString()}
 
 By signing, you agree to our Terms of Service and Privacy Policy.`;
 
-      console.log("🔐 Requesting signature from Phantom...");
-      
-      // Encode message
+      console.log("🔐 Requesting signature...");
+      toast({
+        title: "Check Phantom",
+        description: "A popup should appear in your Phantom wallet",
+      });
+
       const messageBytes = new TextEncoder().encode(message);
       
-      // THIS is where Phantom should popup
+      // THIS WILL TRIGGER PHANTOM POPUP
+      // If Phantom is locked, it will ask user to unlock first
       const signatureBytes = await signMessage(messageBytes);
       
-      console.log("✅ Got signature!");
+      console.log("✅ Signature received!");
       
-      // Encode for backend
       const signature = bs58.encode(signatureBytes);
       const encodedMessage = bs58.encode(messageBytes);
 
-      // Verify with backend
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -108,9 +103,7 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
           description: "Successfully signed in",
         });
 
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 1000);
+        router.push("/dashboard");
       } else {
         setError(result.error || "Authentication failed");
         toast({
@@ -120,21 +113,19 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
         });
       }
     } catch (error: any) {
-      console.error("❌ Sign in error:", error);
+      console.error("❌ Error:", error);
 
       let errorMessage = "Failed to sign message";
-      let errorTitle = "Error";
 
-      if (error.message?.includes("User rejected") || error.code === 4001) {
-        errorTitle = "Signature Rejected";
-        errorMessage = "You declined the signature request.";
-      } else {
-        errorMessage = error.message || errorMessage;
+      if (error.message?.includes("User rejected") || error.code === 4001 || error.code === "USER_REJECTED") {
+        errorMessage = "You declined the signature request";
+      } else if (error.message) {
+        errorMessage = error.message;
       }
 
       setError(errorMessage);
       toast({
-        title: errorTitle,
+        title: "Error",
         description: errorMessage,
         variant: "destructive",
       });
@@ -154,26 +145,10 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
             Sign In with Wallet
           </CardTitle>
           <CardDescription className="text-center">
-            Connect your Solana wallet to continue
+            Connect your Solana wallet and sign to authenticate
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Instructions */}
-          {!publicKey && !showWalletSelector && (
-            <Alert className="border-blue-500 bg-blue-50 dark:bg-blue-950">
-              <Info className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-800 dark:text-blue-200">
-                <p className="font-medium mb-2">Before connecting:</p>
-                <ul className="text-sm space-y-1 list-disc list-inside">
-                  <li>Make sure Phantom wallet is installed</li>
-                  <li>Unlock it by entering your password</li>
-                  <li>Then click "Connect Wallet" below</li>
-                </ul>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Error Display */}
           {error && (
             <Alert className="border-red-500 bg-red-50 dark:bg-red-950">
               <AlertCircle className="h-4 w-4 text-red-600" />
@@ -183,11 +158,22 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
             </Alert>
           )}
 
-          {/* Not Connected - Show Wallet Selection */}
-          {!publicKey && !showWalletSelector && (
+          {!connected && (
             <div className="space-y-4">
+              <Alert>
+                <AlertDescription>
+                  <p className="font-medium mb-2">Before connecting:</p>
+                  <ol className="text-sm space-y-1 list-decimal list-inside">
+                    <li>Make sure Phantom wallet is installed</li>
+                    <li>Click "Connect Wallet" below</li>
+                    <li>Phantom popup will appear - select your wallet</li>
+                    <li>Click "Connect" in Phantom</li>
+                  </ol>
+                </AlertDescription>
+              </Alert>
+
               <Button
-                onClick={() => setShowWalletSelector(true)}
+                onClick={handleConnect}
                 className="w-full"
                 size="lg"
               >
@@ -201,54 +187,24 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
             </div>
           )}
 
-          {/* Wallet Selector */}
-          {showWalletSelector && !publicKey && (
-            <div className="space-y-3">
-              <p className="text-sm font-medium">Choose your wallet:</p>
-              {wallets.filter(w => w.readyState === "Installed").map((wallet) => (
-                <Button
-                  key={wallet.adapter.name}
-                  onClick={() => handleSelectWallet(wallet.adapter.name)}
-                  variant="outline"
-                  className="w-full justify-start"
-                >
-                  {wallet.adapter.icon && (
-                    <img src={wallet.adapter.icon} alt={wallet.adapter.name} className="w-6 h-6 mr-2" />
-                  )}
-                  {wallet.adapter.name}
-                </Button>
-              ))}
-              <Button
-                onClick={() => setShowWalletSelector(false)}
-                variant="ghost"
-                className="w-full"
-              >
-                Cancel
-              </Button>
-            </div>
-          )}
-
-          {/* Connected - Ready to Sign */}
-          {publicKey && (
+          {connected && publicKey && (
             <div className="space-y-4">
               <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800 dark:text-green-200">
-                  <div className="space-y-2">
-                    <p className="font-semibold">✅ Wallet Connected</p>
-                    <p className="text-xs font-mono break-all">
-                      {publicKey.toBase58()}
-                    </p>
-                  </div>
+                  <p className="font-semibold mb-1">✅ Wallet Connected!</p>
+                  <p className="text-xs font-mono break-all">
+                    {publicKey.toBase58()}
+                  </p>
                 </AlertDescription>
               </Alert>
 
               <Alert>
                 <Shield className="h-4 w-4" />
                 <AlertDescription>
-                  <p className="text-sm font-medium mb-1">Ready to authenticate</p>
+                  <p className="text-sm font-medium mb-1">Now sign to authenticate</p>
                   <p className="text-xs">
-                    Click below and Phantom will ask you to sign a message. This is free and proves you own this wallet.
+                    Phantom will ask you to unlock (if locked) and then sign a message. This is free.
                   </p>
                 </AlertDescription>
               </Alert>
@@ -267,7 +223,7 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
                 ) : (
                   <>
                     <Shield className="mr-2 h-4 w-4" />
-                    Sign Message
+                    Sign Message to Continue
                   </>
                 )}
               </Button>
@@ -276,7 +232,6 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
                 onClick={() => {
                   disconnect();
                   setError(null);
-                  setShowWalletSelector(false);
                 }}
                 variant="outline"
                 className="w-full"
@@ -288,21 +243,23 @@ By signing, you agree to our Terms of Service and Privacy Policy.`;
               {isSigning && (
                 <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
                   <AlertCircle className="h-4 w-4 text-yellow-600" />
-                  <AlertDescription className="text-yellow-800 dark:text-yellow-200 text-xs">
-                    <p className="font-medium mb-1">Check your Phantom extension!</p>
-                    <p>• Look for the Phantom icon in your browser toolbar</p>
-                    <p>• A popup should appear asking you to sign</p>
-                    <p>• Click "Sign" or "Approve" in Phantom</p>
+                  <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+                    <p className="font-bold mb-2">⚠️ Check your Phantom extension!</p>
+                    <ul className="text-xs space-y-1 list-disc list-inside">
+                      <li>Look for Phantom icon in browser toolbar (top right)</li>
+                      <li>A popup should appear</li>
+                      <li>If Phantom is locked, unlock it first</li>
+                      <li>Then click "Sign" to approve the message</li>
+                    </ul>
                   </AlertDescription>
                 </Alert>
               )}
             </div>
           )}
 
-          {/* Alternative Options */}
           <div className="text-center text-sm pt-4 border-t space-y-2">
-            <p className="text-muted-foreground">Other sign-in options:</p>
-            <div className="flex gap-2 justify-center flex-wrap">
+            <p className="text-muted-foreground">Other options:</p>
+            <div className="flex gap-2 justify-center">
               <Link href="/auth/register">
                 <Button variant="link" size="sm">
                   Create Account
