@@ -1,8 +1,9 @@
 import { FastifyPluginAsync } from "fastify";
 import { Keypair } from "@solana/web3.js";
 import { prisma } from "../lib/prisma";
-import { signJWT } from "@subra/utils";
+import { signJWT, hashPassword } from "@subra/utils";
 import bs58 from "bs58";
+import crypto from "crypto";
 
 export const createWalletRoutes: FastifyPluginAsync = async (fastify) => {
   // Create embedded Solana wallet for web2 users
@@ -13,12 +14,16 @@ export const createWalletRoutes: FastifyPluginAsync = async (fastify) => {
       const publicKey = keypair.publicKey.toBase58();
       const secretKey = bs58.encode(keypair.secretKey);
 
+      // Generate random password (user won't need it, but DB requires it)
+      const randomPassword = crypto.randomBytes(32).toString('hex');
+      const hashedPassword = await hashPassword(randomPassword);
+
       // Create user with embedded wallet
       const user = await prisma.user.create({
         data: {
           email: `${publicKey.slice(0, 8)}@wallet.subra`,
           walletAddress: publicKey,
-          password: "", // No password for wallet-only accounts
+          password: hashedPassword,
         },
       });
 
@@ -38,15 +43,14 @@ export const createWalletRoutes: FastifyPluginAsync = async (fastify) => {
           wallet: {
             publicKey,
             secretKey, // User must save this!
-            mnemonic: null, // TODO: Generate mnemonic phrase
           },
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       fastify.log.error(error);
       return reply.status(500).send({
         success: false,
-        error: "Failed to create wallet",
+        error: error.message || "Failed to create wallet",
       });
     }
   });
