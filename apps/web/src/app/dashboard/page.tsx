@@ -8,6 +8,7 @@ import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Bot, Plus, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { ConnectWalletButton } from "@/components/connect-wallet-button";
 import { CreateAgentDialog } from "@/components/create-agent-dialog";
 import type { Agent } from "@subra/sdk";
 
@@ -76,9 +77,12 @@ export default function DashboardPage() {
             <Sparkles className="w-6 h-6 text-primary" />
             <h1 className="text-2xl font-bold">SUBRA Dashboard</h1>
           </div>
-          <Button variant="outline" onClick={() => router.push("/")}>
-            Home
-          </Button>
+          <div className="flex items-center gap-3">
+            <ConnectWalletButton />
+            <Button variant="outline" onClick={() => router.push("/")}>
+              Home
+            </Button>
+          </div>
         </div>
       </header>
 

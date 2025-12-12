@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/api-client";
 import { useAuthStore } from "@/store/auth";
 import Link from "next/link";
-import { ConnectWalletButton } from "@/components/connect-wallet-button";
+// Removed wallet button - use email/password registration only
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -99,21 +99,6 @@ export default function RegisterPage() {
               {isLoading ? "Creating account..." : "Create Account"}
             </Button>
           </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <ConnectWalletButton />
-          </div>
 
           <div className="text-center text-sm">
             Already have an account?{" "}
