@@ -9,12 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
+import { CreateWalletModal } from "@/components/create-wallet-modal";
 import { Wallet, Plus, Mail } from "lucide-react";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showCreateWalletModal, setShowCreateWalletModal] = useState(false);
   const { setAuth } = useAuthStore();
   const router = useRouter();
   const { toast } = useToast();
@@ -43,68 +45,8 @@ export default function RegisterPage() {
     }
   };
 
-  const handleCreateNewWallet = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/create-wallet`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}), // Send empty object to satisfy Fastify
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setAuth(data.data.user, data.data.token);
-        
-        // Show secret key in a modal/alert that user MUST save
-        const secretKey = data.data.wallet.secretKey;
-        const publicKey = data.data.wallet.publicKey;
-        
-        toast({ 
-          title: "Wallet Created!", 
-          description: `Your Solana wallet is ready: ${publicKey.slice(0, 8)}...`,
-        });
-        
-        // Alert with secret key - user MUST save this
-        setTimeout(() => {
-          alert(`🔐 IMPORTANT: Save Your Secret Key!
-
-Your wallet has been created successfully.
-
-Public Address:
-${publicKey}
-
-Secret Key (SAVE THIS NOW):
-${secretKey}
-
-⚠️ WARNING:
-- We do NOT store your secret key
-- If you lose it, you lose access to your wallet forever
-- Never share this with anyone
-- Store it somewhere safe
-
-Click OK after you've saved it.`);
-          
-          router.push("/dashboard");
-        }, 500);
-      } else {
-        toast({ title: "Error", description: data.error || "Failed to create wallet", variant: "destructive" });
-      }
-    } catch (error: any) {
-      console.error("Create wallet error:", error);
-      toast({ 
-        title: "Error", 
-        description: error.message || "Failed to connect to server. Make sure the API is running.", 
-        variant: "destructive" 
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleCreateNewWallet = () => {
+    setShowCreateWalletModal(true);
   };
 
   return (
@@ -220,6 +162,11 @@ Click OK after you've saved it.`);
           </div>
         </CardContent>
       </Card>
+
+      <CreateWalletModal
+        open={showCreateWalletModal}
+        onOpenChange={setShowCreateWalletModal}
+      />
     </div>
   );
 }

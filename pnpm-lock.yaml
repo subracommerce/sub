@@ -90,6 +90,9 @@ importers:
       '@trpc/server':
         specifier: ^10.45.0
         version: 10.45.2
+      bip39:
+        specifier: ^3.1.0
+        version: 3.1.0
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
@@ -99,6 +102,9 @@ importers:
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
+      ed25519-hd-key:
+        specifier: ^1.3.0
+        version: 1.3.0
       fastify:
         specifier: ^4.25.2
         version: 4.29.1
@@ -108,6 +114,9 @@ importers:
       tweetnacl:
         specifier: ^1.0.3
         version: 1.0.3
+      tweetnacl-util:
+        specifier: ^0.15.1
+        version: 0.15.1
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -8960,6 +8969,12 @@ packages:
     dependencies:
       file-uri-to-path: 1.0.0
 
+  /bip39@3.1.0:
+    resolution: {integrity: sha512-c9kiwdk45Do5GL0vJMe7tS95VjCii65mYAH7DfWl3uW8AVzXKQVUm64i3hzVybBDMp9r7j9iNxR85+ul8MdN/A==}
+    dependencies:
+      '@noble/hashes': 1.8.0
+    dev: false
+
   /bip66@2.0.0:
     resolution: {integrity: sha512-kBG+hSpgvZBrkIm9dt5T1Hd/7xGCPEX2npoxAWZfsK1FvjgaxySEh2WizjyIstWXriKo9K9uJ4u0OnsyLDUPXQ==}
     dev: false
@@ -9978,6 +9993,13 @@ packages:
       '@noble/ciphers': 1.3.0
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
+    dev: false
+
+  /ed25519-hd-key@1.3.0:
+    resolution: {integrity: sha512-IWwAyiiuJQhgu3L8NaHb68eJxTu2pgCwxIBdgpLJdKpYZM46+AXePSVTr7fkNKaUOfOL4IrjEUaQvyVRIDP7fg==}
+    dependencies:
+      create-hmac: 1.1.7
+      tweetnacl: 1.0.3
     dev: false
 
   /ee-first@1.1.1:
@@ -12216,7 +12238,7 @@ packages:
   /md5.js@1.3.5:
     resolution: {integrity: sha512-xitP+WxNPcTTOgnTJcrhM0xvdPepipPSf3I8EIpGKeFLjt3PlJLIDG3u8EX53ZIubkb+5U2+3rELYpEhHhzdkg==}
     dependencies:
-      hash-base: 3.0.5
+      hash-base: 3.1.2
       inherits: 2.0.4
       safe-buffer: 5.2.1
     dev: false
@@ -13022,8 +13044,8 @@ packages:
       '@adraffy/ens-normalize': 1.11.1
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.6.2
-      '@scure/bip39': 1.5.4
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
       abitype: 1.0.8(typescript@5.9.3)
       eventemitter3: 5.0.1
       typescript: 5.9.3
@@ -15063,6 +15085,10 @@ packages:
       turbo-windows-64: 1.13.4
       turbo-windows-arm64: 1.13.4
     dev: true
+
+  /tweetnacl-util@0.15.1:
+    resolution: {integrity: sha512-RKJBIj8lySrShN4w6i/BonWp2Z/uxwC3h4y7xsRrpP59ZboCd0GpEVsOnMDYLMmKBpYhb5TgHzZXy7wTfYFBRw==}
+    dev: false
 
   /tweetnacl@1.0.3:
     resolution: {integrity: sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==}

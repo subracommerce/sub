@@ -2,29 +2,32 @@ import { FastifyPluginAsync } from "fastify";
 import { Keypair } from "@solana/web3.js";
 import { prisma } from "../lib/prisma";
 import { signJWT } from "@subra/utils";
-import { hashPassword } from "@subra/utils/auth";
 import bs58 from "bs58";
-import crypto from "crypto";
+import * as bip39 from "bip39";
+import { derivePath } from "ed25519-hd-key";
 
 export const createWalletRoutes: FastifyPluginAsync = async (fastify) => {
-  // Create embedded Solana wallet for web2 users
+  // Create Solana wallet with proper BIP39 seed phrase
   fastify.post("/auth/create-wallet", async (request, reply) => {
     try {
-      // Generate new Solana keypair
-      const keypair = Keypair.generate();
+      // Generate proper BIP39 mnemonic (12 words)
+      const mnemonic = bip39.generateMnemonic(128); // 128 bits = 12 words
+      const seed = await bip39.mnemonicToSeed(mnemonic);
+      
+      // Derive Solana keypair from seed using standard derivation path
+      const path = "m/44'/501'/0'/0'"; // Solana's BIP44 path
+      const derivedSeed = derivePath(path, seed.toString("hex")).key;
+      const keypair = Keypair.fromSeed(derivedSeed);
+      
       const publicKey = keypair.publicKey.toBase58();
       const secretKey = bs58.encode(keypair.secretKey);
-
-      // Generate random password (user won't need it, but DB requires it)
-      const randomPassword = crypto.randomBytes(32).toString('hex');
-      const hashedPassword = await hashPassword(randomPassword);
 
       // Create user with embedded wallet
       const user = await prisma.user.create({
         data: {
           email: `${publicKey.slice(0, 8)}@wallet.subra`,
           walletAddress: publicKey,
-          passwordHash: hashedPassword,
+          passwordHash: null, // No password for wallet-only accounts
         },
       });
 
@@ -33,8 +36,7 @@ export const createWalletRoutes: FastifyPluginAsync = async (fastify) => {
         process.env.JWT_SECRET!
       );
 
-      // Return user, token, and wallet details
-      // WARNING: In production, encrypt the secret key and store securely!
+      // Return mnemonic, public key, and secret key
       return reply.send({
         success: true,
         data: {
@@ -45,8 +47,9 @@ export const createWalletRoutes: FastifyPluginAsync = async (fastify) => {
           },
           token,
           wallet: {
+            mnemonic, // 12-word seed phrase
             publicKey,
-            secretKey, // User must save this!
+            secretKey, // For advanced users
           },
         },
       });
@@ -59,4 +62,3 @@ export const createWalletRoutes: FastifyPluginAsync = async (fastify) => {
     }
   });
 };
-
