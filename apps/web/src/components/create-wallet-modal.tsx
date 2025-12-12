@@ -62,7 +62,6 @@ export function CreateWalletModal({ open, onOpenChange }: CreateWalletModalProps
         
         toast({
           title: "Wallet Created!",
-          description: "Ready to use",
         });
       } else {
         setStep("password");
@@ -96,19 +95,21 @@ export function CreateWalletModal({ open, onOpenChange }: CreateWalletModalProps
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md border-primary/20 bg-gradient-to-br from-background via-background to-primary/5">
+      <DialogContent className="max-w-md border-2 bg-white">
         {step === "password" && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-2xl flex items-center gap-2 bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-                <Lock className="h-6 w-6 text-primary" />
+              <DialogTitle className="text-2xl flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+                  <Lock className="h-4 w-4 text-white" />
+                </div>
                 Create Wallet
               </DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -116,12 +117,12 @@ export function CreateWalletModal({ open, onOpenChange }: CreateWalletModalProps
                     placeholder="Min. 8 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pr-10 border-primary/20 focus:border-primary"
+                    className="pr-10 border-2"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-900 transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -129,14 +130,14 @@ export function CreateWalletModal({ open, onOpenChange }: CreateWalletModalProps
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
                 <Input
                   id="confirmPassword"
                   type={showPassword ? "text" : "password"}
                   placeholder="Re-enter password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="border-primary/20 focus:border-primary"
+                  className="border-2"
                 />
               </div>
 
@@ -144,13 +145,13 @@ export function CreateWalletModal({ open, onOpenChange }: CreateWalletModalProps
                 <Button
                   variant="outline"
                   onClick={handleClose}
-                  className="flex-1"
+                  className="flex-1 border-2"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleCreateWallet}
-                  className="flex-1 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-500"
+                  className="flex-1 bg-black hover:bg-gray-900 text-white"
                   size="lg"
                   disabled={!password || !confirmPassword}
                 >
@@ -164,10 +165,9 @@ export function CreateWalletModal({ open, onOpenChange }: CreateWalletModalProps
         {step === "creating" && (
           <div className="flex flex-col items-center justify-center py-12">
             <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary"></div>
-              <div className="animate-ping absolute inset-0 rounded-full h-16 w-16 border-4 border-primary/20"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-black"></div>
             </div>
-            <p className="text-lg font-medium mt-6">Creating wallet...</p>
+            <p className="text-lg font-medium mt-6 text-gray-900">Creating wallet...</p>
           </div>
         )}
 
@@ -175,29 +175,31 @@ export function CreateWalletModal({ open, onOpenChange }: CreateWalletModalProps
           <>
             <DialogHeader>
               <DialogTitle className="text-2xl flex items-center gap-2">
-                <ShieldCheck className="h-6 w-6 text-green-500 animate-pulse" />
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center">
+                  <ShieldCheck className="h-4 w-4 text-white" />
+                </div>
                 Wallet Ready
               </DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
-              <Alert className="border-green-500/50 bg-green-500/10 backdrop-blur">
-                <ShieldCheck className="h-4 w-4 text-green-500" />
-                <AlertDescription className="text-sm">
+              <Alert className="border-2 border-green-500 bg-green-50">
+                <ShieldCheck className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-sm text-green-900">
                   Your Solana wallet is secured and ready
                 </AlertDescription>
               </Alert>
 
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Wallet Address</label>
-                <div className="mt-1 p-3 bg-muted/50 backdrop-blur rounded-lg font-mono text-xs break-all border border-primary/20">
+                <label className="text-xs font-medium text-gray-600">Wallet Address</label>
+                <div className="mt-1 p-3 bg-gray-50 rounded-lg font-mono text-xs break-all border-2">
                   {publicKey}
                 </div>
               </div>
 
               <Button
                 onClick={handleContinue}
-                className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-500"
+                className="w-full bg-black hover:bg-gray-900 text-white"
                 size="lg"
               >
                 Continue

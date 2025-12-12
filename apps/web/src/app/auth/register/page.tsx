@@ -33,7 +33,7 @@ export default function RegisterPage() {
       const data = await response.json();
       if (data.success) {
         setAuth(data.data.user, data.data.token);
-        toast({ title: "Account created!", description: "Welcome to SUBRA." });
+        toast({ title: "Account created!" });
         router.push("/dashboard");
       } else {
         toast({ title: "Error", description: data.error, variant: "destructive" });
@@ -50,72 +50,53 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-950">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-white to-purple-50">
+      <Card className="w-full max-w-md border-2 shadow-xl">
+        <CardHeader className="text-center space-y-2">
           <CardTitle className="text-3xl font-bold">Create Account</CardTitle>
-          <CardDescription>Choose how you want to get started</CardDescription>
+          <CardDescription className="text-base">Choose how to get started</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Option 1: Connect Existing Wallet */}
+          {/* Connect Wallet */}
           <div className="space-y-3 text-center">
-            <h3 className="text-lg font-semibold">Already have a Solana wallet?</h3>
+            <h3 className="text-base font-semibold">Have a Solana wallet?</h3>
             <Link href="/auth/wallet" passHref>
-              <Button className="w-full" size="lg" variant="outline">
+              <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white" size="lg">
                 <Wallet className="mr-2 h-5 w-5" /> Connect Wallet
               </Button>
             </Link>
-            <p className="text-sm text-muted-foreground">
-              Connect Phantom, Solflare, etc. for instant access
-            </p>
           </div>
 
           <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-gray-300" />
             </div>
-            <div className="relative bg-white px-4 text-sm text-muted-foreground dark:bg-gray-950">
-              Or
-            </div>
+            <div className="relative bg-white px-4 text-sm text-gray-500">Or</div>
           </div>
 
-          {/* Option 2: Create New Wallet */}
+          {/* Create Wallet */}
           <div className="space-y-3 text-center">
-            <h3 className="text-lg font-semibold">New to crypto?</h3>
+            <h3 className="text-base font-semibold">New to crypto?</h3>
             <Button 
-              className="w-full" 
+              className="w-full bg-black hover:bg-gray-900 text-white" 
               size="lg" 
               onClick={handleCreateNewWallet} 
               disabled={isLoading}
             >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating Wallet...
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-5 w-5" /> Create New Wallet
-                </>
-              )}
+              <Plus className="mr-2 h-5 w-5" /> Create New Wallet
             </Button>
-            <p className="text-sm text-muted-foreground">
-              We'll create a Solana wallet for you instantly
-            </p>
           </div>
 
           <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-gray-300" />
             </div>
-            <div className="relative bg-white px-4 text-sm text-muted-foreground dark:bg-gray-950">
-              Or
-            </div>
+            <div className="relative bg-white px-4 text-sm text-gray-500">Or</div>
           </div>
 
-          {/* Option 3: Sign up with Email */}
+          {/* Email Signup */}
           <form onSubmit={handleEmailRegister} className="space-y-4">
-            <h3 className="text-lg font-semibold text-center">Sign up with email</h3>
+            <h3 className="text-base font-semibold text-center">Sign up with email</h3>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -125,6 +106,7 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="border-2"
               />
             </div>
             <div className="space-y-2">
@@ -135,28 +117,17 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="border-2"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Mail className="mr-2 h-5 w-5" /> Sign Up with Email
-                </>
-              )}
+            <Button type="submit" className="w-full border-2 border-gray-900 bg-white text-gray-900 hover:bg-gray-50" variant="outline" disabled={isLoading}>
+              <Mail className="mr-2 h-5 w-5" /> Sign Up with Email
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              Connect wallet later in dashboard
-            </p>
           </form>
 
-          <div className="text-center text-sm">
+          <div className="text-center text-sm text-gray-600 pt-4 border-t">
             Already have an account?{" "}
-            <Link href="/auth/login" className="font-medium text-primary hover:underline">
+            <Link href="/auth/login" className="font-medium text-purple-600 hover:text-purple-700">
               Sign in
             </Link>
           </div>
