@@ -24,7 +24,7 @@ export const createWalletRoutes: FastifyPluginAsync = async (fastify) => {
         data: {
           email: `${publicKey.slice(0, 8)}@wallet.subra`,
           walletAddress: publicKey,
-          password: hashedPassword,
+          passwordHash: hashedPassword,
         },
       });
 

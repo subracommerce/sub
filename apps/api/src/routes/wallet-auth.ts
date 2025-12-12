@@ -48,7 +48,7 @@ export const walletAuthRoutes: FastifyPluginAsync = async (fastify) => {
           data: {
             email: `${publicKey.slice(0, 8)}@wallet.subra`,
             walletAddress: publicKey,
-            password: "", // No password for wallet auth
+            passwordHash: null, // No password for wallet auth
           },
         });
       }

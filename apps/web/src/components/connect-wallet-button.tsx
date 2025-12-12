@@ -9,11 +9,13 @@ export function ConnectWalletButton() {
   const { publicKey, disconnect, connected } = useWallet();
   const { setVisible } = useWalletModal();
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent any form submission or page refresh
+    e.stopPropagation(); // Stop event bubbling
+    
     if (connected && publicKey) {
       disconnect();
     } else {
-      // Force the modal to open
       setVisible(true);
     }
   };
@@ -21,6 +23,7 @@ export function ConnectWalletButton() {
   return (
     <Button
       onClick={handleClick}
+      type="button" // Explicitly set type to button
       className="!bg-primary hover:!bg-primary/90"
       size="lg"
     >
