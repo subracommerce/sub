@@ -7,20 +7,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { apiClient } from "@/lib/api-client";
 import { useAuthStore } from "@/store/auth";
 import Link from "next/link";
-// Removed wallet button - use email/password registration only
+import { ConnectWalletButton } from "@/components/connect-wallet-button";
+import { Wallet, Mail, Plus } from "lucide-react";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreatingWallet, setIsCreatingWallet] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
   const { setAuth } = useAuthStore();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -58,49 +59,154 @@ export default function RegisterPage() {
     }
   };
 
+  const handleCreateWallet = async () => {
+    setIsCreatingWallet(true);
+    
+    try {
+      // Generate wallet on backend
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/create-wallet`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setAuth(data.data.user, data.data.token);
+        
+        // Show wallet info
+        toast({
+          title: "Wallet Created! 🎉",
+          description: "Save your recovery phrase securely!",
+          duration: 5000,
+        });
+
+        // Redirect to dashboard with wallet modal
+        router.push("/dashboard?showWallet=true");
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create wallet",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create wallet",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingWallet(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
           <CardDescription className="text-center">
-            Get started with SUBRA
+            Choose how you want to get started
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+          {/* Option 1: Connect Existing Wallet */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Wallet className="w-4 h-4" />
+              <span className="text-sm font-medium">Already have a Solana wallet?</span>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-              />
-              <p className="text-xs text-muted-foreground">
-                Minimum 8 characters
-              </p>
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Create Account"}
-            </Button>
-          </form>
+            <ConnectWalletButton />
+            <p className="text-xs text-muted-foreground text-center">
+              Connect Phantom, Solflare, or any Solana wallet
+            </p>
+          </div>
 
-          <div className="text-center text-sm">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or
+              </span>
+            </div>
+          </div>
+
+          {/* Option 2: Create New Wallet */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Plus className="w-4 h-4" />
+              <span className="text-sm font-medium">New to crypto?</span>
+            </div>
+            <Button 
+              onClick={handleCreateWallet}
+              disabled={isCreatingWallet}
+              className="w-full"
+              variant="outline"
+            >
+              {isCreatingWallet ? "Creating Wallet..." : "Create New Wallet"}
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              We'll create a Solana wallet for you (Web2 friendly)
+            </p>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or
+              </span>
+            </div>
+          </div>
+
+          {/* Option 3: Email/Password */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Mail className="w-4 h-4" />
+              <span className="text-sm font-medium">Sign up with email</span>
+            </div>
+            <form onSubmit={handleEmailSignup} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Minimum 8 characters
+                </p>
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading} variant="outline">
+                {isLoading ? "Creating account..." : "Sign Up with Email"}
+              </Button>
+            </form>
+            <p className="text-xs text-muted-foreground text-center">
+              You'll connect a wallet later in dashboard
+            </p>
+          </div>
+
+          <div className="text-center text-sm pt-4 border-t">
             Already have an account?{" "}
             <Link href="/auth/login" className="text-primary hover:underline">
               Sign in
@@ -111,4 +217,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

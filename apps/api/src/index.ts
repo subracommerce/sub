@@ -7,6 +7,7 @@ import { prisma } from "./lib/prisma";
 import { redis } from "./lib/redis";
 import { authRoutes } from "./routes/auth";
 import { walletAuthRoutes } from "./routes/wallet-auth";
+import { createWalletRoutes } from "./routes/create-wallet";
 import { userRoutes } from "./routes/user";
 import { agentRoutes } from "./routes/agent";
 import { taskRoutes } from "./routes/task";
@@ -57,6 +58,7 @@ fastify.get("/health", async (request, reply) => {
 // Register routes
 fastify.register(authRoutes, { prefix: "/auth" });
 fastify.register(walletAuthRoutes);
+fastify.register(createWalletRoutes);
 fastify.register(userRoutes, { prefix: "/user" });
 fastify.register(agentRoutes, { prefix: "/agent" });
 fastify.register(taskRoutes, { prefix: "/task" });

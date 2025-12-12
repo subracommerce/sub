@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Bot, Plus, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { ConnectWalletButton } from "@/components/connect-wallet-button";
+import { WalletRequiredBanner } from "@/components/wallet-required-banner";
 import { CreateAgentDialog } from "@/components/create-agent-dialog";
 import type { Agent } from "@subra/sdk";
 
@@ -87,6 +88,9 @@ export default function DashboardPage() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Wallet Required Banner */}
+        <WalletRequiredBanner />
+
         {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">Welcome to Your Dashboard</h2>

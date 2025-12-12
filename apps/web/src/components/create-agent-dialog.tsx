@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
+import { AlertCircle } from "lucide-react";
+import { ConnectWalletButton } from "./connect-wallet-button";
 
 interface CreateAgentDialogProps {
   open: boolean;
@@ -28,6 +32,7 @@ export function CreateAgentDialog({ open, onOpenChange, onSuccess }: CreateAgent
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { token } = useAuthStore();
+  const { connected } = useWallet();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,6 +83,23 @@ export function CreateAgentDialog({ open, onOpenChange, onSuccess }: CreateAgent
             Choose an agent type and give it a name to get started
           </DialogDescription>
         </DialogHeader>
+
+        {/* Wallet Required Check */}
+        {!connected && (
+          <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
+            <AlertCircle className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+              <div className="space-y-3">
+                <p className="font-medium">Wallet required to create agents</p>
+                <p className="text-sm">
+                  Agents need a Solana wallet to execute transactions on your behalf.
+                </p>
+                <ConnectWalletButton />
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Agent Name</Label>
@@ -130,8 +152,12 @@ export function CreateAgentDialog({ open, onOpenChange, onSuccess }: CreateAgent
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading} className="flex-1">
-              {isLoading ? "Creating..." : "Create Agent"}
+            <Button 
+              type="submit" 
+              disabled={isLoading || !connected} 
+              className="flex-1"
+            >
+              {isLoading ? "Creating..." : !connected ? "Connect Wallet First" : "Create Agent"}
             </Button>
           </div>
         </form>
