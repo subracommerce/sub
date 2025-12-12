@@ -1,17 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
-import { AlertCircle } from "lucide-react";
-import { ConnectWalletButton } from "./connect-wallet-button";
+import { WalletGate } from "./wallet-gate";
 
 interface CreateAgentDialogProps {
   open: boolean;
@@ -32,7 +29,6 @@ export function CreateAgentDialog({ open, onOpenChange, onSuccess }: CreateAgent
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { token } = useAuthStore();
-  const { connected } = useWallet();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -143,24 +139,21 @@ export function CreateAgentDialog({ open, onOpenChange, onSuccess }: CreateAgent
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isLoading || !connected} 
-              className="flex-1"
-            >
-              {isLoading ? "Creating..." : !connected ? "Connect Wallet First" : "Create Agent"}
-            </Button>
-          </div>
-        </form>
+            <div className="flex gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading} className="flex-1">
+                {isLoading ? "Creating..." : "Create Agent"}
+              </Button>
+            </div>
+          </form>
+        </WalletGate>
       </DialogContent>
     </Dialog>
   );

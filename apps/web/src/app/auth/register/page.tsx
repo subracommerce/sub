@@ -9,8 +9,14 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/auth";
 import Link from "next/link";
-import { ConnectWalletButton } from "@/components/connect-wallet-button";
+import dynamic from "next/dynamic";
 import { Wallet, Mail, Plus } from "lucide-react";
+
+// Dynamically import wallet button with no SSR
+const ConnectWalletButton = dynamic(
+  () => import("@/components/connect-wallet-button").then((mod) => ({ default: mod.ConnectWalletButton })),
+  { ssr: false }
+);
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -63,7 +69,6 @@ export default function RegisterPage() {
     setIsCreatingWallet(true);
     
     try {
-      // Generate wallet on backend
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/create-wallet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -74,15 +79,32 @@ export default function RegisterPage() {
       if (data.success) {
         setAuth(data.data.user, data.data.token);
         
-        // Show wallet info
+        // Show wallet credentials to user
+        const walletInfo = `
+🎉 Wallet Created Successfully!
+
+📍 Public Address:
+${data.data.wallet.publicKey}
+
+🔐 Private Key (SAVE THIS!):
+${data.data.wallet.secretKey}
+
+⚠️ IMPORTANT: Save your private key in a secure location. You'll need it to access your wallet. We don't store this!
+        `;
+
+        // Copy to clipboard
+        navigator.clipboard.writeText(walletInfo);
+
         toast({
           title: "Wallet Created! 🎉",
-          description: "Save your recovery phrase securely!",
-          duration: 5000,
+          description: "Your wallet details have been copied to clipboard. Save them securely!",
+          duration: 10000,
         });
 
-        // Redirect to dashboard with wallet modal
-        router.push("/dashboard?showWallet=true");
+        // Also show in alert
+        alert(walletInfo);
+
+        router.push("/dashboard");
       } else {
         toast({
           title: "Error",
@@ -128,9 +150,7 @@ export default function RegisterPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or
-              </span>
+              <span className="bg-background px-2 text-muted-foreground">Or</span>
             </div>
           </div>
 
@@ -143,7 +163,7 @@ export default function RegisterPage() {
             <Button 
               onClick={handleCreateWallet}
               disabled={isCreatingWallet}
-              className="w-full"
+              className="w-full transition-all hover:scale-105"
               variant="outline"
             >
               {isCreatingWallet ? "Creating Wallet..." : "Create New Wallet"}
@@ -158,9 +178,7 @@ export default function RegisterPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or
-              </span>
+              <span className="bg-background px-2 text-muted-foreground">Or</span>
             </div>
           </div>
 
@@ -197,7 +215,12 @@ export default function RegisterPage() {
                   Minimum 8 characters
                 </p>
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading} variant="outline">
+              <Button 
+                type="submit" 
+                className="w-full transition-all hover:scale-105" 
+                disabled={isLoading} 
+                variant="outline"
+              >
                 {isLoading ? "Creating account..." : "Sign Up with Email"}
               </Button>
             </form>
