@@ -22,7 +22,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900 relative overflow-hidden">
-      {/* Animated grid background with mouse tracking */}
+      {/* Animated grid background */}
       <div className="absolute inset-0 bg-agentic-grid opacity-30" />
       <div 
         className="absolute inset-0 pointer-events-none transition-opacity duration-300"
@@ -74,80 +74,97 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section - Original Style Enhanced */}
+      {/* Hero Section - Enhanced Like LangChain/Scale */}
       <section className="relative z-10 container mx-auto px-4 pt-20 pb-32">
         <div className="max-w-5xl mx-auto text-center">
-          {/* Badge with shimmer effect */}
-          <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-gray-900/20 bg-white/50 backdrop-blur-sm mb-8 agentic-fade-in relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+          {/* Badge with animated gradient border */}
+          <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-gray-900/20 bg-white/50 backdrop-blur-sm mb-8 hero-badge relative overflow-hidden group">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-500/20 via-blue-500/20 to-green-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 animate-gradient-shift" />
             <div className="w-2 h-2 rounded-full bg-gray-900 animate-pulse-smooth relative z-10" />
             <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 tracking-wider relative z-10">
-              <span>AI Agent</span>
-              <span className="text-gray-400">•</span>
-              <span>Commerce</span>
-              <span className="text-gray-400">•</span>
-              <span>Marketplace</span>
+              <span className="animate-fade-in-letter" style={{ animationDelay: '0.1s' }}>AI Agent</span>
+              <span className="text-gray-400 animate-fade-in-letter" style={{ animationDelay: '0.2s' }}>•</span>
+              <span className="animate-fade-in-letter" style={{ animationDelay: '0.3s' }}>Commerce</span>
+              <span className="text-gray-400 animate-fade-in-letter" style={{ animationDelay: '0.4s' }}>•</span>
+              <span className="animate-fade-in-letter" style={{ animationDelay: '0.5s' }}>Marketplace</span>
             </div>
           </div>
           
-          {/* Main Title with Split S - Original Style */}
-          <div className="relative mb-8 agentic-title-slide">
-            <h1 className="text-8xl md:text-9xl lg:text-[12rem] font-bold tracking-tighter text-gray-900 relative">
-              <span className="relative inline-block group cursor-pointer">
-                <span className="absolute inset-0 bg-gradient-to-b from-green-500 from-50% to-blue-500 to-50% bg-clip-text text-transparent group-hover:scale-110 transition-transform origin-center">S</span>
+          {/* Main Title with Advanced Animations */}
+          <div className="relative mb-8">
+            <h1 className="text-8xl md:text-9xl lg:text-[12rem] font-bold tracking-tighter text-gray-900 relative hero-title">
+              <span className="relative inline-block animate-scale-in" style={{ animationDelay: '0.6s' }}>
+                <span className="absolute inset-0 bg-gradient-to-b from-green-500 from-50% to-blue-500 to-50% bg-clip-text text-transparent animate-gradient-rotate">S</span>
                 <span className="opacity-0">S</span>
               </span>
-              <span className="inline-block hover:tracking-wide transition-all duration-500">UBRA</span>
+              {['U', 'B', 'R', 'A'].map((letter, i) => (
+                <span 
+                  key={i} 
+                  className="inline-block animate-slide-up-letter" 
+                  style={{ animationDelay: `${0.7 + i * 0.1}s` }}
+                >
+                  {letter}
+                </span>
+              ))}
             </h1>
           </div>
           
-          {/* Animated expanding underline - full width with glow */}
-          <div className="relative w-full max-w-4xl h-1 mb-10 mx-auto">
-            <div className="absolute inset-0 bg-gray-900 agentic-underline" />
-            <div className="absolute inset-0 bg-gray-900 blur-md agentic-underline opacity-50" />
+          {/* Animated expanding underline with gradient */}
+          <div className="relative w-full max-w-4xl h-1 mb-10 mx-auto hero-underline">
+            <div className="absolute inset-0 bg-gradient-to-r from-green-500 via-gray-900 to-blue-500 animate-gradient-expand" style={{ animationDelay: '1.1s' }} />
+            <div className="absolute inset-0 bg-gradient-to-r from-green-500 via-gray-900 to-blue-500 blur-md opacity-50 animate-gradient-expand" style={{ animationDelay: '1.1s' }} />
           </div>
           
-          {/* Subheading with typing effect */}
+          {/* Subheading with stagger effect */}
           <div className="mb-12 max-w-3xl mx-auto space-y-2">
-            <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed agentic-text-1">
+            <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed animate-fade-slide-up" style={{ animationDelay: '1.3s', opacity: 0 }}>
               AI agents that shop, compare prices, negotiate deals,
             </p>
-            <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed agentic-text-2">
+            <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed animate-fade-slide-up" style={{ animationDelay: '1.5s', opacity: 0 }}>
               and purchase products for you autonomously with crypto
             </p>
-            <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed agentic-text-3">
+            <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed animate-fade-slide-up" style={{ animationDelay: '1.7s', opacity: 0 }}>
               payments, ZK receipts, and agent-to-agent marketplace
             </p>
           </div>
           
-          {/* CTA Buttons with enhanced hover */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 agentic-buttons">
+          {/* CTA Buttons with enhanced animations */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-slide-up" style={{ animationDelay: '1.9s', opacity: 0 }}>
             <Link href="/auth/register">
-              <Button size="lg" className="bg-gray-900 hover:bg-black text-white px-10 py-7 text-lg group relative overflow-hidden w-full sm:w-auto hover:scale-105 transition-all duration-300">
-                <span className="relative z-10 flex items-center">
+              <Button size="lg" className="hero-cta-primary group relative overflow-hidden w-full sm:w-auto">
+                <span className="relative z-10 flex items-center px-10 py-7 text-lg font-semibold">
                   Deploy Your First Agent
                   <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-black to-gray-900 animate-gradient-x" />
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                {/* Glow effect */}
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500" />
               </Button>
             </Link>
             <Link href="/dashboard">
-              <Button size="lg" variant="outline" className="border-2 border-gray-900 hover:bg-gray-900 hover:text-white px-10 py-7 text-lg transition-all duration-500 group w-full sm:w-auto hover:scale-105 hover:shadow-xl">
-                View Dashboard
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              <Button size="lg" variant="outline" className="hero-cta-secondary group relative overflow-hidden w-full sm:w-auto">
+                <span className="relative z-10 flex items-center px-10 py-7 text-lg font-semibold">
+                  View Dashboard
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+                {/* Slide-in background */}
+                <div className="absolute inset-0 bg-gray-900 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
               </Button>
             </Link>
           </div>
 
-          {/* Stats with hover effects */}
-          <div className="grid grid-cols-3 gap-8 mt-20 max-w-2xl mx-auto agentic-text-2">
+          {/* Stats with enhanced animations */}
+          <div className="grid grid-cols-3 gap-8 mt-20 max-w-2xl mx-auto">
             {[
               { value: "24/7", label: "Active Monitoring" },
               { value: "100%", label: "Autonomous" },
               { value: "$0", label: "Gas Fees" }
             ].map((stat, i) => (
-              <div key={i} className="group cursor-pointer">
-                <div className="text-4xl font-bold mb-1 group-hover:scale-110 transition-transform">{stat.value}</div>
+              <div key={i} className="group cursor-pointer animate-fade-scale" style={{ animationDelay: `${2.1 + i * 0.1}s`, opacity: 0 }}>
+                <div className="text-4xl font-bold mb-1 group-hover:scale-110 transition-transform group-hover:bg-gradient-to-r group-hover:from-green-500 group-hover:to-blue-500 group-hover:bg-clip-text group-hover:text-transparent">{stat.value}</div>
                 <div className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">{stat.label}</div>
               </div>
             ))}
