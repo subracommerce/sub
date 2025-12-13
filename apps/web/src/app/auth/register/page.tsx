@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Mail, Wallet, Plus, Home, ArrowLeft, Shield, Zap, Lock, CheckCircle } from "lucide-react";
+import { Sparkles, Mail, Wallet, Plus, Home, ArrowLeft, Shield, Zap, Lock, CheckCircle, Bot, Activity } from "lucide-react";
 import { CreateWalletModal } from "@/components/create-wallet-modal";
 import { useWallet } from "@solana/wallet-adapter-react";
 
@@ -87,259 +87,293 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-green-50 relative overflow-hidden py-12">
-      {/* Animated Grid Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:3rem_3rem] animate-grid-slow opacity-30" />
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      {/* Animated Grid Background - like homepage */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
       
-      {/* Multiple Colorful Floating Orbs */}
-      <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-purple-400/30 rounded-full blur-3xl animate-float-1" />
-      <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-green-400/25 to-blue-400/25 rounded-full blur-3xl animate-float-2" />
-      <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-gradient-to-br from-purple-400/20 to-green-400/20 rounded-full blur-3xl animate-float-3" />
-      <div className="absolute top-1/3 right-1/3 w-64 h-64 bg-gradient-to-br from-green-400/15 to-blue-400/15 rounded-full blur-3xl animate-float-1" style={{animationDelay: '2s'}} />
+      {/* Floating Gradient Orbs - Blue/Green like homepage */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" />
+      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/20 to-green-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000" />
+      <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000" />
 
-      {/* Pulsing accent dots */}
-      <div className="absolute top-40 left-1/4 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-      <div className="absolute top-60 right-1/3 w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{animationDelay: '1s'}} />
-      <div className="absolute bottom-40 left-1/3 w-2 h-2 bg-green-500 rounded-full animate-pulse" style={{animationDelay: '2s'}} />
+      {/* Mouse spotlight effect - like homepage */}
+      <div className="pointer-events-none fixed inset-0 z-30 transition duration-300 lg:absolute" style={{background: 'radial-gradient(600px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(29, 78, 216, 0.08), transparent 80%)'}} />
 
-      {/* Home Button - Top Left */}
-      <Button
-        onClick={handleGoHome}
-        variant="outline"
-        className="absolute top-4 left-4 z-20 border-2 hover:bg-white hover:scale-105 transition-all shadow-lg backdrop-blur-sm"
-        size="sm"
-      >
-        <Home className="mr-2 h-4 w-4" />
-        Home
-      </Button>
-      
-      <div className="w-full max-w-6xl mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Column - Auth Options */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Header Card */}
-            <Card className="border-2 border-gray-900 shadow-2xl bg-white/95 backdrop-blur-sm animate-fade-in-up corner-accents">
-              <CardHeader className="text-center pb-4">
-                <div className="flex justify-center mb-3">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-green-500 flex items-center justify-center animate-pulse-glow relative shadow-xl">
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-green-500 animate-shimmer opacity-30" />
-                    <Sparkles className="w-8 h-8 text-white relative z-10" />
-                  </div>
-                </div>
-                <CardTitle className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
-                  Join SUBRA
-                </CardTitle>
-                <CardDescription className="text-base mt-2">Choose your preferred authentication method</CardDescription>
-              </CardHeader>
-            </Card>
+      {/* Home Button */}
+      <div className="absolute top-6 left-6 z-20">
+        <Button
+          onClick={handleGoHome}
+          variant="ghost"
+          className="text-gray-900 hover:text-black hover:bg-gray-100 transition-all"
+          size="sm"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Home
+        </Button>
+      </div>
 
-            {/* Wallet Options Grid */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Connect Existing Wallet Card */}
-              <Card className="border-2 border-blue-200 hover:shadow-2xl transition-all hover:scale-105 hover:border-blue-400 group relative overflow-hidden animate-slide-in-right bg-gradient-to-br from-blue-50 to-white">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <CardHeader className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-3 shadow-lg group-hover:animate-pulse-glow">
-                    <Wallet className="h-6 w-6 text-white" />
-                  </div>
-                  <CardTitle className="text-xl bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
-                    Connect Wallet
-                  </CardTitle>
-                  <CardDescription className="text-sm">
-                    Use your existing Solana wallet (Phantom, Solflare, etc.)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <Link href="/auth/wallet" className="block">
-                    <Button 
-                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-6 font-semibold hover:scale-105 transition-all relative overflow-hidden group/btn shadow-lg" 
-                      size="lg"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
-                      <Wallet className="mr-2 h-5 w-5 relative z-10" /> 
-                      <span className="relative z-10">Connect</span>
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-
-              {/* Create New Wallet Card */}
-              <Card className="border-2 border-green-200 hover:shadow-2xl transition-all hover:scale-105 hover:border-green-400 group relative overflow-hidden animate-slide-in-right bg-gradient-to-br from-green-50 to-white" style={{animationDelay: '0.05s'}}>
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <CardHeader className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-3 shadow-lg group-hover:animate-pulse-glow">
-                    <Plus className="h-6 w-6 text-white" />
-                  </div>
-                  <CardTitle className="text-xl bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
-                    Create Wallet
-                  </CardTitle>
-                  <CardDescription className="text-sm">
-                    Generate a new secure Solana wallet instantly
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <Button 
-                    onClick={() => setShowCreateWallet(true)}
-                    className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-6 font-semibold hover:scale-105 transition-all relative overflow-hidden group/btn shadow-lg" 
-                    size="lg"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
-                    <Plus className="mr-2 h-5 w-5 relative z-10" /> 
-                    <span className="relative z-10">Create</span>
-                  </Button>
-                </CardContent>
-              </Card>
+      <div className="container mx-auto px-4 py-12 relative z-10">
+        <div className="max-w-6xl mx-auto">
+          {/* Hero Header */}
+          <div className="text-center mb-12 animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-gray-900 bg-white mb-6 animate-slide-in-down">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+              </span>
+              <span className="text-sm font-semibold text-gray-900">
+                AI Agent • Commerce • Marketplace
+              </span>
             </div>
-
-            {/* Email Registration Card */}
-            <Card className="border-2 border-purple-200 hover:shadow-2xl transition-all hover:border-purple-400 group relative overflow-hidden animate-slide-in-right bg-gradient-to-br from-purple-50 to-white" style={{animationDelay: '0.1s'}}>
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <CardHeader className="relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:animate-pulse-glow inline-block mb-3">
-                  <Mail className="h-6 w-6 text-white" />
-                </div>
-                <CardTitle className="text-xl bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">
-                  Sign Up with Email
-                </CardTitle>
-                <CardDescription className="text-sm">
-                  Traditional registration with email and password
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-gray-600" />
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="border-2 focus:ring-2 focus:ring-purple-500 transition-all"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-sm font-medium flex items-center gap-2">
-                      <Lock className="h-4 w-4 text-gray-600" />
-                      Password
-                    </Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Min. 8 characters"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="border-2 focus:ring-2 focus:ring-purple-500 transition-all"
-                    />
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-6 hover:scale-105 transition-all shadow-lg relative overflow-hidden group/btn" 
-                    size="lg"
-                    disabled={isLoading}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
-                    <Mail className="mr-2 h-5 w-5 relative z-10" />
-                    <span className="relative z-10">{isLoading ? "Creating account..." : "Sign Up"}</span>
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Footer */}
-            <div className="text-center text-sm text-gray-600 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
-              <p className="mb-3">
-                Already have an account?{" "}
-                <Link href="/auth/login" className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700">
-                  Sign in
-                </Link>
-              </p>
-              <Button 
-                onClick={handleGoHome}
-                variant="ghost"
-                size="sm"
-                className="text-gray-600 hover:text-gray-900 hover:scale-105 transition-all"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Home
-              </Button>
-            </div>
+            
+            <h1 className="text-5xl md:text-6xl font-bold mb-4">
+              <span className="bg-gradient-to-b from-green-500 to-blue-500 bg-clip-text text-transparent">S</span>
+              <span className="text-gray-900">UBRA</span>
+            </h1>
+            
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-2">
+              Choose Your Path to Autonomous Commerce
+            </p>
+            <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
+              <Shield className="h-4 w-4 text-green-500" />
+              Secured by Zero-Knowledge Cryptography
+            </p>
           </div>
 
-          {/* Right Column - Feature Cards */}
-          <div className="space-y-6 animate-fade-in-up" style={{animationDelay: '0.15s'}}>
-            {/* Why SUBRA Card */}
-            <Card className="border-2 border-gray-200 hover:shadow-xl transition-all bg-white/95 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-500" />
-                  Why SUBRA?
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm text-gray-600">
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p>Deploy autonomous AI agents in seconds</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p>Zero-knowledge privacy for all transactions</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p>Built on Solana for speed and low fees</p>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Main Grid */}
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Auth Options - 2 Column */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Wallet Options Grid */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Connect Wallet */}
+                <Link href="/auth/wallet">
+                  <Card className="h-full border-2 border-gray-900 hover:shadow-2xl transition-all hover:scale-105 group relative overflow-hidden cursor-pointer bg-white animate-fade-in-up corner-accents">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <CardHeader className="relative z-10">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-4 shadow-lg group-hover:shadow-blue-500/50 transition-all">
+                        <Wallet className="h-7 w-7 text-white" />
+                      </div>
+                      <CardTitle className="text-2xl text-gray-900">
+                        Connect Wallet
+                      </CardTitle>
+                      <CardDescription className="text-base">
+                        Phantom, Solflare, Ledger, or any Solana wallet
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="relative z-10">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Instant connection</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Your keys, your control</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
 
-            {/* Security Card */}
-            <Card className="border-2 border-blue-200 hover:shadow-xl transition-all bg-gradient-to-br from-blue-50 to-white">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-blue-600" />
-                  Secure & Private
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm text-gray-600">
-                <p>Your keys, your assets. All wallets are encrypted and secured with industry-standard cryptography.</p>
-                <div className="flex gap-2 flex-wrap">
-                  <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700 font-medium">AES-256</span>
-                  <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700 font-medium">Non-Custodial</span>
-                  <span className="px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-700 font-medium">ZK Proofs</span>
-                </div>
-              </CardContent>
-            </Card>
+                {/* Create Wallet */}
+                <Card 
+                  onClick={() => setShowCreateWallet(true)}
+                  className="h-full border-2 border-gray-900 hover:shadow-2xl transition-all hover:scale-105 group relative overflow-hidden cursor-pointer bg-white animate-fade-in-up corner-accents"
+                  style={{animationDelay: '0.1s'}}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <CardHeader className="relative z-10">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-4 shadow-lg group-hover:shadow-green-500/50 transition-all">
+                      <Plus className="h-7 w-7 text-white" />
+                    </div>
+                    <CardTitle className="text-2xl text-gray-900">
+                      Create Wallet
+                    </CardTitle>
+                    <CardDescription className="text-base">
+                      Generate a new Solana wallet in seconds
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="relative z-10">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>Password protected</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>Encrypted & secure</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-            {/* Getting Started Card */}
-            <Card className="border-2 border-green-200 hover:shadow-xl transition-all bg-gradient-to-br from-green-50 to-white">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-green-600" />
-                  Get Started
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm text-gray-600">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">1</div>
-                  <p>Choose your authentication method</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">2</div>
-                  <p>Create your first AI agent</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">3</div>
-                  <p>Watch it execute autonomous tasks</p>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Email Registration */}
+              <Card className="border-2 border-gray-900 hover:shadow-2xl transition-all group relative overflow-hidden bg-white animate-fade-in-up corner-accents" style={{animationDelay: '0.2s'}}>
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-900/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <CardHeader className="relative z-10">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-2xl text-gray-900 mb-2">
+                        Email Registration
+                      </CardTitle>
+                      <CardDescription className="text-base">
+                        Traditional sign up with email and password
+                      </CardDescription>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center shadow-lg">
+                      <Mail className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <form onSubmit={handleRegister} className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-sm font-medium text-gray-900">
+                          Email Address
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="you@example.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          className="border-2 border-gray-900 focus:ring-2 focus:ring-blue-500 transition-all"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="password" className="text-sm font-medium text-gray-900">
+                          Password
+                        </Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="Min. 8 characters"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          className="border-2 border-gray-900 focus:ring-2 focus:ring-blue-500 transition-all"
+                        />
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gray-900 hover:bg-black text-white py-6 text-base font-semibold hover:scale-105 transition-all shadow-lg border-2 border-gray-900 relative overflow-hidden group/btn" 
+                      size="lg"
+                      disabled={isLoading}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
+                      <span className="relative z-10">{isLoading ? "Creating account..." : "Create Account"}</span>
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+
+              {/* Footer */}
+              <div className="text-center text-sm text-gray-600 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+                <p>
+                  Already have an account?{" "}
+                  <Link href="/auth/login" className="font-semibold text-gray-900 hover:text-black underline">
+                    Sign in
+                  </Link>
+                </p>
+              </div>
+            </div>
+
+            {/* Right Sidebar - Info Cards */}
+            <div className="space-y-6">
+              {/* Platform Stats */}
+              <Card className="border-2 border-gray-900 bg-white animate-fade-in-up corner-accents" style={{animationDelay: '0.15s'}}>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-gray-900" />
+                    <span className="text-gray-900">Platform Power</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                        &lt;100ms
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600">Transaction finality on Solana</p>
+                  </div>
+                  <div>
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                        $0.00025
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600">Average transaction cost</p>
+                  </div>
+                  <div>
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                        100%
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600">Zero-knowledge verified</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Agent Capabilities */}
+              <Card className="border-2 border-gray-900 bg-white animate-fade-in-up corner-accents" style={{animationDelay: '0.2s'}}>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Bot className="h-5 w-5 text-gray-900" />
+                    <span className="text-gray-900">AI Agent Features</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-transparent border-l-2 border-blue-500">
+                    <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">Zero-Knowledge Proofs</p>
+                      <p className="text-xs text-gray-600">Cryptographic privacy for all operations</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-green-50 to-transparent border-l-2 border-green-500">
+                    <Zap className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">Autonomous Execution</p>
+                      <p className="text-xs text-gray-600">Agents operate 24/7 based on your goals</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-transparent border-l-2 border-blue-500">
+                    <Activity className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">On-Chain Commerce</p>
+                      <p className="text-xs text-gray-600">Search, negotiate, and execute purchases</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Security Badge */}
+              <Card className="border-2 border-gray-900 bg-gradient-to-br from-gray-900 to-gray-800 text-white animate-fade-in-up corner-accents" style={{animationDelay: '0.25s'}}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center flex-shrink-0">
+                      <Shield className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold mb-2">Non-Custodial & Secure</h3>
+                      <p className="text-sm text-gray-300 mb-3">
+                        Your keys, your assets. All wallets encrypted with AES-256.
+                      </p>
+                      <div className="flex gap-2 flex-wrap">
+                        <span className="px-2 py-1 rounded-full text-xs bg-white/10 border border-white/20 font-medium">AES-256</span>
+                        <span className="px-2 py-1 rounded-full text-xs bg-white/10 border border-white/20 font-medium">Non-Custodial</span>
+                        <span className="px-2 py-1 rounded-full text-xs bg-white/10 border border-white/20 font-medium">Open Source</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>
