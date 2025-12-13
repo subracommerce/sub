@@ -49,10 +49,11 @@ SUBRA is an **autonomous AI commerce system** where:
 
 ### 🚧 In Progress
 
-**Phase 2: Marketplace Integration** (~75% Complete)
+**Phase 2: Marketplace Integration** (~85% Complete)
 - ✅ Real marketplace API integration (Amazon & eBay)
+- ✅ Solana Pay integration (SOL & USDC payments)
 - 🔄 Price tracking system
-- 🔄 Solana Pay integration
+- 🔄 Purchase UI components
 
 ### ❌ Not Started
 
@@ -105,7 +106,7 @@ SUBRA is an **autonomous AI commerce system** where:
 
 ---
 
-## 🛒 Phase 2: Marketplace Integration (Week 3-4) 🔄 75% COMPLETE
+## 🛒 Phase 2: Marketplace Integration (Week 3-4) 🔄 85% COMPLETE
 
 ### 2.1 Product Search & Discovery
 **Goal:** Agents can search products across multiple marketplaces
