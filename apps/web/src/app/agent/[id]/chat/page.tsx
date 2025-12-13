@@ -117,9 +117,13 @@ export default function AgentChatPage() {
       });
 
       const data = await response.json();
+      
+      // Debug logging
+      console.log("API Response:", JSON.stringify(data, null, 2));
 
       if (data.success && data.data && data.data.result) {
         const result = data.data.result;
+        console.log("Result:", JSON.stringify(result, null, 2));
         
         let responseContent = "";
         let xpGained = result.experienceGained || 0;
