@@ -1,341 +1,325 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2, Wallet, CheckCircle, XCircle, ArrowLeft, X, Shield, Bot, Zap, ShoppingCart, ArrowLeftRight, Package } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, CheckCircle, Loader2, AlertCircle, Wallet as WalletIcon, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import bs58 from "bs58";
-import Link from "next/link";
+
+type WalletAuthStep = "select" | "authenticating" | "success" | "error";
 
 export default function WalletAuthPage() {
-  const { publicKey, signMessage, connected, disconnect, wallet, select, connect } = useWallet();
-  const { setVisible } = useWalletModal();
   const router = useRouter();
+  const { publicKey, signMessage, connected, disconnect, wallet, select, connecting } = useWallet();
   const { setAuth } = useAuthStore();
   const { toast } = useToast();
-  
-  const [status, setStatus] = useState<"idle" | "authenticating" | "success">("idle");
+
+  const [step, setStep] = useState<WalletAuthStep>("select");
   const [error, setError] = useState<string | null>(null);
-  const [selectedWalletName, setSelectedWalletName] = useState<string>("");
-  const isProcessing = useRef(false);
 
-  // Force clean state on mount
+  const isAuthenticatingRef = useRef(false);
+  const hasAttemptedConnectRef = useRef(false);
+
+  // Clear wallet state on mount
   useEffect(() => {
-    const init = async () => {
-      console.log('🔒 Initializing - clearing wallet selection');
-      
-      if (connected) {
-        await disconnect();
-      }
-      
-      select(null);
-      
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('walletName');
-      }
-      
-      setStatus("idle");
-      setError(null);
-      setSelectedWalletName("");
-      isProcessing.current = false;
-      
-      console.log('✅ Clean state - ready');
-    };
-    
-    init();
-  }, []);
-
-  // When wallet is selected, trigger FULL authentication flow
-  useEffect(() => {
-    const fullAuthFlow = async () => {
-      if (wallet && !isProcessing.current && status === "idle") {
-        console.log('🚀 WALLET SELECTED:', wallet.adapter.name);
-        
-        isProcessing.current = true;
-        setSelectedWalletName(wallet.adapter.name);
-        setStatus("authenticating");
-        setError(null);
-        
-        try {
-          // Step 1: Connect
-          console.log('🔌 Step 1: Connecting...');
-          await connect();
-          console.log('✅ Connected!');
-          
-          // Wait for wallet to be ready
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // Step 2: Get wallet info
-          if (!wallet.adapter.publicKey) {
-            throw new Error("Wallet public key not available");
-          }
-          
-          const walletAddress = wallet.adapter.publicKey.toBase58();
-          console.log('✅ Wallet address:', walletAddress);
-          
-          // Step 3: Get nonce
-          console.log('📡 Step 2: Getting nonce...');
-          const nonceResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/nonce`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ walletAddress }),
-          });
-
-          if (!nonceResponse.ok) {
-            throw new Error("Failed to get nonce");
-          }
-
-          const { data: { nonce } } = await nonceResponse.json();
-          console.log('✅ Nonce received');
-
-          // Step 4: Request signature
-          const message = `Sign in to SUBRA\n\nWallet: ${walletAddress}\nNonce: ${nonce}\nTimestamp: ${new Date().toISOString()}\n\nThis proves you own this wallet.\nNo gas fees.`;
-          const encodedMessage = new TextEncoder().encode(message);
-
-          console.log('📝 Step 3: Requesting signature - POPUP SHOULD APPEAR!');
-          
-          if (!wallet.adapter.signMessage) {
-            throw new Error("Wallet does not support message signing");
-          }
-          
-          const signature = await wallet.adapter.signMessage(encodedMessage);
-          const signatureBase58 = bs58.encode(signature);
-          
-          console.log('✅ Signature received!');
-          
-          // Step 5: Verify
-          console.log('🔍 Step 4: Verifying...');
-          const authResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/verify`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              walletAddress,
-              signature: signatureBase58,
-              message: message,
-              nonce: nonce,
-            }),
-          });
-
-          const authData = await authResponse.json();
-
-          if (!authData.success) {
-            throw new Error(authData.error || "Authentication failed");
-          }
-
-          console.log('✅ Authenticated!');
-
-          setAuth(authData.data.user, authData.data.token);
-          setStatus("success");
-          
-          toast({
-            title: "Success!",
-            description: `${wallet.adapter.name} authenticated`,
-          });
-
-          setTimeout(() => {
-            router.push("/dashboard");
-          }, 1500);
-
-        } catch (error: any) {
-          console.error("❌ Authentication failed:", error);
-          
-          // Clean up
-          try {
-            await disconnect();
-            select(null);
-          } catch (e) {
-            console.error('Cleanup error:', e);
-          }
-          
-          isProcessing.current = false;
-          
-          if (error.message?.includes("User rejected") || error.message?.includes("User cancelled")) {
-            setError("You cancelled the signature request.");
-          } else if (error.message?.includes("locked")) {
-            setError("Your wallet is locked. Please unlock and try again.");
-          } else {
-            setError(error.message || "Authentication failed.");
-          }
-          
-          setStatus("idle");
-          setSelectedWalletName("");
-        }
-      }
-    };
-    
-    fullAuthFlow();
-  }, [wallet, status]);
-
-  const handleSelectWallet = () => {
-    console.log('👆 User clicked Select Wallet button');
-    console.log('   Opening wallet modal...');
-    setError(null);
-    isProcessing.current = false;
-    
-    setVisible(true);
-    console.log('📋 Modal opened');
-  };
-
-  const handleCancel = async () => {
-    console.log('❌ User clicked cancel');
-    
-    try {
-      await disconnect();
-      select(null);
-    } catch (e) {
-      console.error('Disconnect error:', e);
+    if (typeof window !== 'undefined') {
+      const keysToClear = ['walletName', 'walletAdapter', 'wallet-adapter', 'subra-wallet-v1'];
+      keysToClear.forEach(key => {
+        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
+      });
     }
-    
-    setStatus("idle");
+    select(null);
+    if (connected) disconnect();
+    setStep("select");
     setError(null);
-    setSelectedWalletName("");
-    isProcessing.current = false;
-  };
+    isAuthenticatingRef.current = false;
+    hasAttemptedConnectRef.current = false;
+  }, [disconnect, select, connected]);
 
-  const handleGoBack = () => {
-    router.back();
-  };
+  // Main authentication flow
+  const connectAndAuthenticate = useCallback(async () => {
+    if (isAuthenticatingRef.current || !wallet?.adapter) return;
+
+    isAuthenticatingRef.current = true;
+    setError(null);
+    setStep("authenticating");
+
+    try {
+      if (!connected) {
+        await wallet.adapter.connect();
+        await new Promise(resolve => setTimeout(resolve, 500)); 
+      }
+
+      if (!publicKey || !signMessage) {
+        throw new Error("Wallet connected but not ready. Please unlock your wallet.");
+      }
+
+      // Request Nonce
+      const nonceResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/nonce`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ walletAddress: publicKey.toBase58() }),
+      });
+      const nonceData = await nonceResponse.json();
+
+      if (!nonceResponse.ok || !nonceData.success) {
+        throw new Error(nonceData.error || "Failed to get nonce");
+      }
+
+      const message = new TextEncoder().encode(
+        `Sign this message to authenticate with SUBRA\n\nWallet: ${publicKey.toBase58()}\nNonce: ${nonceData.data.nonce}\nTimestamp: ${new Date().toISOString()}\n\nThis signature will not cost any gas fees.`
+      );
+
+      // Request Signature
+      const signature = await signMessage(message);
+      const signatureBase58 = bs58.encode(signature);
+
+      // Verify Signature
+      const verifyResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          walletAddress: publicKey.toBase58(),
+          signature: signatureBase58,
+          message: new TextDecoder().decode(message),
+          nonce: nonceData.data.nonce,
+        }),
+      });
+      const verifyData = await verifyResponse.json();
+
+      if (!verifyResponse.ok || !verifyData.success) {
+        throw new Error(verifyData.error || "Failed to verify signature");
+      }
+
+      setAuth(verifyData.data.user, verifyData.data.token);
+      setStep("success");
+      toast({ title: "Authentication Successful!", description: "Redirecting..." });
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Authentication failed");
+      setStep("error");
+      toast({ title: "Authentication Failed", description: err.message, variant: "destructive" });
+      disconnect();
+    } finally {
+      isAuthenticatingRef.current = false;
+    }
+  }, [publicKey, signMessage, wallet, connected, setAuth, router, toast, disconnect]);
+
+  // Trigger auth when wallet selected
+  useEffect(() => {
+    if (wallet?.adapter && !hasAttemptedConnectRef.current) {
+      hasAttemptedConnectRef.current = true;
+      connectAndAuthenticate();
+    }
+  }, [wallet, connectAndAuthenticate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden p-4">
-      {/* Animated Grid Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:3rem_3rem] animate-grid-slow opacity-50" />
+    <div className="min-h-screen bg-white relative overflow-hidden flex items-center justify-center p-4">
+      {/* Subtle Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:4rem_4rem]" />
       
-      {/* Floating Orbs */}
-      <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full blur-3xl animate-float-1" />
-      <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-blue-500/15 to-purple-500/15 rounded-full blur-3xl animate-float-2" />
-      
-      {/* Scan Line Effect */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute w-full h-[2px] bg-gradient-to-r from-transparent via-green-500/50 to-transparent animate-scan-line" />
-      </div>
+      {/* Minimal Dark Orbs */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-gray-900/10 to-gray-700/10 rounded-full filter blur-3xl animate-pulse" style={{animationDuration: '4s'}} />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-gray-800/10 to-green-500/10 rounded-full filter blur-3xl animate-pulse" style={{animationDuration: '5s', animationDelay: '1s'}} />
 
-      {/* Back Button - Top Left */}
+      {/* Navigation Buttons */}
       <Button
-        onClick={handleGoBack}
-        variant="outline"
-        className="absolute top-4 left-4 z-20 border-2 hover:bg-gray-100 hover:scale-105 transition-all"
+        onClick={() => router.back()}
+        variant="ghost"
+        className="absolute top-4 left-4 z-20 text-gray-900 hover:text-black"
         size="sm"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back
       </Button>
 
-      <Card className="w-full max-w-md border-2 border-gray-200 shadow-2xl relative z-10 bg-white/95 backdrop-blur-sm animate-fade-in-up corner-accents">
-        <CardHeader className="text-center relative">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center animate-pulse-glow relative">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-green-500 to-blue-500 animate-shimmer opacity-50" />
-              <WalletIcon className="w-8 h-8 text-white relative z-10" />
-            </div>
+      <Button
+        onClick={() => router.push("/")}
+        variant="ghost"
+        className="absolute top-4 right-4 z-20 text-gray-900 hover:text-black"
+        size="sm"
+      >
+        <X className="h-4 w-4" />
+      </Button>
+
+      <div className="w-full max-w-6xl relative z-10">
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Main Card */}
+          <div className="lg:col-span-2">
+            <Card className="border border-gray-300 bg-white shadow-lg animate-fade-in-up">
+              <CardHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center">
+                    <Wallet className="h-7 w-7 text-white" />
+                  </div>
+                </div>
+                <CardTitle className="text-3xl font-bold text-gray-900">
+                  Connect Wallet
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Securely authenticate with your Solana wallet
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {error && (
+                  <Alert variant="destructive" className="animate-slide-in-down">
+                    <XCircle className="h-4 w-4" />
+                    <AlertTitle>Connection Error</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
+                {step === "select" && (
+                  <div className="flex flex-col items-center space-y-6 animate-fade-in-up">
+                    <p className="text-gray-600 text-center">
+                      Click below to select your Solana wallet
+                    </p>
+                    <WalletMultiButton className="w-full bg-gray-900 hover:bg-black text-white font-semibold py-4 rounded-lg shadow-lg transition-all" />
+                    <p className="text-sm text-gray-500 text-center">
+                      Don't have a wallet?{" "}
+                      <button onClick={() => router.push("/auth/register")} className="underline text-gray-900 hover:text-black">
+                        Create one
+                      </button>
+                    </p>
+                  </div>
+                )}
+
+                {step === "authenticating" && (
+                  <div className="flex flex-col items-center space-y-6 py-8 animate-fade-in">
+                    <Loader2 className="h-12 w-12 animate-spin text-gray-900" />
+                    <p className="text-xl font-bold text-gray-900">Authenticating...</p>
+                    <p className="text-gray-600 text-center text-sm">
+                      Please approve the signature in your wallet
+                    </p>
+                    <Button
+                      onClick={() => {
+                        disconnect();
+                        setStep("select");
+                        setError(null);
+                        isAuthenticatingRef.current = false;
+                        hasAttemptedConnectRef.current = false;
+                      }}
+                      variant="outline"
+                      className="w-full border-gray-300"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+
+                {step === "success" && (
+                  <div className="flex flex-col items-center space-y-6 py-8 animate-fade-in">
+                    <CheckCircle className="h-16 w-16 text-green-600" />
+                    <p className="text-3xl font-bold text-gray-900">Authenticated!</p>
+                    <p className="text-gray-600 text-center">Redirecting to dashboard...</p>
+                  </div>
+                )}
+
+                {step === "error" && (
+                  <div className="flex flex-col items-center space-y-6 py-8 animate-fade-in">
+                    <XCircle className="h-16 w-16 text-red-600" />
+                    <p className="text-3xl font-bold text-gray-900">Failed</p>
+                    <p className="text-gray-600 text-center">{error}</p>
+                    <Button
+                      onClick={() => {
+                        setStep("select");
+                        setError(null);
+                        isAuthenticatingRef.current = false;
+                        hasAttemptedConnectRef.current = false;
+                      }}
+                      className="w-full bg-gray-900 hover:bg-black text-white"
+                    >
+                      Try Again
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent">
-            Connect Your Wallet
-          </CardTitle>
-          <CardDescription className="text-base">
-            {status === "idle" && "Select your wallet to continue"}
-            {status === "authenticating" && (
-              <span className="flex items-center justify-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                Authenticating with {selectedWalletName}...
-              </span>
-            )}
-            {status === "success" && "Success!"}
-          </CardDescription>
-        </CardHeader>
 
-        <CardContent className="space-y-6">
-          {error && (
-            <Alert variant="destructive" className="border-2 animate-scale-in">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          {/* Feature Cards */}
+          <div className="space-y-6">
+            {/* Coming Soon */}
+            <Card className="border border-gray-300 bg-white animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+              <CardHeader>
+                <CardTitle className="text-lg text-gray-900">What's Next</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center flex-shrink-0">
+                    <Shield className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">ZK Proofs</p>
+                    <p className="text-xs text-gray-600">Privacy-preserving verification</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-800 to-green-600 flex items-center justify-center flex-shrink-0">
+                    <Bot className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">AI Agents</p>
+                    <p className="text-xs text-gray-600">Autonomous commerce execution</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center flex-shrink-0">
+                    <ShoppingCart className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">Marketplace</p>
+                    <p className="text-xs text-gray-600">Multi-platform integration</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-          {status === "idle" && (
-            <div className="space-y-4">
-              <Alert className="border-2 border-blue-500 bg-blue-50">
-                <Shield className="h-4 w-4 text-blue-600" />
-                <AlertTitle className="text-blue-900">How It Works</AlertTitle>
-                <AlertDescription className="text-blue-800 text-sm">
-                  <ol className="list-decimal list-inside space-y-1 mt-2">
-                    <li>Click "Select Wallet" below</li>
-                    <li>Choose your wallet from the list</li>
-                    <li>Wallet will popup for connection</li>
-                    <li>Then popup again for signature</li>
-                    <li>You're in! No gas fees</li>
-                  </ol>
-                </AlertDescription>
-              </Alert>
+            {/* Roadmap Features */}
+            <Card className="border border-gray-300 bg-white animate-fade-in-up" style={{animationDelay: '0.15s'}}>
+              <CardHeader>
+                <CardTitle className="text-lg text-gray-900">Coming Soon</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <ArrowLeftRight className="h-4 w-4 text-gray-900" />
+                  <span className="text-gray-600">Agent-to-Agent payments (x402)</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Package className="h-4 w-4 text-gray-900" />
+                  <span className="text-gray-600">Dropshipping capabilities</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Zap className="h-4 w-4 text-gray-900" />
+                  <span className="text-gray-600">Price negotiation engine</span>
+                </div>
+              </CardContent>
+            </Card>
 
-              <Button 
-                onClick={handleSelectWallet}
-                className="w-full bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 hover:from-black hover:via-gray-900 hover:to-black text-white py-6 text-base font-semibold hover:scale-105 transition-all relative overflow-hidden group"
-                size="lg"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                <WalletIcon className="mr-2 h-5 w-5 relative z-10" />
-                <span className="relative z-10">Select Wallet</span>
-              </Button>
-              
-              <p className="text-xs text-gray-500 text-center">
-                Phantom • Solflare • Backpack • Ledger • Torus
-              </p>
-            </div>
-          )}
-
-          {status === "authenticating" && (
-            <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <div className="relative">
-                <Loader2 className="h-16 w-16 animate-spin text-gray-900" />
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-500 to-blue-500 animate-pulse opacity-20" />
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-semibold">Authenticating...</p>
-                <p className="text-sm text-gray-600 mt-2">
-                  Check your {selectedWalletName} popup
+            {/* Security */}
+            <Card className="border border-gray-300 bg-gradient-to-br from-gray-900 to-gray-800 text-white animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+              <CardContent className="pt-6">
+                <Shield className="h-8 w-8 mb-3" />
+                <h3 className="font-bold mb-2">Secure Connection</h3>
+                <p className="text-sm text-gray-300 mb-3">
+                  Your wallet signature never leaves your device. We verify cryptographically.
                 </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  Please sign the message to continue
-                </p>
-              </div>
-              <Button 
-                onClick={handleCancel}
-                variant="outline"
-                className="mt-4 border-2 hover:scale-105 transition-all"
-              >
-                <AlertCircle className="mr-2 h-4 w-4" />
-                Cancel
-              </Button>
-            </div>
-          )}
-
-          {status === "success" && (
-            <div className="flex flex-col items-center justify-center py-12 space-y-4 animate-scale-in">
-              <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center animate-pulse-glow">
-                <CheckCircle className="h-10 w-10 text-white" />
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-semibold">Authenticated!</p>
-                <p className="text-sm text-gray-600 mt-2">Redirecting to dashboard...</p>
-              </div>
-            </div>
-          )}
-
-          <div className="text-center text-sm text-gray-600 pt-4 border-t-2">
-            <Link href="/auth/register" className="font-semibold text-gray-900 hover:underline">
-              ← Back to registration
-            </Link>
+                <div className="flex gap-2">
+                  <span className="px-2 py-1 rounded text-xs bg-white/10 border border-white/20">Non-Custodial</span>
+                  <span className="px-2 py-1 rounded text-xs bg-white/10 border border-white/20">Secure</span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

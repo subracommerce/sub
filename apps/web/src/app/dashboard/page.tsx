@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateAgentDialog } from "@/components/create-agent-dialog";
-import { Shield, Bot, TrendingUp, CheckCircle, LogOut, ArrowLeft, Zap, Activity } from "lucide-react";
+import { Shield, Bot, TrendingUp, CheckCircle, LogOut, ArrowLeft, Zap } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -16,54 +16,39 @@ export default function DashboardPage() {
     setShowCreateAgent(false);
   };
 
-  const handleGoBack = () => {
-    router.push("/");
-  };
-
-  const handleSignOut = () => {
-    // Redirect to register page (all auth options available)
-    router.push("/auth/register");
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 relative overflow-hidden">
-      {/* Animated Background with subtle movement */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:4rem_4rem] animate-grid-slow opacity-20" />
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      {/* Subtle Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:4rem_4rem]" />
       
-      {/* Colorful Floating Orbs */}
-      <div className="absolute top-40 right-40 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-green-400/20 rounded-full blur-3xl animate-float-1" />
-      <div className="absolute bottom-40 left-40 w-80 h-80 bg-gradient-to-br from-green-400/15 to-blue-400/15 rounded-full blur-3xl animate-float-2" />
-      <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-gradient-to-br from-purple-400/10 to-blue-400/10 rounded-full blur-3xl animate-float-3" />
+      {/* Minimal Dark Orbs */}
+      <div className="absolute top-40 right-40 w-96 h-96 bg-gradient-to-br from-gray-900/5 to-gray-700/5 rounded-full filter blur-3xl" />
+      <div className="absolute bottom-40 left-40 w-80 h-80 bg-gradient-to-br from-gray-800/5 to-green-500/10 rounded-full filter blur-3xl" />
       
-      {/* Subtle pulsing accent dots */}
-      <div className="absolute top-20 left-20 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-      <div className="absolute top-40 right-60 w-2 h-2 bg-green-500 rounded-full animate-pulse" style={{animationDelay: '1s'}} />
-      <div className="absolute bottom-60 left-40 w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{animationDelay: '2s'}} />
-      
-      {/* Header with glass morphism */}
-      <header className="border-b-2 border-gray-200/50 sticky top-0 bg-white/80 backdrop-blur-xl z-10 relative shadow-sm">
+      {/* Header */}
+      <header className="border-b border-gray-200 sticky top-0 bg-white/80 backdrop-blur-xl z-10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center space-x-2 group">
-            <div className="text-2xl font-bold transition-all">
-              <span className="bg-gradient-to-b from-blue-500 via-green-500 to-blue-500 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:via-green-600 group-hover:to-blue-600 transition-all">S</span>
-              <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent group-hover:from-black group-hover:to-gray-900 transition-colors">UBRA</span>
+            <div className="text-2xl font-bold">
+              <span className="bg-gradient-to-b from-green-600 to-blue-600 bg-clip-text text-transparent">S</span>
+              <span className="text-gray-900">UBRA</span>
             </div>
           </Link>
           
           <div className="flex items-center gap-3">
             <Button 
-              onClick={handleGoBack}
+              onClick={() => router.push("/")}
               variant="outline" 
-              className="border-2 border-blue-500/50 hover:border-blue-500 hover:bg-blue-50 hover:scale-105 transition-all shadow-md" 
+              className="border-gray-300 hover:border-gray-900" 
               size="sm"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Home
             </Button>
             <Button 
-              onClick={handleSignOut}
+              onClick={() => router.push("/auth/register")}
               variant="outline" 
-              className="border-2 border-gray-900 hover:bg-gray-900 hover:text-white hover:scale-105 transition-all shadow-md" 
+              className="border-gray-900 bg-gray-900 text-white hover:bg-black" 
               size="sm"
             >
               <LogOut className="mr-2 h-4 w-4" />
@@ -74,168 +59,128 @@ export default function DashboardPage() {
       </header>
 
       <div className="container mx-auto px-4 py-8 relative z-10">
-        {/* Page Title with gradient */}
         <div className="mb-8 animate-fade-in-up">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-green-600 to-blue-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
             Agent Command Center
           </h1>
           <p className="text-gray-600 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            Monitor and manage your autonomous AI agents
-            <Activity className="h-4 w-4 text-green-500 animate-pulse ml-1" />
+            Monitor and manage your AI agents
           </p>
         </div>
 
-        {/* Stats Grid - More Colorful */}
+        {/* Stats */}
         <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <Card className="border-2 border-green-200 hover:shadow-2xl transition-all hover:scale-105 hover:border-green-400 group relative overflow-hidden animate-fade-in-up bg-gradient-to-br from-green-50 to-white">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+          <Card className="border border-gray-300 hover:border-gray-900 hover:shadow-lg transition-all bg-white animate-fade-in-up">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Deployed Agents</CardTitle>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center group-hover:animate-pulse-glow shadow-lg">
-                <Bot className="h-5 w-5 text-white" />
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center">
+                <Bot className="h-4 w-4 text-white" />
               </div>
             </CardHeader>
-            <CardContent className="relative z-10">
-              <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">0</div>
-              <p className="text-xs text-gray-600 mt-1 flex items-center gap-1">
-                <Zap className="h-3 w-3 text-green-500" />
-                Deploy your first agent
-              </p>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900">0</div>
+              <p className="text-xs text-gray-600 mt-1">Deploy your first agent</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-blue-200 hover:shadow-2xl transition-all hover:scale-105 hover:border-blue-400 group relative overflow-hidden animate-fade-in-up bg-gradient-to-br from-blue-50 to-white" style={{animationDelay: '0.1s'}}>
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+          <Card className="border border-gray-300 hover:border-gray-900 hover:shadow-lg transition-all bg-white animate-fade-in-up" style={{animationDelay: '0.05s'}}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">On-Chain Volume</CardTitle>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:animate-pulse-glow shadow-lg">
-                <TrendingUp className="h-5 w-5 text-white" />
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-800 to-green-600 flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-white" />
               </div>
             </CardHeader>
-            <CardContent className="relative z-10">
-              <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">$0</div>
-              <p className="text-xs text-gray-600 mt-1 flex items-center gap-1">
-                <Activity className="h-3 w-3 text-blue-500" />
-                Total agent transactions
-              </p>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900">$0</div>
+              <p className="text-xs text-gray-600 mt-1">Total transactions</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-purple-200 hover:shadow-2xl transition-all hover:scale-105 hover:border-purple-400 group relative overflow-hidden animate-fade-in-up bg-gradient-to-br from-purple-50 to-white" style={{animationDelay: '0.2s'}}>
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+          <Card className="border border-gray-300 hover:border-gray-900 hover:shadow-lg transition-all bg-white animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-900">Tasks Executed</CardTitle>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center group-hover:animate-pulse-glow shadow-lg">
-                <CheckCircle className="h-5 w-5 text-white" />
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center">
+                <CheckCircle className="h-4 w-4 text-white" />
               </div>
             </CardHeader>
-            <CardContent className="relative z-10">
-              <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">0</div>
-              <p className="text-xs text-gray-600 mt-1 flex items-center gap-1">
-                <Zap className="h-3 w-3 text-purple-500" />
-                Autonomous operations
-              </p>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900">0</div>
+              <p className="text-xs text-gray-600 mt-1">Autonomous operations</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Content */}
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Agent Creation - More Colorful */}
-          <Card className="border-2 border-blue-200 hover:shadow-2xl transition-all hover:border-blue-400 corner-accents relative overflow-hidden group animate-slide-in-right bg-gradient-to-br from-blue-50/50 to-white">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="relative z-10">
-              <CardTitle className="text-2xl bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent flex items-center gap-2">
-                <Bot className="h-6 w-6 text-blue-600" />
-                Deploy Your First Agent
-              </CardTitle>
-              <CardDescription>
-                Create an autonomous AI agent to execute on-chain commerce tasks
-              </CardDescription>
+          <Card className="border border-gray-300 bg-white animate-slide-in-right">
+            <CardHeader>
+              <CardTitle className="text-2xl text-gray-900">Deploy Your First Agent</CardTitle>
+              <CardDescription>Create an autonomous AI agent</CardDescription>
             </CardHeader>
-            <CardContent className="relative z-10">
+            <CardContent>
               <Button 
                 onClick={() => setShowCreateAgent(true)}
-                className="w-full bg-gradient-to-r from-blue-600 via-green-600 to-blue-600 hover:from-blue-700 hover:via-green-700 hover:to-blue-700 text-white border-2 border-blue-600 hover:scale-105 transition-all relative overflow-hidden group/btn shadow-lg" 
+                className="w-full bg-gray-900 hover:bg-black text-white" 
                 size="lg"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
-                <Bot className="mr-2 h-5 w-5 relative z-10" />
-                <span className="relative z-10">Create Agent</span>
+                <Bot className="mr-2 h-5 w-5" />
+                Create Agent
               </Button>
             </CardContent>
           </Card>
 
-          {/* Features - More Colorful */}
-          <Card className="border-2 border-green-200 hover:shadow-2xl transition-all hover:border-green-400 relative overflow-hidden group animate-slide-in-right bg-gradient-to-br from-green-50/50 to-white" style={{animationDelay: '0.1s'}}>
-            <div className="absolute inset-0 bg-gradient-to-bl from-green-500/5 via-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="relative z-10">
-              <CardTitle className="text-2xl bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-2">
-                <Zap className="h-6 w-6 text-green-600" />
-                Agent Capabilities
-              </CardTitle>
-              <CardDescription>
-                What your AI agents can do
-              </CardDescription>
+          <Card className="border border-gray-300 bg-white animate-slide-in-right" style={{animationDelay: '0.05s'}}>
+            <CardHeader>
+              <CardTitle className="text-2xl text-gray-900">Agent Capabilities</CardTitle>
+              <CardDescription>What your agents can do</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 relative z-10">
-              <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-purple-50/50 transition-colors group/item">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-md">
-                  <Shield className="h-5 w-5 text-white" />
-                </div>
+            <CardContent className="space-y-3">
+              <div className="flex items-start space-x-3">
+                <Shield className="h-5 w-5 text-gray-900 mt-0.5" />
                 <div>
-                  <p className="font-semibold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">Zero-Knowledge Proofs</p>
-                  <p className="text-sm text-gray-600">Privacy-preserving transaction verification</p>
+                  <p className="font-semibold text-gray-900 text-sm">Zero-Knowledge Proofs</p>
+                  <p className="text-sm text-gray-600">Privacy-preserving verification</p>
                 </div>
               </div>
-              <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-green-50/50 transition-colors group/item">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-md">
-                  <Bot className="h-5 w-5 text-white" />
-                </div>
+              <div className="flex items-start space-x-3">
+                <Bot className="h-5 w-5 text-gray-900 mt-0.5" />
                 <div>
-                  <p className="font-semibold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">Autonomous Execution</p>
-                  <p className="text-sm text-gray-600">Agents act independently based on your goals</p>
+                  <p className="font-semibold text-gray-900 text-sm">Autonomous Execution</p>
+                  <p className="text-sm text-gray-600">Agents act independently</p>
                 </div>
               </div>
-              <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-blue-50/50 transition-colors group/item">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
-                  <TrendingUp className="h-5 w-5 text-white" />
-                </div>
+              <div className="flex items-start space-x-3">
+                <TrendingUp className="h-5 w-5 text-gray-900 mt-0.5" />
                 <div>
-                  <p className="font-semibold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">On-Chain Commerce</p>
-                  <p className="text-sm text-gray-600">Search, compare, and execute purchases</p>
+                  <p className="font-semibold text-gray-900 text-sm">On-Chain Commerce</p>
+                  <p className="text-sm text-gray-600">Search and execute purchases</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Empty State - More Colorful */}
-        <Card className="mt-8 border-2 border-blue-200 hover:shadow-2xl transition-all relative overflow-hidden group animate-scale-in bg-gradient-to-br from-blue-50/30 via-white to-green-50/30">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-100/50 to-green-100/50 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <CardContent className="py-12 text-center relative z-10">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-500 via-green-500 to-blue-600 flex items-center justify-center group-hover:animate-pulse-glow shadow-xl">
+        {/* Empty State */}
+        <Card className="mt-8 border border-gray-300 bg-white animate-scale-in">
+          <CardContent className="py-12 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center">
               <Bot className="h-10 w-10 text-white" />
             </div>
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-green-600 to-blue-600 bg-clip-text text-transparent mb-2">
-              No Agents Yet
-            </h3>
-            <p className="text-gray-600 mb-8">Create your first AI agent to get started with autonomous commerce</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">No Agents Yet</h3>
+            <p className="text-gray-600 mb-8">Create your first AI agent to get started</p>
             <Button 
               onClick={() => setShowCreateAgent(true)}
-              className="bg-gradient-to-r from-blue-600 via-green-600 to-blue-600 hover:from-blue-700 hover:via-green-700 hover:to-blue-700 text-white border-2 border-blue-600 hover:scale-110 transition-all relative overflow-hidden group/btn shadow-lg"
+              className="bg-gray-900 hover:bg-black text-white"
               size="lg"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
-              <Bot className="mr-2 h-5 w-5 relative z-10" />
-              <span className="relative z-10">Deploy Agent</span>
+              <Bot className="mr-2 h-5 w-5" />
+              Deploy Agent
             </Button>
           </CardContent>
         </Card>
       </div>
 
-      {/* Create Agent Dialog */}
       <CreateAgentDialog 
         open={showCreateAgent} 
         onOpenChange={setShowCreateAgent}
@@ -243,4 +188,6 @@ export default function DashboardPage() {
       />
     </div>
   );
+}
+
 }
