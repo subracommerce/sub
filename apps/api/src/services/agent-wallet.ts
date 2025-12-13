@@ -32,7 +32,7 @@ export class AgentWalletService {
       throw new Error("Agent not found");
     }
 
-    if (agent.agentWalletAddress) {
+    if (agent.walletAddress) {
       throw new Error("Agent already has a wallet");
     }
 

@@ -41,7 +41,11 @@ export const agentWalletRoutes: FastifyPluginAsync = async (fastify) => {
 
         return reply.send({
           success: true,
-          data: wallet,
+          data: {
+            publicKey: wallet.walletAddress,
+            balance: wallet.balance,
+            message: "Agent wallet created successfully",
+          },
         });
       } catch (error: any) {
         fastify.log.error(error);
@@ -82,7 +86,7 @@ export const agentWalletRoutes: FastifyPluginAsync = async (fastify) => {
           success: true,
           data: {
             agentId,
-            walletAddress: agent.agentWalletAddress,
+            walletAddress: agent.walletAddress,
             balance,
           },
         });
