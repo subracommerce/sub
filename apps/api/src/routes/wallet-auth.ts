@@ -65,6 +65,7 @@ export const walletAuthRoutes: FastifyPluginAsync = async (fastify) => {
             id: user.id,
             email: user.email,
             walletAddress: user.walletAddress,
+            hasWallet: true,
           },
           token,
         },

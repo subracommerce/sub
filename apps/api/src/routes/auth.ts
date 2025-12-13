@@ -67,7 +67,10 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.code(201).send({
         success: true,
         data: {
-          user,
+          user: {
+            ...user,
+            hasWallet: !!user.walletAddress,
+          },
           token,
         },
       });

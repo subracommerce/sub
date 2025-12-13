@@ -1,7 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { User } from "@subra/sdk";
-import { setAccessToken, clearAccessToken, getAccessToken } from "@/lib/api-client";
+
+interface User {
+  id: string;
+  email: string;
+  walletAddress: string | null;
+  hasWallet: boolean;
+}
 
 interface AuthState {
   user: User | null;
@@ -9,28 +14,41 @@ interface AuthState {
   isAuthenticated: boolean;
   setAuth: (user: User, token: string) => void;
   clearAuth: () => void;
-  initializeAuth: () => void;
+  updateUser: (user: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isAuthenticated: false,
+      
       setAuth: (user, token) => {
-        setAccessToken(token);
-        set({ user, token, isAuthenticated: true });
+        set({ 
+          user: {
+            ...user,
+            hasWallet: !!user.walletAddress
+          }, 
+          token, 
+          isAuthenticated: true 
+        });
       },
+      
       clearAuth: () => {
-        clearAccessToken();
         set({ user: null, token: null, isAuthenticated: false });
       },
-      initializeAuth: () => {
-        const token = getAccessToken();
-        if (token) {
-          setAccessToken(token);
-          set({ token, isAuthenticated: true });
+      
+      updateUser: (updates) => {
+        const currentUser = get().user;
+        if (currentUser) {
+          set({ 
+            user: { 
+              ...currentUser, 
+              ...updates,
+              hasWallet: !!(updates.walletAddress ?? currentUser.walletAddress)
+            } 
+          });
         }
       },
     }),
@@ -39,4 +57,3 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
-

@@ -57,21 +57,27 @@ export function CreateWalletModal({ open, onOpenChange }: CreateWalletModalProps
 
       if (data.success) {
         setPublicKey(data.data.user.walletAddress);
-        // Store auth with user object and token
+        // Store auth with complete user object
         setAuth(
           {
             id: data.data.user.id,
             email: data.data.user.email,
             walletAddress: data.data.user.walletAddress,
-          } as any,
+            hasWallet: true,
+          },
           data.data.token
         );
         setStep("success");
         
         toast({
-          title: "Wallet Created!",
-          description: "Your account is ready!",
+          title: "Wallet Created Successfully!",
+          description: "You're all set to create agents",
         });
+        
+        // Auto-redirect after 1.5 seconds
+        setTimeout(() => {
+          handleContinue();
+        }, 1500);
       } else {
         setStep("password");
         toast({

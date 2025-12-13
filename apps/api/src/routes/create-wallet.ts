@@ -64,6 +64,7 @@ export const createWalletRoutes: FastifyPluginAsync = async (fastify) => {
             id: user.id,
             email: user.email,
             walletAddress: user.walletAddress,
+            hasWallet: true,
           },
           token,
           message: "Wallet created and secured with your password"
