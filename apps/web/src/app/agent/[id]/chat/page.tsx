@@ -132,13 +132,16 @@ export default function AgentChatPage() {
           const taskData = result.data;
           
           if (taskType === "search") {
-            const products = taskData.products || [];
-            const totalProducts = products.length;
+            // Handle nested products structure: taskData.products.products
+            const productsData = taskData.products || {};
+            const products = productsData.products || [];
+            const totalProducts = productsData.totalResults || products.length;
             
             responseContent = `I found ${totalProducts} products for "${taskData.query}"!\n\nTop results:\n`;
             
             products.slice(0, 3).forEach((p: any, i: number) => {
-              responseContent += `\n${i + 1}. ${p.title}\n   💰 $${p.price.toFixed(2)} at ${p.marketplace}`;
+              const productName = p.title || p.name || "Unknown Product";
+              responseContent += `\n${i + 1}. ${productName}\n   💰 $${p.price.toFixed(2)} at ${p.marketplace}`;
               if (p.rating) {
                 responseContent += `\n   ⭐ ${p.rating}/5`;
               }
