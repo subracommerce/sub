@@ -10,6 +10,8 @@ import { walletAuthRoutes } from "./routes/wallet-auth";
 import { createWalletRoutes } from "./routes/create-wallet";
 import { agentWalletRoutes } from "./routes/agent-wallet";
 import { agentSkillRoutes } from "./routes/agent-skill";
+import { marketplaceRoutes } from "./routes/marketplace";
+import { agentTaskRoutes } from "./routes/agent-task";
 import { userRoutes } from "./routes/user";
 import { agentRoutes } from "./routes/agent";
 import { taskRoutes } from "./routes/task";
@@ -65,6 +67,8 @@ fastify.register(userRoutes, { prefix: "/user" });
 fastify.register(agentRoutes, { prefix: "/agent" });
 fastify.register(agentWalletRoutes); // Agent wallet management
 fastify.register(agentSkillRoutes); // Agent skills management
+fastify.register(marketplaceRoutes); // Marketplace search & compare
+fastify.register(agentTaskRoutes); // Agent task execution
 fastify.register(taskRoutes, { prefix: "/task" });
 fastify.register(transactionRoutes, { prefix: "/transaction" });
 fastify.register(zkReceiptRoutes, { prefix: "/zk-receipt" });
