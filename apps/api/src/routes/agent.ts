@@ -6,7 +6,7 @@ import { AgentType } from "@prisma/client";
 
 const createAgentSchema = z.object({
   name: z.string().min(1).max(100),
-  type: z.enum(["explorer", "negotiator", "executor", "tracker"]),
+  type: z.enum(["explorer", "negotiator", "executor", "tracker", "dropshipper"]),
   description: z.string().max(500).optional(),
 });
 

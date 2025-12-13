@@ -57,10 +57,11 @@ model Agent {
 }
 
 enum AgentType {
-  explorer   // Product search agent
-  negotiator // Price comparison & negotiation
-  executor   // Purchase execution
-  tracker    // Order tracking
+  explorer    // Product search agent
+  negotiator  // Price comparison & negotiation
+  executor    // Purchase execution
+  tracker     // Order tracking
+  dropshipper // Dropshipping automation
 }
 
 // Agent Task model
