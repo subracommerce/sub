@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
@@ -8,103 +8,122 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, CheckCircle, Loader2, AlertCircle, Wallet as WalletIcon, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Shield, CheckCircle, Loader2, AlertCircle, Wallet as WalletIcon } from "lucide-react";
 import bs58 from "bs58";
 import Link from "next/link";
 
 export default function WalletAuthPage() {
-  const { publicKey, signMessage, connected, disconnect } = useWallet();
+  const { publicKey, signMessage, connected, disconnect, wallet } = useWallet();
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const { toast } = useToast();
   
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [status, setStatus] = useState<"idle" | "authenticating" | "success">("idle");
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const hasAttemptedAuth = useRef(false);
 
-  // After wallet connects, user must explicitly click to sign
-  const handleSignAndAuthenticate = useCallback(async () => {
-    if (!publicKey || !signMessage) {
-      setError("Please connect your wallet first");
-      return;
+  // AUTOMATICALLY sign message when wallet connects
+  useEffect(() => {
+    const authenticateAfterConnection = async () => {
+      // Only proceed if:
+      // 1. Wallet is connected
+      // 2. We have publicKey and signMessage
+      // 3. Haven't already attempted auth
+      // 4. Not currently authenticating
+      if (connected && publicKey && signMessage && !hasAttemptedAuth.current && status !== "authenticating") {
+        console.log('✅ Wallet connected! IMMEDIATELY requesting signature...');
+        
+        hasAttemptedAuth.current = true;
+        setStatus("authenticating");
+        setError(null);
+
+        try {
+          // Step 1: Get nonce
+          console.log('📡 Getting nonce...');
+          const nonceResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/nonce`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ walletAddress: publicKey.toBase58() }),
+          });
+
+          if (!nonceResponse.ok) {
+            throw new Error("Failed to get nonce");
+          }
+
+          const { data: { nonce } } = await nonceResponse.json();
+          console.log('✅ Nonce received');
+
+          // Step 2: IMMEDIATELY request signature (NO separate button click!)
+          const message = `Sign in to SUBRA\n\nWallet: ${publicKey.toBase58()}\nNonce: ${nonce}\nTimestamp: ${new Date().toISOString()}\n\nThis proves you own this wallet.\nNo gas fees.`;
+          const encodedMessage = new TextEncoder().encode(message);
+
+          console.log('📝 Requesting signature - POPUP SHOULD APPEAR NOW!');
+          const signature = await signMessage(encodedMessage);
+          const signatureBase58 = bs58.encode(signature);
+          
+          console.log('✅ Signature received!');
+          
+          // Step 3: Verify
+          console.log('🔍 Verifying...');
+          const authResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/verify`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              walletAddress: publicKey.toBase58(),
+              signature: signatureBase58,
+              message: message,
+              nonce: nonce,
+            }),
+          });
+
+          const authData = await authResponse.json();
+
+          if (!authData.success) {
+            throw new Error(authData.error || "Authentication failed");
+          }
+
+          console.log('✅ Authenticated!');
+
+          setAuth(authData.data.user, authData.data.token);
+          setStatus("success");
+          
+          toast({
+            title: "Success!",
+            description: "Wallet authenticated",
+          });
+
+          setTimeout(() => {
+            router.push("/dashboard");
+          }, 1500);
+
+        } catch (error: any) {
+          console.error("❌ Authentication failed:", error);
+          
+          // Disconnect and reset on error
+          await disconnect();
+          hasAttemptedAuth.current = false;
+          setStatus("idle");
+          
+          if (error.message?.includes("User rejected") || error.message?.includes("User cancelled")) {
+            setError("You cancelled the signature request. Please try again.");
+          } else {
+            setError(error.message || "Authentication failed. Please try again.");
+          }
+        }
+      }
+    };
+
+    authenticateAfterConnection();
+  }, [connected, publicKey, signMessage, status, disconnect, setAuth, router, toast]);
+
+  // Reset when disconnected
+  useEffect(() => {
+    if (!connected && status !== "idle") {
+      hasAttemptedAuth.current = false;
+      setStatus("idle");
+      setError(null);
     }
-
-    setIsAuthenticating(true);
-    setError(null);
-
-    try {
-      console.log('🔐 Starting authentication...');
-      
-      // Step 1: Get nonce
-      const nonceResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/nonce`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ walletAddress: publicKey.toBase58() }),
-      });
-
-      if (!nonceResponse.ok) {
-        throw new Error("Failed to get nonce");
-      }
-
-      const { data: { nonce } } = await nonceResponse.json();
-      console.log('✅ Nonce received');
-
-      // Step 2: Request signature
-      const message = `Sign in to SUBRA\n\nWallet: ${publicKey.toBase58()}\nNonce: ${nonce}\nTimestamp: ${new Date().toISOString()}\n\nThis proves you own this wallet.\nNo gas fees.`;
-      const encodedMessage = new TextEncoder().encode(message);
-
-      console.log('📝 Requesting signature...');
-      const signature = await signMessage(encodedMessage);
-      const signatureBase58 = bs58.encode(signature);
-      
-      console.log('✅ Signature received');
-      
-      // Step 3: Verify
-      console.log('🔍 Verifying...');
-      const authResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          walletAddress: publicKey.toBase58(),
-          signature: signatureBase58,
-          message: message,
-          nonce: nonce,
-        }),
-      });
-
-      const authData = await authResponse.json();
-
-      if (!authData.success) {
-        throw new Error(authData.error || "Authentication failed");
-      }
-
-      console.log('✅ Authenticated!');
-
-      setAuth(authData.data.user, authData.data.token);
-      setSuccess(true);
-      
-      toast({
-        title: "Success!",
-        description: "Wallet authenticated",
-      });
-
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 1500);
-
-    } catch (error: any) {
-      console.error("❌ Authentication failed:", error);
-      
-      if (error.message?.includes("User rejected") || error.message?.includes("User cancelled")) {
-        setError("You cancelled the signature request.");
-      } else {
-        setError(error.message || "Authentication failed.");
-      }
-    } finally {
-      setIsAuthenticating(false);
-    }
-  }, [publicKey, signMessage, setAuth, router, toast]);
+  }, [connected, status]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white relative overflow-hidden p-4">
@@ -120,7 +139,9 @@ export default function WalletAuthPage() {
           </div>
           <CardTitle className="text-3xl font-bold">Connect Your Wallet</CardTitle>
           <CardDescription className="text-base">
-            Industry-standard secure authentication
+            {status === "idle" && "Secure wallet authentication"}
+            {status === "authenticating" && "Authenticating..."}
+            {status === "success" && "Success!"}
           </CardDescription>
         </CardHeader>
 
@@ -128,100 +149,61 @@ export default function WalletAuthPage() {
           {error && (
             <Alert variant="destructive" className="border-2">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>Authentication Failed</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
-          {!success && (
-            <>
-              {/* Step 1: Connect Wallet */}
-              <div className="space-y-4">
-                <Alert className="border-2 border-blue-500 bg-blue-50">
-                  <Shield className="h-4 w-4 text-blue-600" />
-                  <AlertTitle className="text-blue-900">Two-Step Authentication</AlertTitle>
-                  <AlertDescription className="text-blue-800 text-sm">
-                    <ol className="list-decimal list-inside space-y-1 mt-2">
-                      <li><strong>Step 1:</strong> Connect your wallet below</li>
-                      <li><strong>Step 2:</strong> Sign message to authenticate</li>
-                      <li>No gas fees required</li>
-                    </ol>
-                  </AlertDescription>
-                </Alert>
+          {status === "idle" && (
+            <div className="space-y-4">
+              <Alert className="border-2 border-blue-500 bg-blue-50">
+                <Shield className="h-4 w-4 text-blue-600" />
+                <AlertTitle className="text-blue-900">How It Works</AlertTitle>
+                <AlertDescription className="text-blue-800 text-sm">
+                  <ol className="list-decimal list-inside space-y-1 mt-2">
+                    <li>Click "Select Wallet" below</li>
+                    <li>Choose your wallet and approve connection</li>
+                    <li>Sign message to authenticate (automatic)</li>
+                    <li>You're in! No gas fees</li>
+                  </ol>
+                </AlertDescription>
+              </Alert>
 
-                {/* Standard Solana Wallet Multi-Button */}
-                <div className="flex flex-col items-center space-y-4">
-                  {!connected ? (
-                    <>
-                      <p className="text-sm text-gray-600 text-center">
-                        Click below to select your wallet:
-                      </p>
-                      <WalletMultiButton 
-                        className="!bg-gray-900 hover:!bg-black !text-white !py-3 !px-6 !rounded-lg !text-base !font-semibold !transition-all hover:!scale-105"
-                        style={{
-                          backgroundColor: '#111827',
-                          color: 'white',
-                          padding: '12px 24px',
-                          borderRadius: '8px',
-                          fontSize: '16px',
-                          fontWeight: '600',
-                        }}
-                      />
-                      <p className="text-xs text-gray-500 text-center">
-                        Phantom • Solflare • Backpack • Ledger • Torus
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      {/* Step 2: Sign Message */}
-                      <Alert className="border-2 border-green-500 bg-green-50 w-full">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <AlertTitle className="text-green-900">
-                          Wallet Connected ✓
-                        </AlertTitle>
-                        <AlertDescription className="text-green-800 text-sm font-mono">
-                          {publicKey?.toBase58().slice(0, 8)}...{publicKey?.toBase58().slice(-8)}
-                        </AlertDescription>
-                      </Alert>
-
-                      <div className="w-full space-y-3">
-                        <Button 
-                          onClick={handleSignAndAuthenticate}
-                          disabled={isAuthenticating}
-                          className="w-full bg-gray-900 hover:bg-black text-white py-6 text-base font-semibold hover:scale-105 transition-all"
-                          size="lg"
-                        >
-                          {isAuthenticating ? (
-                            <>
-                              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                              Authenticating...
-                            </>
-                          ) : (
-                            <>
-                              <Shield className="mr-2 h-5 w-5" />
-                              Sign Message to Continue
-                              <ArrowRight className="ml-2 h-5 w-5" />
-                            </>
-                          )}
-                        </Button>
-
-                        <Button 
-                          onClick={() => disconnect()}
-                          variant="outline"
-                          className="w-full border-2"
-                        >
-                          Disconnect & Choose Different Wallet
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </div>
+              <div className="flex flex-col items-center space-y-4">
+                <WalletMultiButton 
+                  className="!bg-gray-900 hover:!bg-black !text-white !py-3 !px-6 !rounded-lg !text-base !font-semibold !transition-all hover:!scale-105"
+                  style={{
+                    backgroundColor: '#111827',
+                    color: 'white',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                  }}
+                />
+                <p className="text-xs text-gray-500 text-center">
+                  Phantom • Solflare • Backpack • Ledger • Torus
+                </p>
               </div>
-            </>
+            </div>
           )}
 
-          {/* Success State */}
-          {success && (
+          {status === "authenticating" && (
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <Loader2 className="h-16 w-16 animate-spin text-gray-900" />
+              <div className="text-center">
+                <p className="text-lg font-semibold">Authenticating...</p>
+                <p className="text-sm text-gray-600 mt-2">
+                  Check your {wallet?.adapter?.name || "wallet"} popup
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Please sign the message to continue
+                </p>
+              </div>
+            </div>
+          )}
+
+          {status === "success" && (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center">
                 <CheckCircle className="h-10 w-10 text-white" />
