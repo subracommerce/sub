@@ -1,5 +1,6 @@
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
+import { prisma } from "../lib/prisma";
 import { authenticate } from "../middleware/auth";
 
 const createSkillSchema = z.object({
@@ -26,7 +27,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
         const { agentId } = request.params as { agentId: string };
 
         // Verify agent belongs to user
-        const agent = await fastify.prisma.agent.findFirst({
+        const agent = await prisma.agent.findFirst({
           where: {
             id: agentId,
             userId: request.userId,
@@ -40,7 +41,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
           });
         }
 
-        const skills = await fastify.prisma.agentSkill.findMany({
+        const skills = await prisma.agentSkill.findMany({
           where: { agentId },
           orderBy: { skillType: "asc" },
         });
@@ -73,7 +74,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
           createSkillSchema.parse(request.body);
 
         // Verify agent belongs to user
-        const agent = await fastify.prisma.agent.findFirst({
+        const agent = await prisma.agent.findFirst({
           where: {
             id: agentId,
             userId: request.userId,
@@ -88,7 +89,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
         }
 
         // Check if skill already exists
-        const existingSkill = await fastify.prisma.agentSkill.findUnique({
+        const existingSkill = await prisma.agentSkill.findUnique({
           where: {
             agentId_skillType: {
               agentId,
@@ -105,7 +106,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
         }
 
         // Create skill
-        const skill = await fastify.prisma.agentSkill.create({
+        const skill = await prisma.agentSkill.create({
           data: {
             agentId,
             skillType,
@@ -150,7 +151,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
         const updates = updateSkillSchema.parse(request.body);
 
         // Get skill and verify ownership
-        const skill = await fastify.prisma.agentSkill.findUnique({
+        const skill = await prisma.agentSkill.findUnique({
           where: { id: skillId },
           include: {
             agent: {
@@ -174,7 +175,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
         }
 
         // Update skill
-        const updatedSkill = await fastify.prisma.agentSkill.update({
+        const updatedSkill = await prisma.agentSkill.update({
           where: { id: skillId },
           data: updates,
         });
@@ -210,7 +211,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
         const { skillId } = request.params as { skillId: string };
 
         // Get skill and verify ownership
-        const skill = await fastify.prisma.agentSkill.findUnique({
+        const skill = await prisma.agentSkill.findUnique({
           where: { id: skillId },
           include: {
             agent: {
@@ -234,7 +235,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
         }
 
         // Delete skill
-        await fastify.prisma.agentSkill.delete({
+        await prisma.agentSkill.delete({
           where: { id: skillId },
         });
 
@@ -266,7 +267,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
           .parse(request.body);
 
         // Get skill and verify ownership
-        const skill = await fastify.prisma.agentSkill.findUnique({
+        const skill = await prisma.agentSkill.findUnique({
           where: { id: skillId },
           include: {
             agent: {
@@ -297,7 +298,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
           10 // Max level 10
         );
 
-        const updatedSkill = await fastify.prisma.agentSkill.update({
+        const updatedSkill = await prisma.agentSkill.update({
           where: { id: skillId },
           data: {
             experience: newExperience,
@@ -340,7 +341,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
         const { agentId } = request.params as { agentId: string };
 
         // Verify agent belongs to user
-        const agent = await fastify.prisma.agent.findFirst({
+        const agent = await prisma.agent.findFirst({
           where: {
             id: agentId,
             userId: request.userId,
@@ -355,7 +356,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
         }
 
         // Check if skills already exist
-        const existingSkills = await fastify.prisma.agentSkill.count({
+        const existingSkills = await prisma.agentSkill.count({
           where: { agentId },
         });
 
@@ -372,7 +373,7 @@ export const agentSkillRoutes: FastifyPluginAsync = async (fastify) => {
 
         const skills = await Promise.all(
           skillTypes.map((skillType) =>
-            fastify.prisma.agentSkill.create({
+            prisma.agentSkill.create({
               data: {
                 agentId,
                 skillType,

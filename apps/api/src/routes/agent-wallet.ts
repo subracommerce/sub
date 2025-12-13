@@ -1,5 +1,6 @@
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
+import { prisma } from "../lib/prisma";
 import { agentWalletService } from "../services/agent-wallet";
 import { authenticate } from "../middleware/auth";
 
@@ -23,7 +24,7 @@ export const agentWalletRoutes: FastifyPluginAsync = async (fastify) => {
         const { agentId } = createWalletSchema.parse(request.body);
 
         // Verify agent belongs to user
-        const agent = await fastify.prisma.agent.findFirst({
+        const agent = await prisma.agent.findFirst({
           where: {
             id: agentId,
             userId: request.userId,
@@ -66,7 +67,7 @@ export const agentWalletRoutes: FastifyPluginAsync = async (fastify) => {
         const { agentId } = request.params as { agentId: string };
 
         // Verify agent belongs to user
-        const agent = await fastify.prisma.agent.findFirst({
+        const agent = await prisma.agent.findFirst({
           where: {
             id: agentId,
             userId: request.userId,
@@ -111,7 +112,7 @@ export const agentWalletRoutes: FastifyPluginAsync = async (fastify) => {
         );
 
         // Verify agent belongs to user
-        const agent = await fastify.prisma.agent.findFirst({
+        const agent = await prisma.agent.findFirst({
           where: {
             id: agentId,
             userId: request.userId,
