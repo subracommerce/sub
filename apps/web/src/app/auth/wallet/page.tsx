@@ -177,33 +177,55 @@ export default function WalletAuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white relative overflow-hidden p-4">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:3rem_3rem] animate-grid-slow" />
-      <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-green-500/10 to-blue-500/10 rounded-full blur-3xl animate-float-1" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden p-4">
+      {/* Animated Grid Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:3rem_3rem] animate-grid-slow opacity-50" />
+      
+      {/* Floating Orbs */}
+      <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full blur-3xl animate-float-1" />
+      <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-blue-500/15 to-purple-500/15 rounded-full blur-3xl animate-float-2" />
+      
+      {/* Scan Line Effect */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute w-full h-[2px] bg-gradient-to-r from-transparent via-green-500/50 to-transparent animate-scan-line" />
+      </div>
 
       {/* Back Button - Top Left */}
       <Button
         onClick={handleGoBack}
         variant="outline"
-        className="absolute top-4 left-4 z-20 border-2 hover:bg-gray-100"
+        className="absolute top-4 left-4 z-20 border-2 hover:bg-gray-100 hover:scale-105 transition-all"
         size="sm"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back
       </Button>
 
-      <Card className="w-full max-w-md border-2 border-gray-200 shadow-2xl relative z-10 bg-white">
-        <CardHeader className="text-center">
+      <Card className="w-full max-w-md border-2 border-gray-200 shadow-2xl relative z-10 bg-white/95 backdrop-blur-sm animate-fade-in-up corner-accents">
+        <CardHeader className="text-center relative">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center">
-              <WalletIcon className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center animate-pulse-glow relative">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-green-500 to-blue-500 animate-shimmer opacity-50" />
+              <WalletIcon className="w-8 h-8 text-white relative z-10" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold">Connect Your Wallet</CardTitle>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent">
+            Connect Your Wallet
+          </CardTitle>
           <CardDescription className="text-base">
             {status === "idle" && "Select your wallet to continue"}
-            {status === "connecting" && `Connecting to ${wallet?.adapter?.name || "wallet"}...`}
-            {status === "authenticating" && "Authenticating..."}
+            {status === "connecting" && (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                Connecting to {wallet?.adapter?.name || "wallet"}...
+              </span>
+            )}
+            {status === "authenticating" && (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                Authenticating...
+              </span>
+            )}
             {status === "success" && "Success!"}
           </CardDescription>
         </CardHeader>
@@ -235,11 +257,12 @@ export default function WalletAuthPage() {
 
               <Button 
                 onClick={handleSelectWallet}
-                className="w-full bg-gray-900 hover:bg-black text-white py-6 text-base font-semibold hover:scale-105 transition-all"
+                className="w-full bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 hover:from-black hover:via-gray-900 hover:to-black text-white py-6 text-base font-semibold hover:scale-105 transition-all relative overflow-hidden group"
                 size="lg"
               >
-                <WalletIcon className="mr-2 h-5 w-5" />
-                Select Wallet
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                <WalletIcon className="mr-2 h-5 w-5 relative z-10" />
+                <span className="relative z-10">Select Wallet</span>
               </Button>
               
               <p className="text-xs text-gray-500 text-center">
