@@ -89,11 +89,19 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             {user?.walletAddress && (
               <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-lg">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse-smooth"></div>
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse-smooth" />
                 <span className="text-xs font-mono font-medium text-gray-700">
                   {user.walletAddress.slice(0, 4)}...{user.walletAddress.slice(-4)}
                 </span>
               </div>
+            )}
+            
+            {!user?.hasWallet && (
+              <Link href="/auth/register">
+                <Button size="sm" variant="outline" className="border-2 border-gray-900">
+                  Create Wallet
+                </Button>
+              </Link>
             )}
             
             <Button 
