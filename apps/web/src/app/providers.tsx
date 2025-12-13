@@ -15,23 +15,32 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Empty array - let wallet standard auto-detect
   const wallets = useMemo(() => [], []);
 
-  // CRITICAL: Clear ALL cached wallet connections on mount
+  // CRITICAL: Clear ALL cached wallet connections and force clean state
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Clear all possible wallet cache keys
+      // Comprehensive cache clearing
       const keysToRemove = [
         'walletName',
         'walletAdapter', 
         'wallet-adapter',
         'subra-wallet-v1',
+        'subra-wallet-v2',
         'solana-wallet',
         'phantom-wallet',
-        'solflare-wallet'
+        'solflare-wallet',
+        'backpack-wallet',
+        'glow-wallet',
+        'slope-wallet',
+        'sollet-wallet'
       ];
       
       keysToRemove.forEach(key => {
-        localStorage.removeItem(key);
-        sessionStorage.removeItem(key);
+        try {
+          localStorage.removeItem(key);
+          sessionStorage.removeItem(key);
+        } catch (e) {
+          console.warn('Failed to remove key:', key);
+        }
       });
       
       console.log('🧹 Cleared all wallet caches');
@@ -43,7 +52,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <WalletProvider 
         wallets={wallets} 
         autoConnect={false} // CRITICAL: Never auto-connect
-        localStorageKey="subra-wallet-v2" // New unique key
+        localStorageKey={null as any} // CRITICAL: Disable localStorage persistence
       >
         <WalletModalProvider>
           {children}

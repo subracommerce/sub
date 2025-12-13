@@ -3,36 +3,47 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, CheckCircle, Loader2, AlertCircle, Wallet, XCircle } from "lucide-react";
+import { Shield, CheckCircle, Loader2, AlertCircle, Wallet as WalletIcon } from "lucide-react";
 import bs58 from "bs58";
 import Link from "next/link";
 
 export default function WalletAuthPage() {
-  const { publicKey, signMessage, connected, disconnect, wallet, connecting } = useWallet();
+  const { publicKey, signMessage, connected, disconnect, wallet, connecting, select } = useWallet();
+  const { setVisible } = useWalletModal();
   const { connection } = useConnection();
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const { toast } = useToast();
   
-  const [step, setStep] = useState<"connect" | "sign" | "authenticating" | "success">("connect");
+  const [step, setStep] = useState<"select" | "sign" | "authenticating" | "success">("select");
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const hasAttemptedAuth = useRef(false);
 
-  // Force disconnect on mount to ensure clean state
+  // Force clean state on mount - disconnect any wallet
   useEffect(() => {
     const forceCleanState = async () => {
+      console.log('🧹 Forcing clean state on mount');
+      
+      // Deselect any wallet
+      if (wallet) {
+        console.log('🔌 Deselecting wallet:', wallet.adapter.name);
+        select(null);
+      }
+      
+      // Disconnect if connected
       if (connected) {
-        console.log('🧹 Forcing disconnect on mount');
+        console.log('🔌 Disconnecting wallet');
         await disconnect();
       }
-      setStep("connect");
+      
+      setStep("select");
       setError(null);
       hasAttemptedAuth.current = false;
     };
@@ -51,16 +62,16 @@ export default function WalletAuthPage() {
       step 
     });
 
-    // If disconnected, reset to connect step
-    if (!connected && step !== "connect") {
-      console.log('❌ Wallet disconnected, resetting to connect step');
-      setStep("connect");
+    // If disconnected unexpectedly, reset to select step
+    if (!connected && !connecting && step !== "select" && step !== "success") {
+      console.log('❌ Wallet disconnected, resetting to select step');
+      setStep("select");
       setError(null);
       hasAttemptedAuth.current = false;
     }
 
-    // If connected, validate it's a real connection
-    if (connected && publicKey && step === "connect" && !hasAttemptedAuth.current) {
+    // If wallet connects, validate and proceed to sign step
+    if (connected && publicKey && step === "select" && !hasAttemptedAuth.current) {
       validateConnection();
     }
   }, [connected, publicKey, signMessage, connecting, step, wallet]);
@@ -86,6 +97,14 @@ export default function WalletAuthPage() {
 
     console.log('✅ Connection validated, proceeding to sign step');
     setStep("sign");
+  };
+
+  const handleConnectWallet = () => {
+    console.log('👆 User clicked "Select Wallet"');
+    setError(null);
+    
+    // Force open the wallet modal in selection mode
+    setVisible(true);
   };
 
   const handleSignAndAuthenticate = async () => {
@@ -128,7 +147,7 @@ export default function WalletAuthPage() {
       console.log('📝 Step 2: Requesting signature from wallet...');
       console.log('Message to sign:', message);
 
-      // Step 3: Request signature (THIS SHOULD TRIGGER WALLET POPUP)
+      // Step 3: Request signature (THIS WILL TRIGGER WALLET POPUP)
       const signature = await signMessage(encodedMessage);
       const signatureBase58 = bs58.encode(signature);
       
@@ -179,7 +198,7 @@ export default function WalletAuthPage() {
         setStep("sign");
       } else if (error.message?.includes("Wallet not connected")) {
         setError("Please connect your wallet first");
-        setStep("connect");
+        setStep("select");
         await disconnect();
       } else {
         setError(error.message || "Failed to authenticate. Please try again.");
@@ -193,16 +212,18 @@ export default function WalletAuthPage() {
   const handleDisconnect = async () => {
     console.log('🔌 Manual disconnect');
     await disconnect();
-    setStep("connect");
+    select(null);
+    setStep("select");
     setError(null);
     hasAttemptedAuth.current = false;
   };
 
   const handleTryAgain = () => {
     setError(null);
-    setStep("connect");
+    setStep("select");
     hasAttemptedAuth.current = false;
     disconnect();
+    select(null);
   };
 
   return (
@@ -215,12 +236,12 @@ export default function WalletAuthPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center">
-              <Wallet className="w-8 h-8 text-white" />
+              <WalletIcon className="w-8 h-8 text-white" />
             </div>
           </div>
           <CardTitle className="text-3xl font-bold">Connect Your Wallet</CardTitle>
           <CardDescription className="text-base">
-            {step === "connect" && "Choose your Solana wallet to continue"}
+            {step === "select" && "Choose your Solana wallet"}
             {step === "sign" && "Sign the message to authenticate"}
             {step === "authenticating" && "Verifying your signature..."}
             {step === "success" && "Successfully authenticated!"}
@@ -247,37 +268,42 @@ export default function WalletAuthPage() {
             </Alert>
           )}
 
-          {/* Step 1: Connect Wallet */}
-          {step === "connect" && (
+          {/* Step 1: Select Wallet */}
+          {step === "select" && (
             <div className="space-y-4">
               <Alert className="border-2 border-blue-500 bg-blue-50">
                 <Shield className="h-4 w-4 text-blue-600" />
                 <AlertTitle className="text-blue-900">Secure Connection</AlertTitle>
                 <AlertDescription className="text-blue-800 text-sm">
                   <ul className="list-disc list-inside space-y-1 mt-2">
+                    <li>Choose your wallet from the list</li>
                     <li>Your wallet will ask for approval</li>
                     <li>Then you'll sign a message</li>
                     <li>No gas fees required</li>
-                    <li>Your private key stays in your wallet</li>
                   </ul>
                 </AlertDescription>
               </Alert>
 
-              <div className="flex flex-col items-center space-y-4 pt-4">
-                <WalletMultiButton className="!bg-gray-900 hover:!bg-black !text-white !rounded-lg !px-6 !py-3 !text-base !font-semibold !transition-all hover:!scale-105" />
+              <div className="space-y-3">
+                <Button 
+                  onClick={handleConnectWallet}
+                  className="w-full bg-gray-900 hover:bg-black text-white py-6 text-base font-semibold hover:scale-105 transition-all"
+                  size="lg"
+                  disabled={connecting}
+                >
+                  <WalletIcon className="mr-2 h-5 w-5" />
+                  {connecting ? "Connecting..." : "Select Wallet"}
+                </Button>
                 
                 <p className="text-sm text-gray-600 text-center">
-                  Supports Phantom, Solflare, Backpack, and more
+                  Supports Phantom, Solflare, Backpack, Ledger, Torus, and more
                 </p>
+                
+                <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-3 text-xs text-gray-600">
+                  <p className="font-semibold mb-1">Don't have a wallet?</p>
+                  <p>You'll be prompted to download one when you click "Select Wallet"</p>
+                </div>
               </div>
-
-              <Alert className="border-2 border-gray-200 bg-gray-50">
-                <AlertCircle className="h-4 w-4 text-gray-600" />
-                <AlertTitle className="text-gray-900">Important</AlertTitle>
-                <AlertDescription className="text-gray-700 text-sm">
-                  Make sure your wallet extension is unlocked before connecting.
-                </AlertDescription>
-              </Alert>
             </div>
           )}
 
@@ -286,7 +312,9 @@ export default function WalletAuthPage() {
             <div className="space-y-4">
               <Alert className="border-2 border-green-500 bg-green-50">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertTitle className="text-green-900">Wallet Connected</AlertTitle>
+                <AlertTitle className="text-green-900">
+                  {wallet?.adapter?.name || "Wallet"} Connected
+                </AlertTitle>
                 <AlertDescription className="text-green-800 text-sm font-mono">
                   {publicKey?.toBase58().slice(0, 8)}...{publicKey?.toBase58().slice(-8)}
                 </AlertDescription>
@@ -320,7 +348,7 @@ export default function WalletAuthPage() {
                   className="w-full border-2"
                   disabled={isAuthenticating}
                 >
-                  Disconnect Wallet
+                  Disconnect & Choose Different Wallet
                 </Button>
               </div>
             </div>
@@ -333,7 +361,7 @@ export default function WalletAuthPage() {
               <div className="text-center">
                 <p className="text-lg font-semibold">Authenticating...</p>
                 <p className="text-sm text-gray-600 mt-2">
-                  {!hasAttemptedAuth.current ? "Requesting signature..." : "Verifying signature with blockchain..."}
+                  Verifying your signature with blockchain...
                 </p>
               </div>
             </div>
