@@ -57,11 +57,20 @@ export function CreateWalletModal({ open, onOpenChange }: CreateWalletModalProps
 
       if (data.success) {
         setPublicKey(data.data.user.walletAddress);
-        setAuth(data.data.user, data.data.token);
+        // Store auth with user object and token
+        setAuth(
+          {
+            id: data.data.user.id,
+            email: data.data.user.email,
+            walletAddress: data.data.user.walletAddress,
+          } as any,
+          data.data.token
+        );
         setStep("success");
         
         toast({
           title: "Wallet Created!",
+          description: "Your account is ready!",
         });
       } else {
         setStep("password");

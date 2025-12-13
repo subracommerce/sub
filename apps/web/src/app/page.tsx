@@ -14,14 +14,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900 relative overflow-hidden">
-      {/* Animated grid background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:3rem_3rem] animate-grid-drift" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(0,0,0,0.03),transparent_50%)]" />
-      
-      {/* Scanning line effect */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="scan-line"></div>
-      </div>
+      {/* Stylish agentic grid background - subtle and slow */}
+      <div className="absolute inset-0 bg-agentic-grid animate-grid-drift" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(0,0,0,0.02),transparent_60%)]" />
       
       {/* Hero Section */}
       <div className="relative">

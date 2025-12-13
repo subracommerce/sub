@@ -18,10 +18,13 @@ export default function DashboardPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const { isAuthenticated, token, clearAuth } = useAuthStore();
+  const { isAuthenticated, token, user, clearAuth } = useAuthStore();
   const { connected } = useWallet();
   const router = useRouter();
   const { toast } = useToast();
+  
+  // User has a wallet if they're connected via adapter OR have a wallet address in their account
+  const hasWallet = connected || !!user?.walletAddress;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -54,15 +57,21 @@ export default function DashboardPage() {
   };
 
   const handleCreateAgentClick = () => {
-    if (!connected) {
+    if (!hasWallet) {
       toast({
         title: "Wallet Required",
-        description: "Connect your wallet first",
+        description: "Connect your wallet or create one first",
         variant: "destructive",
       });
       return;
     }
     setShowCreateDialog(true);
+  };
+  
+  const handleSignOut = () => {
+    clearAuth();
+    toast({ title: "Signed out successfully" });
+    router.push("/");
   };
 
   if (isLoading) {
@@ -84,19 +93,30 @@ export default function DashboardPage() {
       <header className="relative border-b-2 border-gray-200 bg-white/80 backdrop-blur">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 via-teal-400 to-green-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight">
-              <span className="bg-gradient-to-br from-blue-500 via-teal-400 to-green-500 bg-clip-text text-transparent">S</span>UBRA
+              <span className="bg-gradient-to-b from-green-500 from-50% to-blue-500 to-50% bg-clip-text text-transparent">S</span>UBRA
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <ConnectWalletButton />
+            {!hasWallet && <ConnectWalletButton />}
+            {hasWallet && user?.walletAddress && (
+              <div className="px-3 py-1.5 bg-gray-50 border-2 border-gray-200 rounded-lg text-xs font-mono">
+                {user.walletAddress.slice(0, 4)}...{user.walletAddress.slice(-4)}
+              </div>
+            )}
             <Button variant="outline" onClick={() => router.push("/")} className="border-2 border-gray-900">
               Home
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => { clearAuth(); router.push("/"); }}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleSignOut}
+              title="Sign Out"
+              className="hover:bg-red-50 hover:text-red-600 transition-colors"
+            >
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
@@ -104,7 +124,7 @@ export default function DashboardPage() {
       </header>
 
       <main className="relative container mx-auto px-4 py-8">
-        <WalletRequiredBanner />
+        {!hasWallet && <WalletRequiredBanner />}
 
         <div className="mb-8">
           <h2 className="text-4xl font-bold mb-2">Dashboard</h2>

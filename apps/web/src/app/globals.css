@@ -71,10 +71,10 @@
 }
 
 .animate-pulse-smooth {
-  animation: pulse-smooth 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse-smooth 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Grid drift animation */
+/* Subtle grid drift - very slow */
 @keyframes grid-drift {
   0% {
     transform: translate(0, 0);
@@ -85,51 +85,58 @@
 }
 
 .animate-grid-drift {
-  animation: grid-drift 20s linear infinite;
+  animation: grid-drift 60s linear infinite;
+  opacity: 0.5;
 }
 
-/* Scanning line effect */
-.scan-line {
+/* Stylish agentic grid lines */
+.bg-agentic-grid {
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(to right, rgba(0, 0, 0, 0.01) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.01) 1px, transparent 1px);
+  background-size: 
+    4rem 4rem,
+    4rem 4rem,
+    1rem 1rem,
+    1rem 1rem;
+  background-position:
+    0 0,
+    0 0,
+    0.5rem 0.5rem,
+    0.5rem 0.5rem;
+}
+
+/* Removed distracting scan line - replaced with subtle radial glow */
+.agentic-glow {
   position: absolute;
-  top: -2px;
+  top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(0, 0, 0, 0.1) 45%, 
-    rgba(0, 0, 0, 0.3) 50%, 
-    rgba(0, 0, 0, 0.1) 55%, 
-    transparent 100%
+  bottom: 0;
+  background: radial-gradient(
+    circle 800px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(0, 0, 0, 0.02),
+    transparent 80%
   );
-  animation: scan-down 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
 }
 
-@keyframes scan-down {
-  0% {
-    top: -2px;
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    top: 100%;
-    opacity: 0;
-  }
+.agentic-glow.active {
+  opacity: 1;
 }
 
-/* Badge shimmer */
+/* Badge shimmer - slower */
 .badge-shimmer {
   background: linear-gradient(90deg, 
     transparent 0%, 
     rgba(0, 0, 0, 0.03) 50%, 
     transparent 100%
   );
-  animation: shimmer-move 3s ease-in-out infinite;
+  animation: shimmer-move 4s ease-in-out infinite;
 }
 
 @keyframes shimmer-move {
@@ -145,7 +152,7 @@
 @keyframes agentic-fade-in {
   0% {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-15px);
   }
   100% {
     opacity: 1;
@@ -154,18 +161,15 @@
 }
 
 .agentic-fade-in {
-  animation: agentic-fade-in 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: agentic-fade-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Title slide with glitch */
+/* Title slide - smoother with less blur */
 @keyframes agentic-title-slide {
   0% {
     opacity: 0;
-    transform: translateY(30px);
-    filter: blur(10px);
-  }
-  50% {
-    filter: blur(5px);
+    transform: translateY(20px);
+    filter: blur(4px);
   }
   100% {
     opacity: 1;
@@ -175,18 +179,18 @@
 }
 
 .agentic-title-slide {
-  animation: agentic-title-slide 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: 0.2s;
+  animation: agentic-title-slide 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.3s;
   opacity: 0;
 }
 
-/* Title glitch effect on hover */
+/* Title glitch effect on hover - more subtle */
 .title-glitch {
   display: inline-block;
 }
 
 .title-glitch:hover {
-  animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: glitch 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 @keyframes glitch {
@@ -194,26 +198,18 @@
     transform: translate(0);
   }
   33% {
-    transform: translate(-2px, 2px);
+    transform: translate(-1px, 1px);
   }
   66% {
-    transform: translate(2px, -2px);
+    transform: translate(1px, -1px);
   }
 }
 
-/* Stagger letters */
-.stagger-letters {
-  display: inline-block;
-}
-
-/* Underline animation */
+/* Underline animation - smoother */
 @keyframes agentic-underline {
   0% {
     width: 0%;
     opacity: 0;
-  }
-  50% {
-    opacity: 1;
   }
   100% {
     width: 100%;
@@ -222,8 +218,8 @@
 }
 
 .agentic-underline {
-  animation: agentic-underline 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: 0.6s;
+  animation: agentic-underline 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.8s;
   width: 0%;
   transform-origin: center;
 }
@@ -232,7 +228,7 @@
 @keyframes agentic-text {
   0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(15px);
   }
   100% {
     opacity: 1;
@@ -241,44 +237,44 @@
 }
 
 .agentic-text-1 {
-  animation: agentic-text 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: 0.9s;
+  animation: agentic-text 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 1.2s;
   opacity: 0;
 }
 
 .agentic-text-2 {
-  animation: agentic-text 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: 1.05s;
+  animation: agentic-text 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 1.4s;
   opacity: 0;
 }
 
 .agentic-text-3 {
-  animation: agentic-text 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: 1.2s;
+  animation: agentic-text 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 1.6s;
   opacity: 0;
 }
 
 /* Button animations */
 .agentic-buttons {
-  animation: agentic-text 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: 1.4s;
+  animation: agentic-text 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 1.8s;
   opacity: 0;
 }
 
-/* Button glow effect */
+/* Button glow effect - more subtle */
 .button-glow {
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
-  animation: button-glow-pulse 2s ease-in-out infinite;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+  animation: button-glow-pulse 3s ease-in-out infinite;
 }
 
 @keyframes button-glow-pulse {
   0%, 100% {
-    transform: scale(0.8);
+    transform: scale(0.9);
     opacity: 0;
   }
   50% {
     transform: scale(1);
-    opacity: 1;
+    opacity: 0.5;
   }
 }
 
@@ -286,7 +282,7 @@
 @keyframes agentic-card {
   0% {
     opacity: 0;
-    transform: translateY(30px) scale(0.95);
+    transform: translateY(20px) scale(0.98);
   }
   100% {
     opacity: 1;
@@ -295,20 +291,20 @@
 }
 
 .agentic-card {
-  animation: agentic-card 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: agentic-card 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
 }
 
-/* Card scan effect */
+/* Card scan effect - more subtle */
 .card-scan {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.05) 50%,
+    rgba(0, 0, 0, 0.03) 50%,
     transparent 100%
   );
   transform: translateX(-100%);
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
 }
 
 .group:hover .card-scan {
@@ -317,20 +313,20 @@
 
 /* Section title */
 .agentic-section-title {
-  animation: agentic-text 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: 1.6s;
+  animation: agentic-text 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 2s;
   opacity: 0;
 }
 
 /* Step animations */
 .agentic-step {
-  animation: agentic-card 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: agentic-card 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
 }
 
 /* Fade in utility */
 .animate-fade-in {
-  animation: agentic-text 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: agentic-text 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
 }
 
@@ -339,3 +335,4 @@
 .animation-delay-1000 { animation-delay: 1s; }
 .animation-delay-1500 { animation-delay: 1.5s; }
 .animation-delay-2000 { animation-delay: 2s; }
+
