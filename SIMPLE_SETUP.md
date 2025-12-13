@@ -7,11 +7,15 @@
 1. **Open your browser** where SUBRA dashboard is open
 2. **Press F12** (opens developer tools)
 3. **Click "Console" tab** at the top
-4. **Type this** and press Enter:
+4. **If you see a warning about pasting**, type this and press Enter:
+   ```
+   allow pasting
+   ```
+5. **Then type this** and press Enter:
    ```javascript
    localStorage.getItem('subra-auth')
    ```
-5. **You'll see something like:**
+6. **You'll see something like:**
    ```
    "{"user":{...},"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}"
    ```
