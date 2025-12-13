@@ -3,42 +3,69 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, CheckCircle, Loader2, AlertCircle, Wallet as WalletIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import bs58 from "bs58";
 import Link from "next/link";
 
 export default function WalletAuthPage() {
-  const { publicKey, signMessage, connected, disconnect, wallet } = useWallet();
+  const { publicKey, signMessage, connected, disconnect, wallet, select } = useWallet();
+  const { setVisible } = useWalletModal();
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const { toast } = useToast();
   
-  const [status, setStatus] = useState<"idle" | "authenticating" | "success">("idle");
+  const [status, setStatus] = useState<"idle" | "connecting" | "authenticating" | "success">("idle");
   const [error, setError] = useState<string | null>(null);
   const hasAttemptedAuth = useRef(false);
+
+  // Force clean state on mount - clear any remembered wallet
+  useEffect(() => {
+    const init = async () => {
+      console.log('🔒 Initializing - clearing wallet selection');
+      
+      // Force disconnect any existing connection
+      if (connected) {
+        await disconnect();
+      }
+      
+      // Clear wallet selection
+      select(null);
+      
+      // Clear localStorage cache
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('walletName');
+      }
+      
+      setStatus("idle");
+      setError(null);
+      hasAttemptedAuth.current = false;
+      
+      console.log('✅ Clean state - ready for wallet selection');
+    };
+    
+    init();
+  }, []);
 
   // AUTOMATICALLY sign message when wallet connects
   useEffect(() => {
     const authenticateAfterConnection = async () => {
-      // Only proceed if:
-      // 1. Wallet is connected
-      // 2. We have publicKey and signMessage
-      // 3. Haven't already attempted auth
-      // 4. Not currently authenticating
-      if (connected && publicKey && signMessage && !hasAttemptedAuth.current && status !== "authenticating") {
-        console.log('✅ Wallet connected! IMMEDIATELY requesting signature...');
+      if (connected && publicKey && signMessage && !hasAttemptedAuth.current && status === "connecting") {
+        console.log('✅ Wallet connected! Requesting signature...');
+        console.log('   Wallet:', wallet?.adapter?.name);
+        console.log('   Address:', publicKey.toBase58());
         
         hasAttemptedAuth.current = true;
         setStatus("authenticating");
         setError(null);
 
         try {
-          // Step 1: Get nonce
+          // Get nonce
           console.log('📡 Getting nonce...');
           const nonceResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/nonce`, {
             method: "POST",
@@ -53,17 +80,17 @@ export default function WalletAuthPage() {
           const { data: { nonce } } = await nonceResponse.json();
           console.log('✅ Nonce received');
 
-          // Step 2: IMMEDIATELY request signature (NO separate button click!)
+          // Request signature
           const message = `Sign in to SUBRA\n\nWallet: ${publicKey.toBase58()}\nNonce: ${nonce}\nTimestamp: ${new Date().toISOString()}\n\nThis proves you own this wallet.\nNo gas fees.`;
           const encodedMessage = new TextEncoder().encode(message);
 
-          console.log('📝 Requesting signature - POPUP SHOULD APPEAR NOW!');
+          console.log('📝 Requesting signature...');
           const signature = await signMessage(encodedMessage);
           const signatureBase58 = bs58.encode(signature);
           
           console.log('✅ Signature received!');
           
-          // Step 3: Verify
+          // Verify
           console.log('🔍 Verifying...');
           const authResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/verify`, {
             method: "POST",
@@ -89,7 +116,7 @@ export default function WalletAuthPage() {
           
           toast({
             title: "Success!",
-            description: "Wallet authenticated",
+            description: `${wallet?.adapter?.name} authenticated`,
           });
 
           setTimeout(() => {
@@ -99,8 +126,9 @@ export default function WalletAuthPage() {
         } catch (error: any) {
           console.error("❌ Authentication failed:", error);
           
-          // Disconnect and reset on error
+          // Disconnect and reset
           await disconnect();
+          select(null);
           hasAttemptedAuth.current = false;
           setStatus("idle");
           
@@ -114,16 +142,33 @@ export default function WalletAuthPage() {
     };
 
     authenticateAfterConnection();
-  }, [connected, publicKey, signMessage, status, disconnect, setAuth, router, toast]);
+  }, [connected, publicKey, signMessage, status, wallet, disconnect, select, setAuth, router, toast]);
+
+  // Detect when wallet connects (to show which wallet)
+  useEffect(() => {
+    if (connected && status === "idle") {
+      console.log('🔌 Wallet connected, moving to connecting state');
+      setStatus("connecting");
+    }
+  }, [connected, status]);
 
   // Reset when disconnected
   useEffect(() => {
-    if (!connected && status !== "idle") {
+    if (!connected && (status === "connecting" || status === "authenticating")) {
+      console.log('❌ Wallet disconnected, resetting');
       hasAttemptedAuth.current = false;
       setStatus("idle");
-      setError(null);
     }
   }, [connected, status]);
+
+  const handleSelectWallet = () => {
+    console.log('👆 Opening wallet selection modal');
+    setError(null);
+    hasAttemptedAuth.current = false;
+    
+    // Open the wallet selection modal
+    setVisible(true);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white relative overflow-hidden p-4">
@@ -139,7 +184,8 @@ export default function WalletAuthPage() {
           </div>
           <CardTitle className="text-3xl font-bold">Connect Your Wallet</CardTitle>
           <CardDescription className="text-base">
-            {status === "idle" && "Secure wallet authentication"}
+            {status === "idle" && "Select your wallet to continue"}
+            {status === "connecting" && `Connecting to ${wallet?.adapter?.name || "wallet"}...`}
             {status === "authenticating" && "Authenticating..."}
             {status === "success" && "Success!"}
           </CardDescription>
@@ -162,27 +208,36 @@ export default function WalletAuthPage() {
                 <AlertDescription className="text-blue-800 text-sm">
                   <ol className="list-decimal list-inside space-y-1 mt-2">
                     <li>Click "Select Wallet" below</li>
-                    <li>Choose your wallet and approve connection</li>
-                    <li>Sign message to authenticate (automatic)</li>
+                    <li>Choose your wallet from the list</li>
+                    <li>Approve connection in wallet popup</li>
+                    <li>Sign message to authenticate</li>
                     <li>You're in! No gas fees</li>
                   </ol>
                 </AlertDescription>
               </Alert>
 
-              <div className="flex flex-col items-center space-y-4">
-                <WalletMultiButton 
-                  className="!bg-gray-900 hover:!bg-black !text-white !py-3 !px-6 !rounded-lg !text-base !font-semibold !transition-all hover:!scale-105"
-                  style={{
-                    backgroundColor: '#111827',
-                    color: 'white',
-                    padding: '12px 24px',
-                    borderRadius: '8px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                  }}
-                />
-                <p className="text-xs text-gray-500 text-center">
-                  Phantom • Solflare • Backpack • Ledger • Torus
+              <Button 
+                onClick={handleSelectWallet}
+                className="w-full bg-gray-900 hover:bg-black text-white py-6 text-base font-semibold hover:scale-105 transition-all"
+                size="lg"
+              >
+                <WalletIcon className="mr-2 h-5 w-5" />
+                Select Wallet
+              </Button>
+              
+              <p className="text-xs text-gray-500 text-center">
+                Phantom • Solflare • Backpack • Ledger • Torus
+              </p>
+            </div>
+          )}
+
+          {status === "connecting" && (
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <Loader2 className="h-16 w-16 animate-spin text-gray-900" />
+              <div className="text-center">
+                <p className="text-lg font-semibold">Connecting to {wallet?.adapter?.name || "Wallet"}...</p>
+                <p className="text-sm text-gray-600 mt-2">
+                  Waiting for wallet popup...
                 </p>
               </div>
             </div>

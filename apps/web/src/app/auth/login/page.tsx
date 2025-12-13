@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -10,14 +10,41 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles, Mail, Wallet } from "lucide-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { setAuth } = useAuthStore();
+  const { setAuth, clearAuth } = useAuthStore();
+  const { disconnect, select } = useWallet();
   const router = useRouter();
   const { toast } = useToast();
+
+  // Clear auth and wallet on mount (sign out)
+  useEffect(() => {
+    const signOut = async () => {
+      console.log('🔓 Signing out - clearing auth and wallet');
+      clearAuth();
+      
+      try {
+        await disconnect();
+        select(null);
+        
+        // Clear localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('walletName');
+          localStorage.removeItem('subra-auth');
+        }
+      } catch (e) {
+        console.error('Disconnect error:', e);
+      }
+      
+      console.log('✅ Signed out');
+    };
+    
+    signOut();
+  }, [clearAuth, disconnect, select]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
