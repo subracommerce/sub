@@ -22,6 +22,7 @@ const agentTypes = [
   { value: "negotiator", label: "Negotiator", description: "Compare prices and negotiate" },
   { value: "executor", label: "Executor", description: "Execute purchases autonomously" },
   { value: "tracker", label: "Tracker", description: "Track orders and shipments" },
+  { value: "dropshipper", label: "Dropshipper", description: "Automate dropshipping business" },
 ];
 
 export function CreateAgentDialog({ open, onOpenChange, onSuccess }: CreateAgentDialogProps) {
