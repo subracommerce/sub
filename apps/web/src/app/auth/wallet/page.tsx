@@ -1,382 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
-import { useAuthStore } from "@/store/auth";
-import { generateNonce } from "@/lib/wallet-auth";
-import { Wallet, Shield, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Wallet } from "lucide-react";
 import Link from "next/link";
-import bs58 from "bs58";
 
 export default function WalletAuthPage() {
-  const { publicKey, signMessage, disconnect, connect, select, wallets, wallet } = useWallet();
   const router = useRouter();
-  const { toast } = useToast();
-  const { setAuth, isAuthenticated } = useAuthStore();
-  const [isSigning, setIsSigning] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showWalletList, setShowWalletList] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard");
-    }
-  }, [isAuthenticated, router]);
-
-  // Force disconnect any cached connections
-  useEffect(() => {
-    if (publicKey && !isAuthenticated) {
-      disconnect();
-    }
-  }, []);
-
-  const handleSelectWallet = async (walletName: string) => {
-    setIsConnecting(true);
-    setError(null);
-    
-    try {
-      // First, make sure we're disconnected
-      if (wallet) {
-        await disconnect();
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
-
-      // Find and select the wallet
-      const selectedWallet = wallets.find(w => w.adapter.name === walletName);
-      if (!selectedWallet) {
-        throw new Error("Wallet not found");
-      }
-
-      // Select the wallet adapter
-      select(selectedWallet.adapter.name);
-      
-      // Give it time to register
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Now connect - this WILL trigger Phantom popup
-      await connect();
-      
-      setShowWalletList(false);
-      
-      toast({
-        title: "Wallet Connected!",
-        description: "Now sign the message to authenticate",
-      });
-    } catch (err: any) {
-      console.error("Connection error:", err);
-      if (err.message?.includes("User rejected")) {
-        setError("You declined the connection request");
-      } else {
-        setError(err.message || "Failed to connect wallet");
-      }
-      toast({
-        title: "Connection Failed",
-        description: err.message || "Failed to connect wallet",
-        variant: "destructive",
-      });
-    } finally {
-      setIsConnecting(false);
-    }
-  };
-
-  const handleSignIn = async () => {
-    if (!publicKey || !signMessage) {
-      toast({
-        title: "Wallet Not Connected",
-        description: "Please connect your wallet first",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSigning(true);
-    setError(null);
-
-    try {
-      const nonce = generateNonce();
-      
-      const message = `Sign in to SUBRA
-
-This request will not trigger a blockchain transaction or cost any gas fees.
-
-Wallet: ${publicKey.toBase58()}
-Nonce: ${nonce}
-Timestamp: ${new Date().toISOString()}
-
-By signing, you agree to our Terms of Service and Privacy Policy.`;
-
-      console.log("🔐 Requesting signature from Phantom...");
-      
-      toast({
-        title: "Check Phantom",
-        description: "A popup should appear in your Phantom wallet",
-      });
-
-      const messageBytes = new TextEncoder().encode(message);
-      const signatureBytes = await signMessage(messageBytes);
-      
-      console.log("✅ Signature received!");
-      
-      const signature = bs58.encode(signatureBytes);
-      const encodedMessage = bs58.encode(messageBytes);
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          publicKey: publicKey.toBase58(),
-          signature,
-          message: encodedMessage,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setAuth(result.data.user, result.data.token);
-        
-        toast({
-          title: "Welcome! 🎉",
-          description: "Successfully signed in",
-        });
-
-        router.push("/dashboard");
-      } else {
-        setError(result.error || "Authentication failed");
-        toast({
-          title: "Authentication Failed",
-          description: result.error || "Failed to verify signature",
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      console.error("❌ Error:", error);
-
-      let errorMessage = "Failed to sign message";
-
-      if (error.message?.includes("User rejected") || error.code === 4001) {
-        errorMessage = "You declined the signature request";
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      setError(errorMessage);
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsSigning(false);
-    }
-  };
-
-  const installedWallets = wallets.filter(w => w.readyState === "Installed");
+    // Redirect to register page - we're using embedded wallets only
+    router.push("/auth/register");
+  }, [router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <div className="flex items-center justify-center mb-4">
-            <Wallet className="w-12 h-12 text-primary" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-center">
-            Sign In with Wallet
-          </CardTitle>
-          <CardDescription className="text-center">
-            Secure authentication using your Solana wallet
+    <div className="min-h-screen flex items-center justify-center bg-white p-4">
+      <div className="absolute inset-0 bg-agentic-grid opacity-40" />
+      
+      <Card className="relative z-10 w-full max-w-md border-2 border-gray-200 shadow-xl">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold text-gray-900">Connect Wallet</CardTitle>
+          <CardDescription className="text-gray-600">
+            We're using embedded wallets for security and simplicity
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {error && (
-            <Alert className="border-red-500 bg-red-50 dark:bg-red-950">
-              <AlertCircle className="h-4 w-4 text-red-600" />
-              <AlertDescription className="text-red-800 dark:text-red-200">
-                {error}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Not Connected - Show Wallet Selection */}
-          {!publicKey && !showWalletList && (
-            <div className="space-y-4">
-              <Alert className="border-blue-500 bg-blue-50 dark:bg-blue-950">
-                <AlertDescription className="text-blue-800 dark:text-blue-200">
-                  <p className="font-semibold mb-2">🔐 Secure Connection:</p>
-                  <ol className="text-sm space-y-1 list-decimal list-inside">
-                    <li>Make sure Phantom is unlocked</li>
-                    <li>Click "Connect Wallet" below</li>
-                    <li>Choose your wallet from the list</li>
-                    <li>Approve the connection in Phantom popup</li>
-                    <li>Sign the authentication message</li>
-                  </ol>
-                </AlertDescription>
-              </Alert>
-
-              <Button
-                onClick={() => setShowWalletList(true)}
-                className="w-full"
-                size="lg"
-              >
-                <Wallet className="mr-2 h-5 w-5" />
-                Connect Wallet
-              </Button>
-              
-              <p className="text-xs text-center text-muted-foreground">
-                Don't have Phantom? <a href="https://phantom.app" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Download here</a>
-              </p>
-            </div>
-          )}
-
-          {/* Wallet Selection List */}
-          {showWalletList && !publicKey && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold">Choose your wallet:</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowWalletList(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-
-              {installedWallets.length > 0 ? (
-                installedWallets.map((w) => (
-                  <Button
-                    key={w.adapter.name}
-                    onClick={() => handleSelectWallet(w.adapter.name)}
-                    disabled={isConnecting}
-                    variant="outline"
-                    className="w-full justify-start h-auto py-3"
-                  >
-                    {w.adapter.icon && (
-                      <img 
-                        src={w.adapter.icon} 
-                        alt={w.adapter.name} 
-                        className="w-8 h-8 mr-3 rounded" 
-                      />
-                    )}
-                    <span className="font-medium">{w.adapter.name}</span>
-                    {isConnecting && <span className="ml-auto text-sm">Connecting...</span>}
-                  </Button>
-                ))
-              ) : (
-                <Alert>
-                  <AlertDescription>
-                    <p className="font-medium mb-2">No wallets detected</p>
-                    <p className="text-sm">
-                      Please install Phantom or another Solana wallet to continue.
-                    </p>
-                    <a 
-                      href="https://phantom.app" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline text-sm block mt-2"
-                    >
-                      Download Phantom →
-                    </a>
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
-          )}
-
-          {/* Connected - Ready to Sign */}
-          {publicKey && (
-            <div className="space-y-4">
-              <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-800 dark:text-green-200">
-                  <p className="font-semibold mb-1">✅ Wallet Connected!</p>
-                  <p className="text-xs font-mono break-all">
-                    {publicKey.toBase58()}
-                  </p>
-                </AlertDescription>
-              </Alert>
-
-              <Alert>
-                <Shield className="h-4 w-4" />
-                <AlertDescription>
-                  <p className="text-sm font-medium mb-1">Now sign to authenticate</p>
-                  <p className="text-xs">
-                    Click below and Phantom will ask you to sign a message. This is free and proves you own this wallet.
-                  </p>
-                </AlertDescription>
-              </Alert>
-
-              <Button
-                onClick={handleSignIn}
-                disabled={isSigning}
-                className="w-full"
-                size="lg"
-              >
-                {isSigning ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Waiting for Signature...
-                  </>
-                ) : (
-                  <>
-                    <Shield className="mr-2 h-4 w-4" />
-                    Sign to Authenticate
-                  </>
-                )}
-              </Button>
-
-              <Button
-                onClick={() => {
-                  disconnect();
-                  setError(null);
-                  setShowWalletList(false);
-                }}
-                variant="outline"
-                className="w-full"
-                disabled={isSigning}
-              >
-                Disconnect & Try Again
-              </Button>
-
-              {isSigning && (
-                <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
-                  <AlertCircle className="h-4 w-4 text-yellow-600" />
-                  <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-                    <p className="font-bold mb-2">📱 Check Phantom Extension</p>
-                    <ul className="text-xs space-y-1 list-disc list-inside">
-                      <li>Look for Phantom icon in your browser toolbar</li>
-                      <li>A popup should appear with signature request</li>
-                      <li>Review the message</li>
-                      <li>Click "Sign" or "Approve"</li>
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
-          )}
-
-          <div className="text-center text-sm pt-4 border-t space-y-2">
-            <p className="text-muted-foreground">Other options:</p>
-            <div className="flex gap-2 justify-center">
-              <Link href="/auth/register">
-                <Button variant="link" size="sm">
-                  Create Account
-                </Button>
-              </Link>
-              <span className="text-muted-foreground">•</span>
-              <Link href="/auth/login">
-                <Button variant="link" size="sm">
-                  Email Sign In
-                </Button>
-              </Link>
-            </div>
+        <CardContent className="space-y-4 text-center">
+          <div className="p-6 bg-gray-50 rounded-lg border-2 border-gray-200">
+            <Wallet className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <p className="text-sm text-gray-600 mb-4">
+              External wallet connection is coming soon. For now, create a secure embedded wallet.
+            </p>
           </div>
+          
+          <Link href="/auth/register">
+            <Button className="w-full bg-gray-900 hover:bg-black text-white" size="lg">
+              Create Embedded Wallet
+            </Button>
+          </Link>
+          
+          <Link href="/">
+            <Button variant="outline" className="w-full border-2" size="lg">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Home
+            </Button>
+          </Link>
         </CardContent>
       </Card>
     </div>
