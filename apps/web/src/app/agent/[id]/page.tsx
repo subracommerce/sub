@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Bot, Wallet, Copy, Zap, TrendingUp, Activity, MessageSquare, History } from "lucide-react";
@@ -177,9 +176,13 @@ export default function AgentDetailPage() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-4xl font-bold text-gray-900">{agent.name}</h1>
-              <Badge variant={agent.isActive ? "default" : "secondary"}>
+              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                agent.isActive 
+                  ? "bg-green-100 text-green-900 border border-green-900" 
+                  : "bg-gray-100 text-gray-600 border border-gray-300"
+              }`}>
                 {agent.isActive ? "Active" : "Inactive"}
-              </Badge>
+              </span>
             </div>
             <p className="text-lg text-gray-600 mb-2">
               {agent.type.charAt(0).toUpperCase() + agent.type.slice(1)} Agent
@@ -264,9 +267,9 @@ export default function AgentDetailPage() {
                             </p>
                           </div>
                         </div>
-                        <Badge variant="outline">
+                        <span className="px-2 py-1 bg-gray-50 border border-gray-300 rounded-full text-xs font-semibold text-gray-700">
                           {xpNeeded} XP to next level
-                        </Badge>
+                        </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
@@ -340,20 +343,18 @@ export default function AgentDetailPage() {
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="outline" className="capitalize">
+                        <span className="px-2 py-1 bg-gray-50 border border-gray-300 rounded-full text-xs font-semibold text-gray-700 capitalize">
                           {task.type}
-                        </Badge>
-                        <Badge
-                          variant={
-                            task.status === "completed"
-                              ? "default"
-                              : task.status === "failed"
-                              ? "destructive"
-                              : "secondary"
-                          }
-                        >
+                        </span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          task.status === "completed"
+                            ? "bg-green-100 text-green-900 border border-green-900"
+                            : task.status === "failed"
+                            ? "bg-red-100 text-red-900 border border-red-900"
+                            : "bg-yellow-100 text-yellow-900 border border-yellow-900"
+                        }`}>
                           {task.status}
-                        </Badge>
+                        </span>
                       </div>
                       <p className="text-sm text-gray-600">
                         {new Date(task.createdAt).toLocaleString()}
