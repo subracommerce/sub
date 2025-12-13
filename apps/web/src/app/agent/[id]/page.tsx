@@ -1,77 +1,151 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Bot, Activity, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Bot, Wallet, Copy, Zap, TrendingUp, Activity, MessageSquare, History } from "lucide-react";
 import Link from "next/link";
+
+interface Agent {
+  id: string;
+  name: string;
+  type: string;
+  description?: string;
+  walletAddress?: string;
+  walletBalance?: number;
+  isActive: boolean;
+  createdAt: string;
+  _count?: {
+    tasks: number;
+    transactions: number;
+  };
+}
+
+interface AgentSkill {
+  id: string;
+  skillType: string;
+  level: number;
+  experience: number;
+  isActive: boolean;
+}
+
+interface Task {
+  id: string;
+  type: string;
+  status: string;
+  input: any;
+  output: any;
+  createdAt: string;
+  completedAt?: string;
+}
 
 export default function AgentDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { isAuthenticated, token } = useAuthStore();
+  const { token } = useAuthStore();
   const { toast } = useToast();
-  const [agent, setAgent] = useState<any>(null);
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [skills, setSkills] = useState<AgentSkill[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-      return;
-    }
-    loadAgentDetails();
-  }, [isAuthenticated, params.id]);
+    fetchAgentData();
+  }, [params.id]);
 
-  const loadAgentDetails = async () => {
+  const fetchAgentData = async () => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/agent/${params.id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const data = await response.json();
-      if (data.success) {
-        setAgent(data.data);
-        // Load tasks for this agent
-        // TODO: Add tasks endpoint
+      setLoading(true);
+
+      // Fetch agent details
+      const agentResponse = await fetch(`http://localhost:4000/agent/${params.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (agentResponse.ok) {
+        const agentData = await agentResponse.json();
+        setAgent(agentData.data);
       }
-    } catch (error) {
+
+      // Fetch skills
+      const skillsResponse = await fetch(`http://localhost:4000/agent/${params.id}/skills`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (skillsResponse.ok) {
+        const skillsData = await skillsResponse.json();
+        setSkills(skillsData.data.skills || []);
+      }
+
+      // Fetch tasks
+      const tasksResponse = await fetch(`http://localhost:4000/agent/${params.id}/tasks`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (tasksResponse.ok) {
+        const tasksData = await tasksResponse.json();
+        setTasks(tasksData.data.tasks || []);
+      }
+
+    } catch (error: any) {
+      console.error("Failed to fetch agent data:", error);
       toast({
         title: "Error",
         description: "Failed to load agent details",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  if (isLoading) {
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: "Wallet address copied to clipboard",
+    });
+  };
+
+  const getSkillIcon = (skillType: string) => {
+    const icons: Record<string, string> = {
+      search: "🔍",
+      compare: "💰",
+      negotiate: "🤝",
+      execute: "⚡",
+    };
+    return icons[skillType] || "🎯";
+  };
+
+  const getXPToNextLevel = (experience: number) => {
+    const currentLevel = Math.floor(experience / 100) + 1;
+    const xpInCurrentLevel = experience % 100;
+    const xpNeeded = 100 - xpInCurrentLevel;
+    return { xpInCurrentLevel, xpNeeded };
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse">
-          <Bot className="w-12 h-12 animate-spin" />
-        </div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900" />
       </div>
     );
   }
 
   if (!agent) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card>
-          <CardHeader>
-            <CardTitle>Agent Not Found</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Link href="/dashboard">
-              <Button>Back to Dashboard</Button>
-            </Link>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardContent className="pt-6">
+            <p className="text-center text-gray-600">Agent not found</p>
+            <Button
+              onClick={() => router.push("/dashboard")}
+              className="w-full mt-4"
+            >
+              Back to Dashboard
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -79,117 +153,226 @@ export default function AgentDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <Link href="/dashboard">
-          <Button variant="ghost" className="mb-6">
-            <ArrowLeft className="w-4 h-4 mr-2" />
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="border-b border-gray-200 sticky top-0 bg-white/80 backdrop-blur-xl z-10">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <Button
+            onClick={() => router.push("/dashboard")}
+            variant="ghost"
+            size="sm"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Button>
-        </Link>
+        </div>
+      </header>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {/* Agent Info */}
-          <div className="md:col-span-1">
-            <Card className="agent-card">
-              <CardHeader>
-                <div className="flex items-center justify-between mb-4">
-                  <Bot className="w-12 h-12 text-primary" />
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm ${
-                      agent.isActive
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {agent.isActive ? "Active" : "Inactive"}
-                  </span>
-                </div>
-                <CardTitle className="text-2xl">{agent.name}</CardTitle>
-                <CardDescription className="capitalize">
-                  {agent.type} Agent
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Description</p>
-                  <p className="text-sm">{agent.description || "No description"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Created</p>
-                  <p className="text-sm">
-                    {new Date(agent.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <Button
-                  className="w-full"
-                  onClick={() => router.push(`/agent/${params.id}/chat`)}
-                >
-                  Start Chat
-                </Button>
-              </CardContent>
-            </Card>
+      <div className="container mx-auto px-4 py-8">
+        {/* Agent Header */}
+        <div className="flex items-start gap-6 mb-8">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center">
+            <Bot className="h-10 w-10 text-white" />
           </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-4xl font-bold text-gray-900">{agent.name}</h1>
+              <Badge variant={agent.isActive ? "default" : "secondary"}>
+                {agent.isActive ? "Active" : "Inactive"}
+              </Badge>
+            </div>
+            <p className="text-lg text-gray-600 mb-2">
+              {agent.type.charAt(0).toUpperCase() + agent.type.slice(1)} Agent
+            </p>
+            {agent.description && (
+              <p className="text-gray-600">{agent.description}</p>
+            )}
+          </div>
+          <Button
+            onClick={() => router.push(`/agent/${agent.id}/chat`)}
+            size="lg"
+            className="bg-gray-900 hover:bg-black"
+          >
+            <MessageSquare className="mr-2 h-5 w-5" />
+            Chat with Agent
+          </Button>
+        </div>
 
-          {/* Activity & Stats */}
-          <div className="md:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Activity className="w-5 h-5 mr-2" />
-                  Recent Activity
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {tasks.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Bot className="w-16 h-16 mx-auto mb-4 opacity-20" />
-                    <p>No activity yet</p>
-                    <p className="text-sm mt-2">
-                      Start a chat to see your agent in action
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {tasks.map((task) => (
-                      <div
-                        key={task.id}
-                        className="flex items-center justify-between p-4 border rounded-lg"
-                      >
-                        <div className="flex items-center gap-3">
-                          {task.status === "completed" ? (
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                          ) : (
-                            <XCircle className="w-5 h-5 text-red-600" />
-                          )}
+        {/* Stats Grid */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <Card className="border-gray-900">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600">Total Tasks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900">
+                {agent._count?.tasks || 0}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-gray-900">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600">Transactions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900">
+                {agent._count?.transactions || 0}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-gray-900">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600">Wallet Balance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900">
+                {agent.walletBalance?.toFixed(4) || "0.0000"} SOL
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Skills */}
+          <Card className="border-gray-900">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5" />
+                Skills & Experience
+              </CardTitle>
+              <CardDescription>Agent capabilities and progression</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {skills.length === 0 ? (
+                <p className="text-gray-600 text-center py-4">No skills initialized</p>
+              ) : (
+                skills.map((skill) => {
+                  const { xpInCurrentLevel, xpNeeded } = getXPToNextLevel(skill.experience);
+                  return (
+                    <div key={skill.id} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{getSkillIcon(skill.skillType)}</span>
                           <div>
-                            <p className="font-medium">{task.type}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(task.createdAt).toLocaleString()}
+                            <p className="font-semibold text-gray-900 capitalize">
+                              {skill.skillType}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              Level {skill.level} • {skill.experience} XP
                             </p>
                           </div>
                         </div>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs ${
+                        <Badge variant="outline">
+                          {xpNeeded} XP to next level
+                        </Badge>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-gray-900 to-gray-700 h-2 rounded-full transition-all"
+                          style={{ width: `${xpInCurrentLevel}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Wallet */}
+          <Card className="border-gray-900">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5" />
+                Wallet
+              </CardTitle>
+              <CardDescription>Agent's Solana wallet</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {agent.walletAddress ? (
+                <>
+                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <span className="text-xs font-mono text-gray-700 flex-1 break-all">
+                      {agent.walletAddress}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(agent.walletAddress!)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="pt-2 border-t border-gray-200">
+                    <p className="text-sm text-gray-600 mb-2">Balance</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {agent.walletBalance?.toFixed(4) || "0.0000"} SOL
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <p className="text-gray-600 text-center py-4">No wallet created</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Tasks */}
+        <Card className="border-gray-900 mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Recent Tasks
+            </CardTitle>
+            <CardDescription>Latest agent activities</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {tasks.length === 0 ? (
+              <p className="text-gray-600 text-center py-8">No tasks yet</p>
+            ) : (
+              <div className="space-y-3">
+                {tasks.slice(0, 5).map((task) => (
+                  <div
+                    key={task.id}
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-gray-900 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="outline" className="capitalize">
+                          {task.type}
+                        </Badge>
+                        <Badge
+                          variant={
                             task.status === "completed"
-                              ? "bg-green-100 text-green-800"
+                              ? "default"
                               : task.status === "failed"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
+                              ? "destructive"
+                              : "secondary"
+                          }
                         >
                           {task.status}
-                        </span>
+                        </Badge>
                       </div>
-                    ))}
+                      <p className="text-sm text-gray-600">
+                        {new Date(task.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    {task.output && (
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-gray-900">
+                          {task.output.products?.length || task.output.totalResults || 0} results
+                        </p>
+                      </div>
+                    )}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
-
