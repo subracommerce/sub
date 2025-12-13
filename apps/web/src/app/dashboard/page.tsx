@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateAgentDialog } from "@/components/create-agent-dialog";
-import { Shield, Bot, TrendingUp, CheckCircle, LogOut, ArrowLeft, Zap, Activity, Lock, ShoppingCart, Sparkles } from "lucide-react";
+import { Shield, Bot, TrendingUp, CheckCircle, LogOut, ArrowLeft, Zap, Activity, Lock, ShoppingCart, Sparkles, Copy, Wallet, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
@@ -22,6 +22,13 @@ interface Agent {
     tasks: number;
     transactions: number;
   };
+}
+
+interface AgentSkill {
+  id: string;
+  skillType: string;
+  level: number;
+  experience: number;
 }
 
 export default function DashboardPage() {
@@ -69,6 +76,77 @@ export default function DashboardPage() {
   const handleAgentCreated = () => {
     setShowCreateAgent(false);
     fetchAgents(); // Refresh agent list
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: "Wallet address copied to clipboard",
+    });
+  };
+
+  const createAgentWallet = async (agentId: string) => {
+    try {
+      const response = await fetch("http://localhost:4000/agent/wallet/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ agentId }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to create wallet");
+      }
+
+      const data = await response.json();
+      toast({
+        title: "Wallet Created!",
+        description: `Wallet address: ${data.data.publicKey.slice(0, 8)}...`,
+      });
+      
+      // Refresh agents
+      fetchAgents();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create wallet",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const initializeSkills = async (agentId: string) => {
+    try {
+      const response = await fetch(`http://localhost:4000/agent/${agentId}/skills/initialize`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to initialize skills");
+      }
+
+      toast({
+        title: "Skills Initialized!",
+        description: "Agent now has all 4 skills (Search, Compare, Negotiate, Execute)",
+      });
+      
+      // Refresh agents
+      fetchAgents();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to initialize skills",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -328,8 +406,7 @@ export default function DashboardPage() {
               {agents.map((agent) => (
                 <Card 
                   key={agent.id} 
-                  className="group border border-gray-900 bg-white hover:shadow-2xl transition-all duration-300 relative overflow-hidden corner-accents cursor-pointer"
-                  onClick={() => router.push(`/agent/${agent.id}`)}
+                  className="group border border-gray-900 bg-white hover:shadow-2xl transition-all duration-300 relative overflow-hidden corner-accents"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-900/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <CardHeader className="relative z-10">
@@ -350,19 +427,83 @@ export default function DashboardPage() {
                       {agent.type.charAt(0).toUpperCase() + agent.type.slice(1)} Agent
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="relative z-10">
+                  <CardContent className="relative z-10 space-y-4">
                     {agent.description && (
-                      <p className="text-sm text-gray-600 mb-4">{agent.description}</p>
+                      <p className="text-sm text-gray-600">{agent.description}</p>
                     )}
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>
-                        {agent.walletAddress 
-                          ? `${agent.walletAddress.slice(0, 4)}...${agent.walletAddress.slice(-4)}`
-                          : "No wallet"}
-                      </span>
+                    
+                    {/* Wallet Section */}
+                    <div className="space-y-2">
+                      {agent.walletAddress ? (
+                        <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                          <Wallet className="h-4 w-4 text-gray-600 flex-shrink-0" />
+                          <span className="text-xs font-mono text-gray-700 flex-1 truncate">
+                            {agent.walletAddress}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyToClipboard(agent.walletAddress!);
+                            }}
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full border-gray-900 hover:bg-gray-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            createAgentWallet(agent.id);
+                          }}
+                        >
+                          <Wallet className="mr-2 h-4 w-4" />
+                          Create Wallet
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/agent/${agent.id}`);
+                        }}
+                      >
+                        View Details
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          initializeSkills(agent.id);
+                        }}
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Skills
+                      </Button>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
                       <span className="flex items-center gap-1">
                         <Activity className="h-3 w-3" />
                         {agent._count?.tasks || 0} tasks
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <TrendingUp className="h-3 w-3" />
+                        {agent._count?.transactions || 0} txns
                       </span>
                     </div>
                   </CardContent>
