@@ -15,16 +15,26 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Empty array - let wallet standard auto-detect
   const wallets = useMemo(() => [], []);
 
-  // Clear old cached connections from ExePay or other projects
+  // CRITICAL: Clear ALL cached wallet connections on mount
   useEffect(() => {
-    // Clear any old wallet connections cached in browser
     if (typeof window !== 'undefined') {
-      // Remove old wallet adapter cache
-      const oldKeys = ['walletName', 'walletAdapter', 'wallet-adapter'];
-      oldKeys.forEach(key => {
+      // Clear all possible wallet cache keys
+      const keysToRemove = [
+        'walletName',
+        'walletAdapter', 
+        'wallet-adapter',
+        'subra-wallet-v1',
+        'solana-wallet',
+        'phantom-wallet',
+        'solflare-wallet'
+      ];
+      
+      keysToRemove.forEach(key => {
         localStorage.removeItem(key);
         sessionStorage.removeItem(key);
       });
+      
+      console.log('🧹 Cleared all wallet caches');
     }
   }, []);
 
@@ -32,8 +42,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider 
         wallets={wallets} 
-        autoConnect={false} // Never auto-connect
-        localStorageKey="subra-wallet-v1" // Use unique key for SUBRA
+        autoConnect={false} // CRITICAL: Never auto-connect
+        localStorageKey="subra-wallet-v2" // New unique key
       >
         <WalletModalProvider>
           {children}
