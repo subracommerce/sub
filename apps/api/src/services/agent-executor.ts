@@ -44,18 +44,11 @@ export class AgentExecutor {
       });
 
       // Execute search using real scraping
-      const products = await productSearchService.searchProducts(
+      const searchResult = await productSearchService.searchProducts(
         query,
         marketplaces || ["amazon", "ebay"],
         true // useRealData
       );
-
-      const searchResult = {
-        query,
-        marketplaces: marketplaces || ["amazon", "ebay"],
-        products,
-        totalResults: products.length,
-      };
 
       // Update task with results
       await prisma.agentTask.update({
@@ -139,11 +132,14 @@ export class AgentExecutor {
       });
 
       // Execute price comparison using real scraping
-      const products = await productSearchService.searchProducts(
+      const searchResult = await productSearchService.searchProducts(
         productName,
         marketplaces || ["amazon", "ebay", "walmart"],
         true // useRealData
       );
+
+      // Extract products array from search result
+      const products = searchResult.products || [];
 
       // Compare prices - find best deal
       let bestProduct = products.length > 0 ? products[0] : null;
