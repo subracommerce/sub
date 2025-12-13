@@ -15,35 +15,37 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Empty array - let wallet standard auto-detect
   const wallets = useMemo(() => [], []);
 
-  // CRITICAL: Clear ALL cached wallet connections and force clean state
+  // ULTRA AGGRESSIVE: Clear everything on every mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Comprehensive cache clearing
-      const keysToRemove = [
-        'walletName',
-        'walletAdapter', 
-        'wallet-adapter',
-        'subra-wallet-v1',
-        'subra-wallet-v2',
-        'solana-wallet',
-        'phantom-wallet',
-        'solflare-wallet',
-        'backpack-wallet',
-        'glow-wallet',
-        'slope-wallet',
-        'sollet-wallet'
-      ];
+      console.log('🧹 AGGRESSIVE cache clearing...');
       
-      keysToRemove.forEach(key => {
-        try {
-          localStorage.removeItem(key);
-          sessionStorage.removeItem(key);
-        } catch (e) {
-          console.warn('Failed to remove key:', key);
-        }
-      });
+      // Clear ALL localStorage
+      try {
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+          if (key.includes('wallet') || key.includes('solana') || key.includes('phantom') || key.includes('solflare')) {
+            localStorage.removeItem(key);
+            console.log('  Removed:', key);
+          }
+        });
+      } catch (e) {
+        console.warn('Failed to clear localStorage');
+      }
       
-      console.log('🧹 Cleared all wallet caches');
+      // Clear ALL sessionStorage
+      try {
+        const keys = Object.keys(sessionStorage);
+        keys.forEach(key => {
+          if (key.includes('wallet') || key.includes('solana') || key.includes('phantom') || key.includes('solflare')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+      } catch (e) {
+        console.warn('Failed to clear sessionStorage');
+      }
+      
+      console.log('✅ Cache cleared');
     }
   }, []);
 
@@ -51,8 +53,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider 
         wallets={wallets} 
-        autoConnect={false} // CRITICAL: Never auto-connect
-        localStorageKey={null as any} // CRITICAL: Disable localStorage persistence
+        autoConnect={false}
+        localStorageKey={undefined as any}
       >
         <WalletModalProvider>
           {children}
