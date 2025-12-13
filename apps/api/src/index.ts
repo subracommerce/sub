@@ -8,6 +8,7 @@ import { redis } from "./lib/redis";
 import { authRoutes } from "./routes/auth";
 import { walletAuthRoutes } from "./routes/wallet-auth";
 import { createWalletRoutes } from "./routes/create-wallet";
+import { agentWalletRoutes } from "./routes/agent-wallet";
 import { userRoutes } from "./routes/user";
 import { agentRoutes } from "./routes/agent";
 import { taskRoutes } from "./routes/task";
@@ -61,6 +62,7 @@ fastify.register(walletAuthRoutes);
 fastify.register(createWalletRoutes);
 fastify.register(userRoutes, { prefix: "/user" });
 fastify.register(agentRoutes, { prefix: "/agent" });
+fastify.register(agentWalletRoutes); // Agent wallet management
 fastify.register(taskRoutes, { prefix: "/task" });
 fastify.register(transactionRoutes, { prefix: "/transaction" });
 fastify.register(zkReceiptRoutes, { prefix: "/zk-receipt" });

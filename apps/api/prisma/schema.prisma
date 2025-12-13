@@ -37,8 +37,9 @@ model Agent {
   name            String
   type            AgentType
   description     String?
-  walletAddress   String?  @unique
-  encryptedKey    String?  // MPC key share or encrypted private key
+  walletAddress   String?  @unique // Agent's Solana wallet address
+  encryptedKey    String?  // Encrypted private key (AES-256)
+  walletBalance   Float    @default(0) // SOL balance cache
   isActive        Boolean  @default(true)
   config          Json?    // Agent-specific configuration
   createdAt       DateTime @default(now())
@@ -47,9 +48,11 @@ model Agent {
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   tasks        AgentTask[]
   transactions Transaction[]
+  skills       AgentSkill[]
 
   @@index([userId])
   @@index([type])
+  @@index([walletAddress])
   @@map("agents")
 }
 
@@ -197,5 +200,25 @@ model Session {
   @@index([userId])
   @@index([refreshToken])
   @@map("sessions")
+}
+
+// Agent Skills
+model AgentSkill {
+  id          String   @id @default(uuid())
+  agentId     String
+  skillType   String   // "search", "compare", "negotiate", "execute"
+  level       Int      @default(1)
+  experience  Int      @default(0)
+  isActive    Boolean  @default(true)
+  metadata    Json?    // Additional skill-specific data
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, skillType])
+  @@index([agentId])
+  @@index([skillType])
+  @@map("agent_skills")
 }
 
