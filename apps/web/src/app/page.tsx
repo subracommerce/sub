@@ -78,12 +78,16 @@ export default function Home() {
       <section className="relative z-10 container mx-auto px-4 pt-20 pb-32">
         <div className="max-w-5xl mx-auto text-center">
           {/* Badge with shimmer effect */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-900/20 bg-white/50 backdrop-blur-sm mb-8 agentic-fade-in relative overflow-hidden group">
+          <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-gray-900/20 bg-white/50 backdrop-blur-sm mb-8 agentic-fade-in relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             <div className="w-2 h-2 rounded-full bg-gray-900 animate-pulse-smooth relative z-10" />
-            <span className="text-xs font-semibold text-gray-700 tracking-wide relative z-10">
-              AUTONOMOUS AI COMMERCE PLATFORM
-            </span>
+            <div className="flex items-center gap-1 text-xs font-semibold text-gray-700 tracking-wider relative z-10">
+              <span>AI Agent</span>
+              <span className="text-gray-400">•</span>
+              <span>Commerce</span>
+              <span className="text-gray-400">•</span>
+              <span>Marketplace</span>
+            </div>
           </div>
           
           {/* Main Title with Split S - Original Style */}
@@ -119,7 +123,7 @@ export default function Home() {
           {/* CTA Buttons with enhanced hover */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 agentic-buttons">
             <Link href="/auth/register">
-              <Button size="lg" className="bg-gray-900 hover:bg-black text-white px-10 py-7 text-lg group relative overflow-hidden w-full sm:w-auto">
+              <Button size="lg" className="bg-gray-900 hover:bg-black text-white px-10 py-7 text-lg group relative overflow-hidden w-full sm:w-auto hover:scale-105 transition-all duration-300">
                 <span className="relative z-10 flex items-center">
                   Deploy Your First Agent
                   <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -128,7 +132,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link href="/dashboard">
-              <Button size="lg" variant="outline" className="border-2 border-gray-900 hover:bg-gray-900 hover:text-white px-10 py-7 text-lg transition-all duration-500 group w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="border-2 border-gray-900 hover:bg-gray-900 hover:text-white px-10 py-7 text-lg transition-all duration-500 group w-full sm:w-auto hover:scale-105 hover:shadow-xl">
                 View Dashboard
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -170,10 +174,16 @@ export default function Home() {
             ].map((feature, i) => (
               <div
                 key={i}
-                className="group p-6 rounded-2xl border-2 border-gray-200 hover:border-gray-900 bg-white transition-all duration-500 hover:shadow-xl hover:-translate-y-1 agentic-card relative overflow-hidden"
+                className="group p-6 rounded-2xl border-2 border-gray-200 hover:border-gray-900 bg-white transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 agentic-card relative overflow-hidden cursor-pointer"
                 style={{ animationDelay: `${i * 100 + 1000}ms` }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                {/* Corner accent lines */}
+                <div className="absolute top-0 right-0 w-20 h-20 border-t-2 border-r-2 border-gray-900 rounded-tr-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0" />
+                <div className="absolute bottom-0 left-0 w-20 h-20 border-b-2 border-l-2 border-gray-900 rounded-bl-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 transform -translate-x-2 translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0" />
+                
+                {/* Scan line effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-900/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                
                 <div className="relative z-10">
                   <div className="w-12 h-12 rounded-lg bg-gray-900 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
                     <feature.icon className="w-6 h-6 text-white" />
@@ -231,9 +241,12 @@ export default function Home() {
               { name: "Executor", desc: "Executes purchases autonomously with cryptographic verification" },
               { name: "Tracker", desc: "Monitors orders and provides real-time shipment updates" },
             ].map((agent, i) => (
-              <div key={i} className="p-6 rounded-2xl border-2 border-gray-200 hover:border-gray-900 bg-white transition-all hover:shadow-lg hover:-translate-y-1 duration-500 group">
-                <h3 className="text-xl font-bold mb-2 group-hover:text-gray-900 transition-colors">{agent.name}</h3>
-                <p className="text-gray-600 leading-relaxed">{agent.desc}</p>
+              <div key={i} className="group p-6 rounded-2xl border-2 border-gray-200 hover:border-gray-900 bg-white transition-all hover:shadow-xl hover:-translate-y-2 duration-500 cursor-pointer relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative z-10">
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-gray-900 transition-colors">{agent.name}</h3>
+                  <p className="text-gray-600 leading-relaxed">{agent.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -243,7 +256,7 @@ export default function Home() {
       {/* CTA Section */}
       <section className="relative z-10 py-24">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center p-12 rounded-3xl border-2 border-gray-900 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden group">
+          <div className="max-w-4xl mx-auto text-center p-12 rounded-3xl border-2 border-gray-900 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
             <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             <div className="relative z-10">
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
@@ -253,7 +266,7 @@ export default function Home() {
                 Join the future of autonomous commerce. Start with a free account.
               </p>
               <Link href="/auth/register">
-                <Button size="lg" className="bg-gray-900 hover:bg-black text-white px-12 py-6 text-lg group">
+                <Button size="lg" className="bg-gray-900 hover:bg-black text-white px-12 py-6 text-lg group hover:scale-105 transition-all duration-300">
                   Get Started Free
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
