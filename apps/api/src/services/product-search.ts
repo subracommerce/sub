@@ -52,6 +52,12 @@ export class ProductSearchService {
       // Use real web scraping
       const scrapedProducts = await scraperService.scrapeAll(query, marketplaces);
       
+      // If scraping returned no products, use mock data
+      if (!scrapedProducts || scrapedProducts.length === 0) {
+        console.warn(`⚠️ Scraping returned 0 products, using mock data fallback`);
+        return this.getMockSearchResult(query, marketplaces, maxResults, startTime);
+      }
+      
       // Transform scraped data to Product format
       const products: Product[] = scrapedProducts.map((p) => ({
         id: crypto.randomUUID(),

@@ -68,7 +68,8 @@ export class AgentExecutor {
       });
 
       // Add experience to search skill (10 base + 2 per product found)
-      const experienceGained = 10 + searchResult.products.length * 2;
+      const productCount = searchResult.products?.length || 0;
+      const experienceGained = 10 + productCount * 2;
       await this.addSkillExperience(agentId, "search", experienceGained);
 
       // Publish completion
@@ -79,7 +80,7 @@ export class AgentExecutor {
       });
 
       console.log(
-        `✅ Agent ${agentId} found ${searchResult.products.length} products (gained ${experienceGained} XP)`
+        `✅ Agent ${agentId} found ${productCount} products (gained ${experienceGained} XP)`
       );
 
       return {
