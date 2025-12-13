@@ -43,12 +43,15 @@ SUBRA is an **autonomous AI commerce system** where:
 - ✅ Real-time activity feed (Redis pub/sub)
 - ✅ Agent chat interface
 - ✅ Task history and analytics
+- ✅ Web scraping service (Puppeteer with stealth plugin)
+- ✅ Search task execution (working with fallback data)
+- ✅ Compare task execution (working with fallback data)
 
 ### 🚧 In Progress
 
-**Phase 2: Marketplace Integration** (~15% Complete)
-- 🔄 Mock product data (needs real API integration)
-- 🔄 Basic search functionality (needs enhancement)
+**Phase 2: Marketplace Integration** (~60% Complete)
+- 🔄 Web scraper debugging (returns 0 products, needs selector fixes)
+- 🔄 Real marketplace API integration (recommended over scraping)
 
 ### ❌ Not Started
 
