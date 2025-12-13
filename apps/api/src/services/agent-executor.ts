@@ -43,12 +43,19 @@ export class AgentExecutor {
         marketplaces,
       });
 
-      // Execute search
-      const searchResult = await productSearchService.searchProducts(
+      // Execute search using real scraping
+      const products = await productSearchService.searchProducts(
         query,
-        marketplaces,
-        20
+        marketplaces || ["amazon", "ebay"],
+        true // useRealData
       );
+
+      const searchResult = {
+        query,
+        marketplaces: marketplaces || ["amazon", "ebay"],
+        products,
+        totalResults: products.length,
+      };
 
       // Update task with results
       await prisma.agentTask.update({
@@ -60,7 +67,7 @@ export class AgentExecutor {
         },
       });
 
-      // Add experience to search skill
+      // Add experience to search skill (10 base + 2 per product found)
       const experienceGained = 10 + searchResult.products.length * 2;
       await this.addSkillExperience(agentId, "search", experienceGained);
 
@@ -72,7 +79,7 @@ export class AgentExecutor {
       });
 
       console.log(
-        `✅ Agent ${agentId} found ${searchResult.products.length} products`
+        `✅ Agent ${agentId} found ${searchResult.products.length} products (gained ${experienceGained} XP)`
       );
 
       return {
@@ -130,11 +137,27 @@ export class AgentExecutor {
         marketplaces,
       });
 
-      // Execute price comparison
-      const compareResult = await productSearchService.comparePrice(
+      // Execute price comparison using real scraping
+      const products = await productSearchService.searchProducts(
         productName,
-        marketplaces
+        marketplaces || ["amazon", "ebay", "walmart"],
+        true // useRealData
       );
+
+      // Compare prices
+      const priceComparison = productSearchService.comparePrices(products);
+
+      const compareResult = {
+        productName,
+        marketplaces: marketplaces || ["amazon", "ebay", "walmart"],
+        products,
+        bestProduct: priceComparison.bestProduct,
+        bestPrice: priceComparison.bestProduct?.price || 0,
+        bestMarketplace: priceComparison.bestProduct?.marketplace || "unknown",
+        savings: priceComparison.savings,
+        priceRange: priceComparison.priceRange,
+        totalResults: products.length,
+      };
 
       await prisma.agentTask.update({
         where: { id: taskId },
@@ -145,8 +168,8 @@ export class AgentExecutor {
         },
       });
 
-      // Add experience to compare skill
-      const experienceGained = 15 + compareResult.products.length * 3;
+      // Add experience to compare skill (15 base + 3 per product compared)
+      const experienceGained = 15 + products.length * 3;
       await this.addSkillExperience(agentId, "compare", experienceGained);
 
       await this.publishActivity(agentId, "compare_completed", {
@@ -158,7 +181,7 @@ export class AgentExecutor {
       });
 
       console.log(
-        `✅ Agent ${agentId} found best price: $${compareResult.bestPrice} at ${compareResult.bestMarketplace}`
+        `✅ Agent ${agentId} found best price: $${compareResult.bestPrice} at ${compareResult.bestMarketplace} (saved $${compareResult.savings.toFixed(2)}, gained ${experienceGained} XP)`
       );
 
       return {
