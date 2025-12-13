@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, CheckCircle, Loader2, AlertCircle, Wallet as WalletIcon, Lock } from "lucide-react";
+import { Shield, CheckCircle, Loader2, AlertCircle, Wallet as WalletIcon } from "lucide-react";
 import bs58 from "bs58";
 import Link from "next/link";
 
@@ -23,7 +23,6 @@ export default function WalletAuthPage() {
   const [step, setStep] = useState<"select" | "connecting" | "sign" | "authenticating" | "success">("select");
   const [error, setError] = useState<string | null>(null);
   const hasAttemptedAuth = useRef(false);
-  const hasCheckedConnection = useRef(false);
   const hasTriggeredConnect = useRef(false);
 
   // Force clean state on mount
@@ -32,19 +31,17 @@ export default function WalletAuthPage() {
       console.log('🔒 Initializing wallet page');
       
       if (connected) {
-        console.log('  Found existing connection, disconnecting...');
+        console.log('  Disconnecting existing connection...');
         await disconnect();
       }
       
       if (wallet) {
-        console.log('  Deselecting wallet:', wallet.adapter.name);
         select(null);
       }
       
       setStep("select");
       setError(null);
       hasAttemptedAuth.current = false;
-      hasCheckedConnection.current = false;
       hasTriggeredConnect.current = false;
       
       console.log('✅ Ready for wallet selection');
@@ -53,36 +50,31 @@ export default function WalletAuthPage() {
     init();
   }, []);
 
-  // CRITICAL: When wallet is selected, manually trigger connection
+  // When wallet is selected, trigger connection
   useEffect(() => {
     const triggerConnection = async () => {
       if (wallet && !connected && !connecting && !hasTriggeredConnect.current && step === "select") {
         console.log('🚀 WALLET SELECTED:', wallet.adapter.name);
-        console.log('   Manually triggering connection...');
+        console.log('   Triggering connection (popup should appear)...');
         
         hasTriggeredConnect.current = true;
         setStep("connecting");
         setError(null);
         
         try {
-          console.log('   Calling connect()...');
           await connect();
-          console.log('✅ Connect() called successfully');
+          console.log('✅ Connection successful!');
         } catch (err: any) {
-          console.error('❌ Connect() failed:', err);
+          console.error('❌ Connection failed:', err);
           
-          if (err.message?.includes('User rejected')) {
-            setError('You rejected the connection request.');
-          } else if (err.message?.includes('wallet is locked')) {
-            setError('Your wallet is locked. Please unlock it and try again.');
+          if (err.message?.includes('User rejected') || err.message?.includes('User cancelled')) {
+            setError('You cancelled the connection.');
           } else {
-            setError(err.message || 'Failed to connect wallet.');
+            setError(err.message || 'Failed to connect. Please try again.');
           }
           
           setStep("select");
           hasTriggeredConnect.current = false;
-          
-          // Deselect the wallet so user can try again
           select(null);
         }
       }
@@ -91,92 +83,43 @@ export default function WalletAuthPage() {
     triggerConnection();
   }, [wallet, connected, connecting, step, connect, select]);
 
-  // Monitor wallet connection state changes
+  // Monitor connection success
   useEffect(() => {
-    console.log('🔄 Wallet state changed:', {
-      connected,
-      connecting,
-      hasPublicKey: !!publicKey,
-      hasSignMessage: !!signMessage,
-      walletName: wallet?.adapter?.name,
-      currentStep: step,
-    });
-
-    // If connecting, ensure we're in connecting state
-    if (connecting && step !== "connecting") {
-      console.log('🔌 Wallet is connecting...');
-      setStep("connecting");
-      setError(null);
-      return;
-    }
-
-    // If successfully connected
-    if (connected && publicKey && !hasCheckedConnection.current) {
-      console.log('✅ Wallet connected! Checking if unlocked...');
-      hasCheckedConnection.current = true;
+    if (connected && publicKey && step === "connecting") {
+      console.log('✅ Wallet connected successfully!');
+      console.log('   Public Key:', publicKey.toBase58());
+      console.log('   Has signMessage:', !!signMessage);
       
-      // Small delay to let wallet fully initialize
-      setTimeout(async () => {
-        // Check if wallet is actually unlocked
-        if (!signMessage) {
-          console.error('❌ WALLET IS LOCKED - signMessage not available');
-          setError(`${wallet?.adapter?.name || "Wallet"} is locked! Please unlock it and try again.`);
-          await disconnect();
-          select(null);
-          setStep("select");
-          hasCheckedConnection.current = false;
-          hasTriggeredConnect.current = false;
-          return;
-        }
-
-        // Check if wallet adapter is ready
-        if (!wallet?.adapter?.publicKey) {
-          console.error('❌ WALLET NOT READY - adapter publicKey not accessible');
-          setError("Wallet not ready. Please unlock it and try again.");
-          await disconnect();
-          select(null);
-          setStep("select");
-          hasCheckedConnection.current = false;
-          hasTriggeredConnect.current = false;
-          return;
-        }
-
-        console.log('✅ Wallet is unlocked and ready!');
-        setStep("sign");
-        setError(null);
-      }, 500);
+      // Move to sign step
+      setStep("sign");
+      setError(null);
     }
+  }, [connected, publicKey, signMessage, step]);
 
-    // If disconnected unexpectedly
-    if (!connected && !connecting && step === "sign") {
-      console.log('❌ Wallet disconnected unexpectedly');
+  // Handle disconnection
+  useEffect(() => {
+    if (!connected && step === "sign") {
+      console.log('❌ Wallet disconnected');
       setError("Wallet disconnected. Please reconnect.");
       setStep("select");
-      hasCheckedConnection.current = false;
       hasTriggeredConnect.current = false;
     }
-  }, [connected, connecting, publicKey, signMessage, wallet, step]);
+  }, [connected, step]);
 
   const handleSelectWallet = () => {
     console.log('👆 Opening wallet selection modal');
     setError(null);
-    hasCheckedConnection.current = false;
     hasTriggeredConnect.current = false;
-    
-    // Open the wallet modal
     setVisible(true);
-    
-    console.log('📋 Modal opened - waiting for user to select wallet...');
   };
 
   const handleSignAndAuthenticate = async () => {
     if (!publicKey || !signMessage) {
-      setError("Wallet not properly connected");
+      setError("Wallet not ready to sign");
       return;
     }
 
     if (hasAttemptedAuth.current) {
-      console.log('⏳ Already authenticating...');
       return;
     }
 
@@ -185,7 +128,7 @@ export default function WalletAuthPage() {
     setError(null);
 
     try {
-      console.log('🔐 Step 1: Requesting nonce from backend...');
+      console.log('🔐 Step 1: Requesting nonce...');
       
       const nonceResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/nonce`, {
         method: "POST",
@@ -194,24 +137,22 @@ export default function WalletAuthPage() {
       });
 
       if (!nonceResponse.ok) {
-        throw new Error("Failed to get nonce from server");
+        throw new Error("Failed to get nonce");
       }
 
       const { data: { nonce } } = await nonceResponse.json();
-      console.log('✅ Nonce received:', nonce.slice(0, 20) + '...');
+      console.log('✅ Nonce received');
 
       const message = `Sign this message to authenticate with SUBRA\n\nWallet: ${publicKey.toBase58()}\nNonce: ${nonce}\nTimestamp: ${new Date().toISOString()}\n\nNo gas fees required.`;
       const encodedMessage = new TextEncoder().encode(message);
 
-      console.log('📝 Step 2: Requesting signature from wallet...');
-      console.log('   This should trigger wallet popup!');
+      console.log('📝 Step 2: Requesting signature (popup should appear)...');
 
-      // This WILL popup if wallet is unlocked
       const signature = await signMessage(encodedMessage);
       const signatureBase58 = bs58.encode(signature);
       
-      console.log('✅ Signature received:', signatureBase58.slice(0, 20) + '...');
-      console.log('🔍 Step 3: Verifying signature with backend...');
+      console.log('✅ Signature received');
+      console.log('🔍 Step 3: Verifying...');
       
       const authResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/verify`, {
         method: "POST",
@@ -249,8 +190,10 @@ export default function WalletAuthPage() {
       
       hasAttemptedAuth.current = false;
       
-      if (error.message?.includes("User rejected")) {
-        setError("You rejected the signature request.");
+      if (error.message?.includes("User rejected") || error.message?.includes("User cancelled")) {
+        setError("You cancelled the signature request.");
+      } else if (error.message?.includes("locked")) {
+        setError("Your wallet is locked. Please unlock it and try again.");
       } else {
         setError(error.message || "Authentication failed.");
       }
@@ -260,7 +203,7 @@ export default function WalletAuthPage() {
   };
 
   const handleDisconnect = async () => {
-    console.log('🔌 User requested disconnect');
+    console.log('🔌 Disconnecting...');
     
     try {
       await disconnect();
@@ -272,7 +215,6 @@ export default function WalletAuthPage() {
     setStep("select");
     setError(null);
     hasAttemptedAuth.current = false;
-    hasCheckedConnection.current = false;
     hasTriggeredConnect.current = false;
   };
 
@@ -303,15 +245,7 @@ export default function WalletAuthPage() {
             <Alert variant="destructive" className="border-2">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
-              <AlertDescription>
-                {error}
-                {error.includes("locked") && (
-                  <div className="mt-2 p-2 bg-red-100 rounded text-xs text-red-900">
-                    <Lock className="h-3 w-3 inline mr-1" />
-                    Unlock your {wallet?.adapter?.name || "wallet"} extension and try again.
-                  </div>
-                )}
-              </AlertDescription>
+              <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
@@ -320,15 +254,15 @@ export default function WalletAuthPage() {
             <div className="space-y-4">
               <Alert className="border-2 border-blue-500 bg-blue-50">
                 <Shield className="h-4 w-4 text-blue-600" />
-                <AlertTitle className="text-blue-900">Before You Start</AlertTitle>
+                <AlertTitle className="text-blue-900">How It Works</AlertTitle>
                 <AlertDescription className="text-blue-800 text-sm">
-                  <ul className="list-disc list-inside space-y-1 mt-2">
-                    <li><strong>Make sure your wallet is UNLOCKED 🔓</strong></li>
-                    <li>Click button below to see wallet options</li>
-                    <li>Click on your preferred wallet</li>
-                    <li>Your wallet extension will popup</li>
-                    <li>Approve the connection</li>
-                  </ul>
+                  <ol className="list-decimal list-inside space-y-1 mt-2">
+                    <li>Click button below</li>
+                    <li>Choose your wallet</li>
+                    <li>Wallet popup will appear</li>
+                    <li>If locked, unlock it first</li>
+                    <li>Then authorize the connection</li>
+                  </ol>
                 </AlertDescription>
               </Alert>
 
@@ -354,10 +288,10 @@ export default function WalletAuthPage() {
               <div className="text-center">
                 <p className="text-lg font-semibold">Connecting to {wallet?.adapter?.name || "Wallet"}...</p>
                 <p className="text-sm text-gray-600 mt-2">
-                  Please approve the connection in your wallet popup
+                  Check your wallet popup
                 </p>
-                <p className="text-xs text-gray-500 mt-4">
-                  (If popup doesn't appear, check if your wallet is unlocked)
+                <p className="text-xs text-gray-500 mt-2">
+                  (If your wallet is locked, unlock it first, then approve)
                 </p>
               </div>
               <Button 
@@ -399,7 +333,6 @@ export default function WalletAuthPage() {
                   onClick={handleSignAndAuthenticate}
                   className="w-full bg-gray-900 hover:bg-black text-white py-6 text-base font-semibold hover:scale-105 transition-all"
                   size="lg"
-                  disabled={!signMessage}
                 >
                   <Shield className="mr-2 h-5 w-5" />
                   Sign & Authenticate
