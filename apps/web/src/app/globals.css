@@ -48,21 +48,88 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1a1a1a;
+  background: linear-gradient(to bottom, #10b981, #3b82f6);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #000000;
+  background: linear-gradient(to bottom, #059669, #2563eb);
 }
 
-/* ===== HERO ANIMATIONS ===== */
+/* ===== ADVANCED FUTURISTIC ANIMATIONS ===== */
 
-/* Slide in from right for agent activity */
+/* Hero content entrance */
+@keyframes heroContentAppear {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.hero-content-appear {
+  animation: heroContentAppear 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hero visual entrance */
+@keyframes heroVisualAppear {
+  from {
+    opacity: 0;
+    transform: translateX(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.hero-visual-appear {
+  animation: heroVisualAppear 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+
+/* Gradient flow for AI Agents text */
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-flow {
+  animation: gradientFlow 3s ease infinite;
+}
+
+/* Draw SVG line */
+@keyframes drawLine {
+  from {
+    stroke-dasharray: 0 1000;
+  }
+  to {
+    stroke-dasharray: 1000 0;
+  }
+}
+
+.animate-draw-line {
+  stroke-dasharray: 1000;
+  animation: drawLine 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.5s;
+}
+
+/* Slide in from right for activity items */
 @keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(30px);
   }
   to {
     opacity: 1;
@@ -75,7 +142,177 @@
   opacity: 0;
 }
 
-/* ===== FEATURE CARD ANIMATIONS (KEPT AS YOU LIKE!) ===== */
+/* Fade in up for pills */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+/* Fade in for trust badges */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease forwards;
+  opacity: 0;
+}
+
+/* Bounce for loading dots */
+@keyframes bounceDot {
+  0%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-bounce-dot {
+  animation: bounceDot 1.4s ease-in-out infinite;
+}
+
+/* Pulse glow for demo card */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+/* Pulse for badge */
+@keyframes pulseBadge {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-badge {
+  animation: pulseBadge 2s ease-in-out infinite;
+}
+
+/* Floating animations for orbs */
+@keyframes float1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(20px, -20px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+@keyframes float2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-30px, 30px) scale(1.15);
+  }
+  66% {
+    transform: translate(30px, -15px) scale(0.9);
+  }
+}
+
+.animate-float-1 {
+  animation: float1 25s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: float2 30s ease-in-out infinite;
+}
+
+/* Subtle float for bot icon */
+@keyframes floatSubtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-float-subtle {
+  animation: floatSubtle 3s ease-in-out infinite;
+}
+
+/* Grid animation */
+@keyframes gridSlow {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(4rem);
+  }
+}
+
+.animate-grid-slow {
+  animation: gridSlow 40s linear infinite;
+}
+
+/* Scanning line vertical */
+@keyframes scanVertical {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10%, 90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+.animate-scan-vertical {
+  animation: scanVertical 8s ease-in-out infinite;
+}
+
+/* Smooth pulse */
+@keyframes pulseSmooth {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+.animate-pulse-smooth {
+  animation: pulseSmooth 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ===== FEATURE CARD ANIMATIONS (YOUR FAVORITES!) ===== */
 
 @keyframes agentic-card {
   0% {
@@ -93,24 +330,13 @@
   opacity: 0;
 }
 
-/* ===== UTILITY ANIMATIONS ===== */
+/* Enhanced shadow for hover */
+.hover\:shadow-3xl:hover {
+  box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
+}
 
 /* Standard delays */
 .animation-delay-500 { animation-delay: 0.5s; }
 .animation-delay-1000 { animation-delay: 1s; }
 .animation-delay-1500 { animation-delay: 1.5s; }
 .animation-delay-2000 { animation-delay: 2s; }
-
-/* Smooth pulse */
-@keyframes pulse-smooth {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-pulse-smooth {
-  animation: pulse-smooth 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
