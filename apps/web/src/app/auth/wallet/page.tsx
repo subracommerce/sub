@@ -16,7 +16,7 @@ type WalletAuthStep = "select" | "authenticating" | "success" | "error";
 
 export default function WalletAuthPage() {
   const router = useRouter();
-  const { publicKey, signMessage, connected, disconnect, wallet, select } = useWallet();
+  const { publicKey, signMessage, connected, disconnect, wallet, select, connecting } = useWallet();
   const { setAuth } = useAuthStore();
   const { toast } = useToast();
 
@@ -43,7 +43,7 @@ export default function WalletAuthPage() {
     hasAttemptedConnectRef.current = false;
   }, [disconnect, select, connected]);
 
-  // Main authentication flow - SIMPLIFIED
+  // Main authentication flow
   const connectAndAuthenticate = useCallback(async () => {
     if (isAuthenticatingRef.current || !wallet?.adapter) return;
 
@@ -52,30 +52,16 @@ export default function WalletAuthPage() {
     setStep("authenticating");
 
     try {
-      // Step 1: Connect wallet
       if (!connected) {
-        console.log('🔌 Connecting wallet...');
         await wallet.adapter.connect();
-        // Give wallet time to initialize
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-
-      // Step 2: Wait for publicKey and signMessage to be available
-      let retries = 0;
-      while ((!publicKey || !signMessage) && retries < 5) {
-        console.log(`⏳ Waiting for wallet to be ready... (attempt ${retries + 1})`);
-        await new Promise(resolve => setTimeout(resolve, 500));
-        retries++;
+        await new Promise(resolve => setTimeout(resolve, 500)); 
       }
 
       if (!publicKey || !signMessage) {
-        throw new Error("Unable to access wallet. Please make sure your wallet is unlocked and try again.");
+        throw new Error("Wallet connected but not ready. Please unlock your wallet.");
       }
 
-      console.log('✅ Wallet ready!');
-      console.log('📡 Requesting nonce...');
-
-      // Step 3: Request Nonce
+      // Request Nonce
       const nonceResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/nonce`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -84,24 +70,18 @@ export default function WalletAuthPage() {
       const nonceData = await nonceResponse.json();
 
       if (!nonceResponse.ok || !nonceData.success) {
-        throw new Error(nonceData.error || "Failed to get authentication nonce");
+        throw new Error(nonceData.error || "Failed to get nonce");
       }
-
-      console.log('✅ Nonce received');
 
       const message = new TextEncoder().encode(
         `Sign this message to authenticate with SUBRA\n\nWallet: ${publicKey.toBase58()}\nNonce: ${nonceData.data.nonce}\nTimestamp: ${new Date().toISOString()}\n\nThis signature will not cost any gas fees.`
       );
 
-      // Step 4: Request Signature - this will trigger the popup
-      console.log('📝 Requesting signature...');
+      // Request Signature
       const signature = await signMessage(message);
       const signatureBase58 = bs58.encode(signature);
 
-      console.log('✅ Signature received');
-
-      // Step 5: Verify Signature
-      console.log('🔍 Verifying signature...');
+      // Verify Signature
       const verifyResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -118,35 +98,14 @@ export default function WalletAuthPage() {
         throw new Error(verifyData.error || "Failed to verify signature");
       }
 
-      console.log('✅ Authentication successful!');
-
       setAuth(verifyData.data.user, verifyData.data.token);
       setStep("success");
-      toast({ 
-        title: "Authentication Successful!", 
-        description: "Redirecting to dashboard..." 
-      });
-      
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 1500);
+      toast({ title: "Authentication Successful!", description: "Redirecting..." });
+      router.push("/dashboard");
     } catch (err: any) {
-      console.error('❌ Authentication failed:', err);
-      
-      // Provide user-friendly error messages
-      let userError = err.message || "Authentication failed";
-      
-      if (userError.includes("User rejected") || userError.includes("rejected")) {
-        userError = "You rejected the signature request. Please try again and approve the signature.";
-      }
-      
-      setError(userError);
+      setError(err.message || "Authentication failed");
       setStep("error");
-      toast({ 
-        title: "Authentication Failed", 
-        description: userError, 
-        variant: "destructive" 
-      });
+      toast({ title: "Authentication Failed", description: err.message, variant: "destructive" });
       disconnect();
     } finally {
       isAuthenticatingRef.current = false;
@@ -156,7 +115,6 @@ export default function WalletAuthPage() {
   // Trigger auth when wallet selected
   useEffect(() => {
     if (wallet?.adapter && !hasAttemptedConnectRef.current) {
-      console.log(`🎯 Wallet selected: ${wallet.adapter.name}`);
       hasAttemptedConnectRef.current = true;
       connectAndAuthenticate();
     }
@@ -221,7 +179,7 @@ export default function WalletAuthPage() {
                 {step === "select" && (
                   <div className="flex flex-col items-center space-y-6 animate-fade-in-up">
                     <p className="text-gray-600 text-center">
-                      Select your Solana wallet to continue
+                      Click below to select your Solana wallet
                     </p>
                     <WalletMultiButton className="w-full bg-gray-900 hover:bg-black text-white font-semibold py-4 rounded-lg shadow-lg transition-all" />
                     <p className="text-sm text-gray-500 text-center">
@@ -238,7 +196,7 @@ export default function WalletAuthPage() {
                     <Loader2 className="h-12 w-12 animate-spin text-gray-900" />
                     <p className="text-xl font-bold text-gray-900">Authenticating...</p>
                     <p className="text-gray-600 text-center text-sm">
-                      Please approve the signature request in your wallet popup
+                      Please approve the signature in your wallet
                     </p>
                     <Button
                       onClick={() => {
