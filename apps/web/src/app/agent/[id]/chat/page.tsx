@@ -118,38 +118,51 @@ export default function AgentChatPage() {
 
       const data = await response.json();
 
-      if (data.success && data.data.result.success) {
-        const result = data.data.result.data;
-        const xpGained = data.data.result.experienceGained;
-
+      if (data.success) {
+        const result = data.data.result;
+        
         let responseContent = "";
+        let xpGained = 0;
         
-        if (taskType === "search") {
-          responseContent = `I found ${result.totalResults} products for "${result.query}"!\n\nTop results:\n`;
-          result.products.slice(0, 3).forEach((p: any, i: number) => {
-            responseContent += `\n${i + 1}. ${p.name}\n   💰 $${p.price} at ${p.marketplace}\n   ⭐ ${p.rating}/5 (${p.reviews} reviews)`;
-          });
-        } else if (taskType === "compare") {
-          responseContent = `I compared prices for "${result.productName}"!\n\n`;
-          responseContent += `🎯 Best Deal: $${result.bestPrice} at ${result.bestMarketplace}\n`;
-          responseContent += `💰 You save: $${result.savings.toFixed(2)}\n`;
-          responseContent += `📊 Price range: $${result.priceRange.min} - $${result.priceRange.max}`;
+        if (result.success) {
+          const taskData = result.data;
+          xpGained = result.experienceGained || 0;
+          
+          if (taskType === "search") {
+            const products = taskData.products || [];
+            responseContent = `I found ${products.length} products for "${taskData.query}"!\n\nTop results:\n`;
+            products.slice(0, 3).forEach((p: any, i: number) => {
+              responseContent += `\n${i + 1}. ${p.title}\n   💰 $${p.price} at ${p.marketplace}\n   ⭐ ${p.rating || "N/A"}/5`;
+              if (p.reviews) {
+                responseContent += ` (${p.reviews} reviews)`;
+              }
+            });
+          } else if (taskType === "compare") {
+            responseContent = `I compared prices for "${taskData.productName}"!\n\n`;
+            responseContent += `🎯 Best Deal: $${taskData.bestPrice} at ${taskData.bestMarketplace}\n`;
+            responseContent += `💰 You save: $${taskData.savings.toFixed(2)}\n`;
+            responseContent += `📊 Price range: $${taskData.priceRange.min.toFixed(2)} - $${taskData.priceRange.max.toFixed(2)}`;
+          }
+
+          const agentMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "agent",
+            content: responseContent,
+            timestamp: new Date(),
+          };
+
+          setMessages((prev) => [...prev, agentMessage]);
+          
+          // Show XP toast notification
+          if (xpGained > 0) {
+            toast({
+              title: "Task Complete!",
+              description: `Agent gained +${xpGained} XP`,
+            });
+          }
+        } else {
+          throw new Error(result.error || "Task failed");
         }
-
-        const agentMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "agent",
-          content: responseContent,
-          timestamp: new Date(),
-        };
-
-        setMessages((prev) => [...prev, agentMessage]);
-        
-        // Show XP toast notification instead
-        toast({
-          title: "Task Complete!",
-          description: `Agent gained +${xpGained} XP`,
-        });
       } else {
         throw new Error(data.error || "Task failed");
       }
