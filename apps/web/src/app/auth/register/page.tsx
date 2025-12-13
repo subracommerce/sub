@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
 import { CreateWalletModal } from "@/components/create-wallet-modal";
-import { Wallet, Mail, Sparkles } from "lucide-react";
+import { Wallet, Plus, Mail, Sparkles, Shield } from "lucide-react";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -63,39 +63,66 @@ export default function RegisterPage() {
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* Primary CTA: Create Wallet */}
-          <div className="space-y-3 p-6 rounded-xl border-2 border-gray-900 bg-gradient-to-br from-gray-50 to-white hover:shadow-xl transition-all">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center">
-                <Wallet className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold">Create Solana Wallet</h3>
-                <p className="text-sm text-gray-600">Recommended • Most secure</p>
-              </div>
+          {/* Option 1: Connect External Wallet */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Shield className="h-5 w-5 text-gray-700" />
+              <h3 className="text-base font-semibold">Have a Solana Wallet?</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Get a password-protected Solana wallet. No browser extension needed. Start deploying agents instantly.
+            <Link href="/auth/wallet" className="block">
+              <Button 
+                className="w-full bg-gray-900 hover:bg-black text-white border-2 border-gray-900 py-6 text-base font-semibold hover:scale-105 transition-all" 
+                size="lg"
+              >
+                <Wallet className="mr-2 h-5 w-5" /> 
+                Connect Wallet
+              </Button>
+            </Link>
+            <p className="text-xs text-gray-600">
+              Secure sign-in with Phantom, Solflare, or other Solana wallets
             </p>
-            <Button 
-              className="w-full bg-gray-900 hover:bg-black text-white py-6 text-base font-semibold hover:scale-105 transition-all" 
-              size="lg" 
-              onClick={() => setShowCreateWalletModal(true)}
-              disabled={isLoading}
-            >
-              Create Wallet & Start
-            </Button>
           </div>
 
           <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t-2 border-gray-300" />
             </div>
-            <div className="relative bg-white px-4 text-sm text-gray-500 font-medium">Or sign up with email</div>
+            <div className="relative bg-white px-4 text-sm text-gray-500 font-medium">Or</div>
           </div>
 
-          {/* Secondary: Email Signup */}
+          {/* Option 2: Create New Wallet */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Plus className="h-5 w-5 text-gray-700" />
+              <h3 className="text-base font-semibold">New to Crypto?</h3>
+            </div>
+            <Button 
+              className="w-full bg-black hover:bg-gray-900 text-white py-6 text-base font-semibold hover:scale-105 transition-all" 
+              size="lg" 
+              onClick={() => setShowCreateWalletModal(true)}
+              disabled={isLoading}
+            >
+              <Plus className="mr-2 h-5 w-5" /> 
+              Create New Wallet
+            </Button>
+            <p className="text-xs text-gray-600">
+              Password-protected Solana wallet • No extension needed
+            </p>
+          </div>
+
+          <div className="relative flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t-2 border-gray-300" />
+            </div>
+            <div className="relative bg-white px-4 text-sm text-gray-500 font-medium">Or</div>
+          </div>
+
+          {/* Option 3: Email Signup */}
           <form onSubmit={handleEmailRegister} className="space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Mail className="h-5 w-5 text-gray-700" />
+              <h3 className="text-base font-semibold">Sign Up with Email</h3>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <Input
@@ -127,18 +154,12 @@ export default function RegisterPage() {
               size="lg"
               disabled={isLoading}
             >
-              <Mail className="mr-2 h-5 w-5" /> 
-              {isLoading ? "Creating account..." : "Sign Up with Email"}
+              {isLoading ? "Creating account..." : "Sign Up"}
             </Button>
-          </form>
-
-          {/* Info callout */}
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-sm text-blue-900">
-            <p className="font-semibold mb-1">💡 Why create a wallet?</p>
-            <p className="text-xs">
-              Wallets let you deploy AI agents and execute on-chain transactions. Email accounts need to create a wallet later.
+            <p className="text-xs text-gray-600 text-center">
+              You'll need to create a wallet later to deploy agents
             </p>
-          </div>
+          </form>
 
           <div className="text-center text-sm text-gray-600 pt-4 border-t-2">
             Already have an account?{" "}
