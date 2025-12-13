@@ -21,8 +21,8 @@ export default function DashboardPage() {
   };
 
   const handleSignOut = () => {
-    // Redirect to login page (now with all options)
-    router.push("/auth/login");
+    // Redirect to register page (all auth options available)
+    router.push("/auth/register");
   };
 
   return (
