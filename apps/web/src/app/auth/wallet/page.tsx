@@ -14,7 +14,7 @@ import bs58 from "bs58";
 import Link from "next/link";
 
 export default function WalletAuthPage() {
-  const { publicKey, signMessage, connected, disconnect, wallet, select, connecting } = useWallet();
+  const { publicKey, signMessage, connected, disconnect, wallet, select, connecting, connect } = useWallet();
   const { setVisible } = useWalletModal();
   const router = useRouter();
   const { setAuth } = useAuthStore();
@@ -24,6 +24,7 @@ export default function WalletAuthPage() {
   const [error, setError] = useState<string | null>(null);
   const hasAttemptedAuth = useRef(false);
   const hasCheckedConnection = useRef(false);
+  const hasTriggeredConnect = useRef(false);
 
   // Force clean state on mount
   useEffect(() => {
@@ -44,12 +45,51 @@ export default function WalletAuthPage() {
       setError(null);
       hasAttemptedAuth.current = false;
       hasCheckedConnection.current = false;
+      hasTriggeredConnect.current = false;
       
       console.log('✅ Ready for wallet selection');
     };
     
     init();
   }, []);
+
+  // CRITICAL: When wallet is selected, manually trigger connection
+  useEffect(() => {
+    const triggerConnection = async () => {
+      if (wallet && !connected && !connecting && !hasTriggeredConnect.current && step === "select") {
+        console.log('🚀 WALLET SELECTED:', wallet.adapter.name);
+        console.log('   Manually triggering connection...');
+        
+        hasTriggeredConnect.current = true;
+        setStep("connecting");
+        setError(null);
+        
+        try {
+          console.log('   Calling connect()...');
+          await connect();
+          console.log('✅ Connect() called successfully');
+        } catch (err: any) {
+          console.error('❌ Connect() failed:', err);
+          
+          if (err.message?.includes('User rejected')) {
+            setError('You rejected the connection request.');
+          } else if (err.message?.includes('wallet is locked')) {
+            setError('Your wallet is locked. Please unlock it and try again.');
+          } else {
+            setError(err.message || 'Failed to connect wallet.');
+          }
+          
+          setStep("select");
+          hasTriggeredConnect.current = false;
+          
+          // Deselect the wallet so user can try again
+          select(null);
+        }
+      }
+    };
+    
+    triggerConnection();
+  }, [wallet, connected, connecting, step, connect, select]);
 
   // Monitor wallet connection state changes
   useEffect(() => {
@@ -62,19 +102,11 @@ export default function WalletAuthPage() {
       currentStep: step,
     });
 
-    // If connecting, show connecting state
-    if (connecting && step === "select") {
+    // If connecting, ensure we're in connecting state
+    if (connecting && step !== "connecting") {
       console.log('🔌 Wallet is connecting...');
       setStep("connecting");
       setError(null);
-      return;
-    }
-
-    // If connection failed and no longer connecting
-    if (!connecting && !connected && step === "connecting") {
-      console.log('❌ Connection attempt finished but not connected');
-      setError("Connection failed. Please try again or choose a different wallet.");
-      setStep("select");
       return;
     }
 
@@ -93,6 +125,7 @@ export default function WalletAuthPage() {
           select(null);
           setStep("select");
           hasCheckedConnection.current = false;
+          hasTriggeredConnect.current = false;
           return;
         }
 
@@ -104,6 +137,7 @@ export default function WalletAuthPage() {
           select(null);
           setStep("select");
           hasCheckedConnection.current = false;
+          hasTriggeredConnect.current = false;
           return;
         }
 
@@ -114,11 +148,12 @@ export default function WalletAuthPage() {
     }
 
     // If disconnected unexpectedly
-    if (!connected && step === "sign") {
+    if (!connected && !connecting && step === "sign") {
       console.log('❌ Wallet disconnected unexpectedly');
       setError("Wallet disconnected. Please reconnect.");
       setStep("select");
       hasCheckedConnection.current = false;
+      hasTriggeredConnect.current = false;
     }
   }, [connected, connecting, publicKey, signMessage, wallet, step]);
 
@@ -126,6 +161,7 @@ export default function WalletAuthPage() {
     console.log('👆 Opening wallet selection modal');
     setError(null);
     hasCheckedConnection.current = false;
+    hasTriggeredConnect.current = false;
     
     // Open the wallet modal
     setVisible(true);
@@ -237,6 +273,7 @@ export default function WalletAuthPage() {
     setError(null);
     hasAttemptedAuth.current = false;
     hasCheckedConnection.current = false;
+    hasTriggeredConnect.current = false;
   };
 
   return (
@@ -254,7 +291,7 @@ export default function WalletAuthPage() {
           <CardTitle className="text-3xl font-bold">Connect Your Wallet</CardTitle>
           <CardDescription className="text-base">
             {step === "select" && "Choose your Solana wallet"}
-            {step === "connecting" && "Connecting to your wallet..."}
+            {step === "connecting" && `Connecting to ${wallet?.adapter?.name || "wallet"}...`}
             {step === "sign" && "Sign to authenticate"}
             {step === "authenticating" && "Verifying..."}
             {step === "success" && "Success!"}
@@ -286,7 +323,7 @@ export default function WalletAuthPage() {
                 <AlertTitle className="text-blue-900">Before You Start</AlertTitle>
                 <AlertDescription className="text-blue-800 text-sm">
                   <ul className="list-disc list-inside space-y-1 mt-2">
-                    <li><strong>Make sure your wallet is UNLOCKED</strong></li>
+                    <li><strong>Make sure your wallet is UNLOCKED 🔓</strong></li>
                     <li>Click button below to see wallet options</li>
                     <li>Click on your preferred wallet</li>
                     <li>Your wallet extension will popup</li>
@@ -318,6 +355,9 @@ export default function WalletAuthPage() {
                 <p className="text-lg font-semibold">Connecting to {wallet?.adapter?.name || "Wallet"}...</p>
                 <p className="text-sm text-gray-600 mt-2">
                   Please approve the connection in your wallet popup
+                </p>
+                <p className="text-xs text-gray-500 mt-4">
+                  (If popup doesn't appear, check if your wallet is unlocked)
                 </p>
               </div>
               <Button 
