@@ -118,28 +118,37 @@ export default function AgentChatPage() {
 
       const data = await response.json();
 
-      if (data.success) {
+      if (data.success && data.data && data.data.result) {
         const result = data.data.result;
         
         let responseContent = "";
-        let xpGained = 0;
+        let xpGained = result.experienceGained || 0;
         
-        if (result.success) {
+        if (result.success && result.data) {
           const taskData = result.data;
-          xpGained = result.experienceGained || 0;
           
           if (taskType === "search") {
             const products = taskData.products || [];
-            responseContent = `I found ${products.length} products for "${taskData.query}"!\n\nTop results:\n`;
+            const totalProducts = products.length;
+            
+            responseContent = `I found ${totalProducts} products for "${taskData.query}"!\n\nTop results:\n`;
+            
             products.slice(0, 3).forEach((p: any, i: number) => {
-              responseContent += `\n${i + 1}. ${p.title}\n   💰 $${p.price} at ${p.marketplace}\n   ⭐ ${p.rating || "N/A"}/5`;
+              responseContent += `\n${i + 1}. ${p.title}\n   💰 $${p.price.toFixed(2)} at ${p.marketplace}`;
+              if (p.rating) {
+                responseContent += `\n   ⭐ ${p.rating}/5`;
+              }
               if (p.reviews) {
                 responseContent += ` (${p.reviews} reviews)`;
               }
             });
+            
+            if (totalProducts > 3) {
+              responseContent += `\n\n...and ${totalProducts - 3} more products!`;
+            }
           } else if (taskType === "compare") {
             responseContent = `I compared prices for "${taskData.productName}"!\n\n`;
-            responseContent += `🎯 Best Deal: $${taskData.bestPrice} at ${taskData.bestMarketplace}\n`;
+            responseContent += `🎯 Best Deal: $${taskData.bestPrice.toFixed(2)} at ${taskData.bestMarketplace}\n`;
             responseContent += `💰 You save: $${taskData.savings.toFixed(2)}\n`;
             responseContent += `📊 Price range: $${taskData.priceRange.min.toFixed(2)} - $${taskData.priceRange.max.toFixed(2)}`;
           }
@@ -161,10 +170,10 @@ export default function AgentChatPage() {
             });
           }
         } else {
-          throw new Error(result.error || "Task failed");
+          throw new Error(result.error || "Task execution failed");
         }
       } else {
-        throw new Error(data.error || "Task failed");
+        throw new Error(data.error || "Failed to create task");
       }
     } catch (error: any) {
       const errorMessage: Message = {
