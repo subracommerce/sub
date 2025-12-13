@@ -14,11 +14,15 @@ export default function DashboardPage() {
 
   const handleAgentCreated = () => {
     setShowCreateAgent(false);
-    // Refresh agents list or show success message
   };
 
   const handleGoBack = () => {
     router.push("/");
+  };
+
+  const handleSignOut = () => {
+    // Redirect to register page (more options than login)
+    router.push("/auth/register");
   };
 
   return (
@@ -29,6 +33,11 @@ export default function DashboardPage() {
       {/* Floating Orbs */}
       <div className="absolute top-40 right-40 w-96 h-96 bg-gradient-to-br from-green-500/10 to-blue-500/10 rounded-full blur-3xl animate-float-1" />
       <div className="absolute bottom-40 left-40 w-80 h-80 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl animate-float-2" />
+      
+      {/* Scan Line */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute w-full h-[2px] bg-gradient-to-r from-transparent via-green-500/30 to-transparent animate-scan-line" />
+      </div>
       
       {/* Header */}
       <header className="border-b-2 border-gray-200/50 sticky top-0 bg-white/90 backdrop-blur-md z-10 relative">
@@ -50,12 +59,15 @@ export default function DashboardPage() {
               <ArrowLeft className="mr-2 h-4 w-4" />
               Home
             </Button>
-            <Link href="/auth/login">
-              <Button variant="outline" className="border-2 border-gray-900 hover:bg-gray-900 hover:text-white hover:scale-105 transition-all" size="sm">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
-              </Button>
-            </Link>
+            <Button 
+              onClick={handleSignOut}
+              variant="outline" 
+              className="border-2 border-gray-900 hover:bg-gray-900 hover:text-white hover:scale-105 transition-all" 
+              size="sm"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </header>
