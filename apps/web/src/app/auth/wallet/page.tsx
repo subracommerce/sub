@@ -8,13 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, CheckCircle, Loader2, AlertCircle, Wallet as WalletIcon, ArrowLeft, X } from "lucide-react";
+import { Shield, CheckCircle, Loader2, AlertCircle, Wallet as WalletIcon, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import bs58 from "bs58";
 import Link from "next/link";
 
 export default function WalletAuthPage() {
-  const { publicKey, signMessage, connected, disconnect, wallet, select } = useWallet();
+  const { publicKey, signMessage, connected, disconnect, wallet, select, connect } = useWallet();
   const { setVisible } = useWalletModal();
   const router = useRouter();
   const { setAuth } = useAuthStore();
@@ -23,8 +23,9 @@ export default function WalletAuthPage() {
   const [status, setStatus] = useState<"idle" | "connecting" | "authenticating" | "success">("idle");
   const [error, setError] = useState<string | null>(null);
   const hasAttemptedAuth = useRef(false);
+  const hasAttemptedConnect = useRef(false);
 
-  // Force clean state on mount - clear any remembered wallet
+  // Force clean state on mount
   useEffect(() => {
     const init = async () => {
       console.log('🔒 Initializing - clearing wallet selection');
@@ -42,6 +43,7 @@ export default function WalletAuthPage() {
       setStatus("idle");
       setError(null);
       hasAttemptedAuth.current = false;
+      hasAttemptedConnect.current = false;
       
       console.log('✅ Clean state - ready for wallet selection');
     };
@@ -49,11 +51,48 @@ export default function WalletAuthPage() {
     init();
   }, []);
 
-  // AUTOMATICALLY sign message when wallet connects
+  // When wallet is selected, manually trigger connect()
+  useEffect(() => {
+    const triggerConnect = async () => {
+      if (wallet && !connected && !hasAttemptedConnect.current && status === "idle") {
+        console.log('🚀 WALLET SELECTED:', wallet.adapter.name);
+        console.log('   Manually calling connect()...');
+        
+        hasAttemptedConnect.current = true;
+        setStatus("connecting");
+        setError(null);
+        
+        try {
+          console.log('   Attempting connection...');
+          await connect();
+          console.log('✅ Connect successful!');
+        } catch (err: any) {
+          console.error('❌ Connect failed:', err);
+          
+          hasAttemptedConnect.current = false;
+          setStatus("idle");
+          
+          if (err.message?.includes("User rejected") || err.message?.includes("User cancelled")) {
+            setError("You cancelled the connection. Please try again.");
+          } else {
+            setError(err.message || "Failed to connect. Please try again.");
+          }
+          
+          select(null);
+        }
+      }
+    };
+    
+    triggerConnect();
+  }, [wallet, connected, status]);
+
+  // When connected, request signature
   useEffect(() => {
     const authenticateAfterConnection = async () => {
       if (connected && publicKey && signMessage && !hasAttemptedAuth.current && status === "connecting") {
-        console.log('✅ Wallet connected! Requesting signature...');
+        console.log('✅ Wallet connected! Address:', publicKey.toBase58());
+        console.log('   Wallet:', wallet?.adapter?.name);
+        console.log('   Requesting signature...');
         
         hasAttemptedAuth.current = true;
         setStatus("authenticating");
@@ -76,7 +115,7 @@ export default function WalletAuthPage() {
           const message = `Sign in to SUBRA\n\nWallet: ${publicKey.toBase58()}\nNonce: ${nonce}\nTimestamp: ${new Date().toISOString()}\n\nThis proves you own this wallet.\nNo gas fees.`;
           const encodedMessage = new TextEncoder().encode(message);
 
-          console.log('📝 Requesting signature...');
+          console.log('📝 Requesting signature - popup should appear...');
           const signature = await signMessage(encodedMessage);
           const signatureBase58 = bs58.encode(signature);
           
@@ -119,6 +158,7 @@ export default function WalletAuthPage() {
           await disconnect();
           select(null);
           hasAttemptedAuth.current = false;
+          hasAttemptedConnect.current = false;
           setStatus("idle");
           
           if (error.message?.includes("User rejected") || error.message?.includes("User cancelled")) {
@@ -133,32 +173,30 @@ export default function WalletAuthPage() {
     authenticateAfterConnection();
   }, [connected, publicKey, signMessage, status, wallet, disconnect, select, setAuth, router, toast]);
 
-  // Detect when wallet connects
-  useEffect(() => {
-    if (connected && status === "idle") {
-      console.log('🔌 Wallet connected, moving to connecting state');
-      setStatus("connecting");
-    }
-  }, [connected, status]);
-
   // Reset when disconnected
   useEffect(() => {
     if (!connected && (status === "connecting" || status === "authenticating")) {
       console.log('❌ Wallet disconnected, resetting');
       hasAttemptedAuth.current = false;
+      hasAttemptedConnect.current = false;
       setStatus("idle");
     }
   }, [connected, status]);
 
   const handleSelectWallet = () => {
-    console.log('👆 Opening wallet selection modal');
+    console.log('👆 User clicked Select Wallet button');
+    console.log('   Opening wallet modal...');
     setError(null);
     hasAttemptedAuth.current = false;
+    hasAttemptedConnect.current = false;
+    
+    // Open the wallet selection modal
     setVisible(true);
+    console.log('📋 Modal should be visible now');
   };
 
   const handleCancel = async () => {
-    console.log('❌ User cancelled');
+    console.log('❌ User clicked cancel');
     
     try {
       await disconnect();
@@ -170,11 +208,25 @@ export default function WalletAuthPage() {
     setStatus("idle");
     setError(null);
     hasAttemptedAuth.current = false;
+    hasAttemptedConnect.current = false;
   };
 
   const handleGoBack = () => {
     router.back();
   };
+
+  // Debug: log all state changes
+  useEffect(() => {
+    console.log('📊 STATE:', {
+      status,
+      connected,
+      hasPublicKey: !!publicKey,
+      hasSignMessage: !!signMessage,
+      walletName: wallet?.adapter?.name,
+      hasAttemptedConnect: hasAttemptedConnect.current,
+      hasAttemptedAuth: hasAttemptedAuth.current,
+    });
+  }, [status, connected, publicKey, signMessage, wallet]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden p-4">
@@ -234,7 +286,7 @@ export default function WalletAuthPage() {
           {error && (
             <Alert variant="destructive" className="border-2">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Authentication Failed</AlertTitle>
+              <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -268,6 +320,14 @@ export default function WalletAuthPage() {
               <p className="text-xs text-gray-500 text-center">
                 Phantom • Solflare • Backpack • Ledger • Torus
               </p>
+
+              {/* Debug Info */}
+              <div className="text-xs text-gray-400 text-center space-y-1 mt-4 p-3 bg-gray-50 rounded">
+                <p>Debug Info:</p>
+                <p>Connected: {connected ? "✅" : "❌"}</p>
+                <p>Wallet: {wallet?.adapter?.name || "None"}</p>
+                <p>Status: {status}</p>
+              </div>
             </div>
           )}
 
@@ -279,13 +339,16 @@ export default function WalletAuthPage() {
                 <p className="text-sm text-gray-600 mt-2">
                   Waiting for wallet popup...
                 </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  If popup doesn't appear, check if wallet is unlocked
+                </p>
               </div>
               <Button 
                 onClick={handleCancel}
                 variant="outline"
                 className="mt-4 border-2"
               >
-                <X className="mr-2 h-4 w-4" />
+                <AlertCircle className="mr-2 h-4 w-4" />
                 Cancel
               </Button>
             </div>
@@ -308,7 +371,7 @@ export default function WalletAuthPage() {
                 variant="outline"
                 className="mt-4 border-2"
               >
-                <X className="mr-2 h-4 w-4" />
+                <AlertCircle className="mr-2 h-4 w-4" />
                 Cancel
               </Button>
             </div>
