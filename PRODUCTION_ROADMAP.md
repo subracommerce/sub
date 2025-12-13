@@ -49,9 +49,10 @@ SUBRA is an **autonomous AI commerce system** where:
 
 ### 🚧 In Progress
 
-**Phase 2: Marketplace Integration** (~60% Complete)
-- 🔄 Web scraper debugging (returns 0 products, needs selector fixes)
-- 🔄 Real marketplace API integration (recommended over scraping)
+**Phase 2: Marketplace Integration** (~75% Complete)
+- ✅ Real marketplace API integration (Amazon & eBay)
+- 🔄 Price tracking system
+- 🔄 Solana Pay integration
 
 ### ❌ Not Started
 
@@ -104,7 +105,7 @@ SUBRA is an **autonomous AI commerce system** where:
 
 ---
 
-## 🛒 Phase 2: Marketplace Integration (Week 3-4) 🔄 50% COMPLETE
+## 🛒 Phase 2: Marketplace Integration (Week 3-4) 🔄 75% COMPLETE
 
 ### 2.1 Product Search & Discovery
 **Goal:** Agents can search products across multiple marketplaces
@@ -118,9 +119,11 @@ SUBRA is an **autonomous AI commerce system** where:
 - [x] ✅ **eBay scraper** (real-time product data)
 - [x] ✅ **Walmart scraper** (bonus marketplace)
 - [x] ✅ **Agent task integration** (real data in chat)
-- [ ] ❌ Real API integrations (Amazon PA-API, eBay Finding API)
-- [ ] ❌ Product data normalization pipeline
-- [ ] ❌ Price comparison engine (ML-powered)
+- [x] ✅ **Amazon PA-API integration** - NEW!
+- [x] ✅ **eBay Finding API integration** - NEW!
+- [x] ✅ **Unified product search service** - NEW!
+- [x] ✅ **Product data normalization pipeline** - COMPLETE
+- [x] ✅ **Price comparison engine** - COMPLETE
 - [ ] ❌ Product database (Elasticsearch for search)
 - [ ] ❌ Real-time price tracking
 - [ ] ❌ Product categorization (AI-powered)
