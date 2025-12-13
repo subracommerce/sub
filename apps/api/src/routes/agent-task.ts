@@ -69,6 +69,17 @@ export const agentTaskRoutes: FastifyPluginAsync = async (fastify) => {
             input.productName as string,
             input.marketplaces as string[] | undefined
           );
+        } else if (type === "purchase") {
+          result = await agentExecutor.executePurchaseTask(
+            agentId,
+            task.id,
+            request.userId,
+            input.productId as string,
+            input.productName as string,
+            input.price as number,
+            input.merchant as string,
+            (input.currency as "SOL" | "USDC") || "USDC"
+          );
         } else {
           // Other task types not yet implemented
           await prisma.agentTask.update({

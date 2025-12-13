@@ -1,6 +1,9 @@
 import { prisma } from "../lib/prisma";
 import { redis } from "../lib/redis";
 import { productSearchService } from "./product-search";
+import { solanaPayService } from "./solana-pay";
+import { Keypair, PublicKey } from "@solana/web3.js";
+import bs58 from "bs58";
 
 /**
  * AgentExecutor
@@ -218,6 +221,168 @@ export class AgentExecutor {
       });
 
       await this.publishActivity(agentId, "compare_failed", {
+        productName,
+        error: error.message,
+      });
+
+      return {
+        success: false,
+        error: error.message,
+        experienceGained: 0,
+      };
+    }
+  }
+
+  /**
+   * Execute a purchase task
+   */
+  async executePurchaseTask(
+    agentId: string,
+    taskId: string,
+    userId: string,
+    productId: string,
+    productName: string,
+    price: number,
+    merchant: string,
+    currency: "SOL" | "USDC" = "USDC"
+  ): Promise<TaskResult> {
+    console.log(`💳 Agent ${agentId} purchasing "${productName}" for ${price} ${currency}`);
+
+    try {
+      // Update task status
+      await prisma.agentTask.update({
+        where: { id: taskId },
+        data: {
+          status: "in_progress",
+          startedAt: new Date(),
+        },
+      });
+
+      await this.publishActivity(agentId, "purchase_started", {
+        productName,
+        price,
+        currency,
+        merchant,
+      });
+
+      // Get agent wallet keypair
+      const agent = await prisma.agent.findUnique({
+        where: { id: agentId },
+        select: { encryptedKey: true, walletAddress: true },
+      });
+
+      if (!agent || !agent.encryptedKey || !agent.walletAddress) {
+        throw new Error("Agent wallet not configured");
+      }
+
+      // Decrypt agent's private key
+      // TODO: Implement proper decryption with user's password
+      // For now, assume the encryptedKey is the base58-encoded private key
+      const agentKeypair = Keypair.fromSecretKey(bs58.decode(agent.encryptedKey));
+
+      // Check balance
+      const balance = await solanaPayService.getBalance(
+        agentKeypair.publicKey,
+        currency
+      );
+
+      console.log(`💰 Agent balance: ${balance} ${currency}`);
+
+      if (balance < price) {
+        throw new Error(
+          `Insufficient balance. Required: ${price} ${currency}, Available: ${balance} ${currency}`
+        );
+      }
+
+      // Execute payment
+      const paymentResult = await solanaPayService.executePayment(agentKeypair, {
+        recipient: merchant,
+        amount: price,
+        currency,
+        label: productName,
+        message: `Purchase: ${productName}`,
+        memo: `Agent purchase - ${productId}`,
+      });
+
+      if (!paymentResult.success) {
+        throw new Error(paymentResult.error || "Payment failed");
+      }
+
+      // Create transaction record
+      const transaction = await prisma.transaction.create({
+        data: {
+          userId,
+          agentId,
+          type: "purchase",
+          status: "completed",
+          amount: price,
+          currency,
+          fromAddress: agent.walletAddress,
+          toAddress: merchant,
+          txHash: paymentResult.signature,
+          metadata: {
+            productId,
+            productName,
+            merchant,
+            taskId,
+          },
+        },
+      });
+
+      const purchaseResult = {
+        productName,
+        price,
+        currency,
+        merchant,
+        transactionId: transaction.id,
+        signature: paymentResult.signature,
+        timestamp: paymentResult.timestamp,
+      };
+
+      // Update task with results
+      await prisma.agentTask.update({
+        where: { id: taskId },
+        data: {
+          status: "completed",
+          output: purchaseResult,
+          completedAt: new Date(),
+        },
+      });
+
+      // Add experience to execute skill (20 base + 5 per $10 spent)
+      const experienceGained = 20 + Math.floor(price / 10) * 5;
+      await this.addSkillExperience(agentId, "execute", experienceGained);
+
+      await this.publishActivity(agentId, "purchase_completed", {
+        productName,
+        price,
+        currency,
+        signature: paymentResult.signature,
+        experienceGained,
+      });
+
+      console.log(
+        `✅ Agent ${agentId} purchased "${productName}" for ${price} ${currency} (TX: ${paymentResult.signature})`
+      );
+
+      return {
+        success: true,
+        data: purchaseResult,
+        experienceGained,
+      };
+    } catch (error: any) {
+      console.error(`❌ Purchase task failed:`, error);
+
+      await prisma.agentTask.update({
+        where: { id: taskId },
+        data: {
+          status: "failed",
+          error: error.message,
+          completedAt: new Date(),
+        },
+      });
+
+      await this.publishActivity(agentId, "purchase_failed", {
         productName,
         error: error.message,
       });
