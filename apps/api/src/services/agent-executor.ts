@@ -145,8 +145,27 @@ export class AgentExecutor {
         true // useRealData
       );
 
-      // Compare prices
-      const priceComparison = productSearchService.comparePrices(products);
+      // Compare prices - find best deal
+      let bestProduct = products.length > 0 ? products[0] : null;
+      let highestPrice = products.length > 0 ? products[0].price : 0;
+      let lowestPrice = products.length > 0 ? products[0].price : 0;
+
+      for (const product of products) {
+        if (product.price < lowestPrice) {
+          lowestPrice = product.price;
+          bestProduct = product;
+        }
+        if (product.price > highestPrice) {
+          highestPrice = product.price;
+        }
+      }
+
+      const savings = highestPrice - lowestPrice;
+      const priceComparison = {
+        bestProduct,
+        savings,
+        priceRange: { min: lowestPrice, max: highestPrice },
+      };
 
       const compareResult = {
         productName,
