@@ -414,13 +414,15 @@ export default function DashboardPage() {
                       <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <Bot className="h-6 w-6 text-white" />
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        agent.isActive 
-                          ? "bg-green-100 text-green-900 border border-green-900" 
-                          : "bg-gray-100 text-gray-600 border border-gray-300"
-                      }`}>
-                        {agent.isActive ? "Active" : "Inactive"}
-                      </span>
+                      <div className="flex gap-2">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          agent.isActive 
+                            ? "bg-green-100 text-green-900 border border-green-900" 
+                            : "bg-gray-100 text-gray-600 border border-gray-300"
+                        }`}>
+                          {agent.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </div>
                     </div>
                     <CardTitle className="text-xl text-gray-900">{agent.name}</CardTitle>
                     <CardDescription className="text-sm">

@@ -5,17 +5,15 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Bot, Send, User, Sparkles, TrendingUp } from "lucide-react";
+import { ArrowLeft, Bot, Send, User, Activity } from "lucide-react";
 
 interface Message {
   id: string;
   role: "user" | "agent";
   content: string;
   timestamp: Date;
-  xpGained?: number;
 }
 
 export default function AgentChatPage() {
@@ -143,10 +141,15 @@ export default function AgentChatPage() {
           role: "agent",
           content: responseContent,
           timestamp: new Date(),
-          xpGained,
         };
 
         setMessages((prev) => [...prev, agentMessage]);
+        
+        // Show XP toast notification instead
+        toast({
+          title: "Task Complete!",
+          description: `Agent gained +${xpGained} XP`,
+        });
       } else {
         throw new Error(data.error || "Task failed");
       }
@@ -187,9 +190,9 @@ export default function AgentChatPage() {
           <div className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-gray-900" />
             <span className="font-semibold text-gray-900">{agent.name}</span>
-            <Badge variant="outline" className="capitalize">
+            <span className="px-2 py-1 bg-gray-100 border border-gray-900 rounded-full text-xs font-semibold capitalize">
               {agent.type}
-            </Badge>
+            </span>
           </div>
         </div>
       </header>
@@ -233,17 +236,9 @@ export default function AgentChatPage() {
                       }`}
                     >
                       <p className="text-sm whitespace-pre-line">{message.content}</p>
-                      <div className="flex items-center justify-between mt-2">
-                        <p className="text-xs opacity-70">
-                          {new Date(message.timestamp).toLocaleTimeString()}
-                        </p>
-                        {message.xpGained && (
-                          <Badge variant="outline" className="ml-2 text-xs">
-                            <Sparkles className="h-3 w-3 mr-1" />
-                            +{message.xpGained} XP
-                          </Badge>
-                        )}
-                      </div>
+                      <p className="text-xs opacity-70 mt-2">
+                        {new Date(message.timestamp).toLocaleTimeString()}
+                      </p>
                     </div>
                     {message.role === "user" && (
                       <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
