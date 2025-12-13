@@ -1,19 +1,74 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateAgentDialog } from "@/components/create-agent-dialog";
 import { Shield, Bot, TrendingUp, CheckCircle, LogOut, ArrowLeft, Zap, Activity, Lock, ShoppingCart, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
+import { useToast } from "@/hooks/use-toast";
+
+interface Agent {
+  id: string;
+  name: string;
+  type: string;
+  description?: string;
+  walletAddress?: string;
+  isActive: boolean;
+  createdAt: string;
+  _count?: {
+    tasks: number;
+    transactions: number;
+  };
+}
 
 export default function DashboardPage() {
   const [showCreateAgent, setShowCreateAgent] = useState(false);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { token, user } = useAuthStore();
+  const { toast } = useToast();
+
+  // Fetch agents on mount
+  useEffect(() => {
+    fetchAgents();
+  }, []);
+
+  const fetchAgents = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:4000/agent", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch agents");
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setAgents(data.data);
+      }
+    } catch (error: any) {
+      console.error("Failed to fetch agents:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load agents",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAgentCreated = () => {
     setShowCreateAgent(false);
+    fetchAgents(); // Refresh agent list
   };
 
   return (
@@ -90,10 +145,12 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-3xl font-bold text-gray-900 mb-1">0</div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">
+                {loading ? "..." : agents.length}
+              </div>
               <p className="text-xs text-gray-600 flex items-center gap-1">
                 <Sparkles className="h-3 w-3 text-gray-900" />
-                Deploy your first agent
+                {agents.length === 0 ? "Deploy your first agent" : "Active and ready"}
               </p>
             </CardContent>
           </Card>
@@ -208,44 +265,112 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Empty State / Getting Started */}
-        <Card className="border border-gray-900 bg-white hover:shadow-2xl transition-all duration-300 relative overflow-hidden animate-scale-in corner-accents">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <CardContent className="py-16 text-center relative z-10">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center animate-pulse-glow">
-              <Bot className="h-10 w-10 text-white" />
-            </div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-3">
-              No Agents Deployed Yet
-            </h3>
-            <p className="text-gray-600 mb-2 text-lg">Create your first AI agent to unlock autonomous commerce</p>
-            <p className="text-sm text-gray-500 mb-8 max-w-md mx-auto">
-              Your agent will search products, compare prices, negotiate deals, and execute purchases—all while you sleep
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
-              <Button 
-                onClick={() => setShowCreateAgent(true)}
-                className="w-full sm:w-auto bg-gray-900 hover:bg-black text-white px-8 py-6 text-base font-semibold transition-all hover:scale-105 relative overflow-hidden group/btn"
-                size="lg"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
-                <Bot className="mr-2 h-5 w-5 relative z-10" />
-                <span className="relative z-10">Deploy Your First Agent</span>
-              </Button>
+        {/* Agents List or Empty State */}
+        {loading ? (
+          <Card className="border border-gray-900 bg-white">
+            <CardContent className="py-16 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4" />
+              <p className="text-gray-600">Loading agents...</p>
+            </CardContent>
+          </Card>
+        ) : agents.length === 0 ? (
+          <Card className="border border-gray-900 bg-white hover:shadow-2xl transition-all duration-300 relative overflow-hidden animate-scale-in corner-accents">
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardContent className="py-16 text-center relative z-10">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center animate-pulse-glow">
+                <Bot className="h-10 w-10 text-white" />
+              </div>
+              <h3 className="text-3xl font-bold text-gray-900 mb-3">
+                No Agents Deployed Yet
+              </h3>
+              <p className="text-gray-600 mb-2 text-lg">Create your first AI agent to unlock autonomous commerce</p>
+              <p className="text-sm text-gray-500 mb-8 max-w-md mx-auto">
+                Your agent will search products, compare prices, negotiate deals, and execute purchases—all while you sleep
+              </p>
               
-              <Link href="/">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
                 <Button 
-                  variant="outline"
-                  className="w-full sm:w-auto border-gray-900 text-gray-900 hover:bg-gray-100 px-8 py-6 text-base transition-all"
+                  onClick={() => setShowCreateAgent(true)}
+                  className="w-full sm:w-auto bg-gray-900 hover:bg-black text-white px-8 py-6 text-base font-semibold transition-all hover:scale-105 relative overflow-hidden group/btn"
                   size="lg"
                 >
-                  Learn More
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
+                  <Bot className="mr-2 h-5 w-5 relative z-10" />
+                  <span className="relative z-10">Deploy Your First Agent</span>
                 </Button>
-              </Link>
+                
+                <Link href="/">
+                  <Button 
+                    variant="outline"
+                    className="w-full sm:w-auto border-gray-900 text-gray-900 hover:bg-gray-100 px-8 py-6 text-base transition-all"
+                    size="lg"
+                  >
+                    Learn More
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Your Agents</h2>
+              <Button 
+                onClick={() => setShowCreateAgent(true)}
+                className="bg-gray-900 hover:bg-black text-white"
+              >
+                <Bot className="mr-2 h-4 w-4" />
+                Deploy New Agent
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+            
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {agents.map((agent) => (
+                <Card 
+                  key={agent.id} 
+                  className="group border border-gray-900 bg-white hover:shadow-2xl transition-all duration-300 relative overflow-hidden corner-accents cursor-pointer"
+                  onClick={() => router.push(`/agent/${agent.id}`)}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-900/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <CardHeader className="relative z-10">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Bot className="h-6 w-6 text-white" />
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        agent.isActive 
+                          ? "bg-green-100 text-green-900 border border-green-900" 
+                          : "bg-gray-100 text-gray-600 border border-gray-300"
+                      }`}>
+                        {agent.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                    <CardTitle className="text-xl text-gray-900">{agent.name}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {agent.type.charAt(0).toUpperCase() + agent.type.slice(1)} Agent
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="relative z-10">
+                    {agent.description && (
+                      <p className="text-sm text-gray-600 mb-4">{agent.description}</p>
+                    )}
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>
+                        {agent.walletAddress 
+                          ? `${agent.walletAddress.slice(0, 4)}...${agent.walletAddress.slice(-4)}`
+                          : "No wallet"}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Activity className="h-3 w-3" />
+                        {agent._count?.tasks || 0} tasks
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* What Makes SUBRA Different */}
         <div className="mt-12 grid md:grid-cols-3 gap-6">
