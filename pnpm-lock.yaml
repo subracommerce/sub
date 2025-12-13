@@ -90,6 +90,12 @@ importers:
       '@trpc/server':
         specifier: ^10.45.0
         version: 10.45.2
+      amazon-paapi:
+        specifier: ^1.0.7
+        version: 1.0.7
+      axios:
+        specifier: ^1.6.5
+        version: 1.13.2
       bip39:
         specifier: ^3.1.0
         version: 3.1.0
@@ -8554,6 +8560,16 @@ packages:
       require-from-string: 2.0.2
     dev: false
 
+  /amazon-paapi@1.0.7:
+    resolution: {integrity: sha512-Cnt3nPHa7iz5w5YU815CyQG4Cq+cyrrrM4Eb8ga/mEJCukzhTHWy9x9FJVLlTnDV5tXrrj+3rdhO0IqrmuQ2uw==}
+    dependencies:
+      crypto-js: 4.2.0
+      querystring: 0.2.1
+      superagent: 5.3.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /anser@1.4.10:
     resolution: {integrity: sha512-hCv9AqTQ8ycjpSd3upOJd7vFwW1JaoYQ7tpham03GJ1ca8/65rqn0RpaWpItOAd6ylW9wAw6luXYPJIyPFVOww==}
     dev: false
@@ -9647,6 +9663,10 @@ packages:
     engines: {node: '>= 6'}
     dev: true
 
+  /component-emitter@1.3.1:
+    resolution: {integrity: sha512-T0+barUSQRTUQASh8bx02dl+DhF54GtIDY13Y3m9oWTklKbb3Wv974meRpeZ3lp1JpLVECWWNHC4vaG2XHXouQ==}
+    dev: false
+
   /concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
 
@@ -9673,6 +9693,10 @@ packages:
   /cookie@0.7.2:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
+    dev: false
+
+  /cookiejar@2.1.4:
+    resolution: {integrity: sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==}
     dev: false
 
   /core-util-is@1.0.3:
@@ -11221,6 +11245,17 @@ packages:
     resolution: {integrity: sha512-qfqtYan3rxrnCk1VYaA4H+Ms9xdpPqvLZa6xmMgFvhO32x7/3J/ExcTd6qpxM0vH2GdMI+poehyBZvqfMTto8A==}
     dev: false
 
+  /form-data@3.0.4:
+    resolution: {integrity: sha512-f0cRzm6dkyVYV3nPoooP8XlccPQukegwhAnpoLcXy+X+A8KfpGOoXwDr9FLZd3wzgLaBGQBE3lY93Zm/i1JvIQ==}
+    engines: {node: '>= 6'}
+    dependencies:
+      asynckit: 0.4.0
+      combined-stream: 1.0.8
+      es-set-tostringtag: 2.1.0
+      hasown: 2.0.2
+      mime-types: 2.1.35
+    dev: false
+
   /form-data@4.0.5:
     resolution: {integrity: sha512-8RipRLol37bNs2bhoV67fiTEvdTrbMUYcFTiy3+wuuOnUog2QBHCZWXDRijWQfAkhBj2Uf5UnVaiWwA5vdd82w==}
     engines: {node: '>= 6'}
@@ -11238,6 +11273,11 @@ packages:
     dependencies:
       node-domexception: 1.0.0
       web-streams-polyfill: 4.0.0-beta.3
+    dev: false
+
+  /formidable@1.2.6:
+    resolution: {integrity: sha512-KcpbcpuLNOwrEjnbpMC0gS+X8ciDoZE1kkqzat4a8vrprf+s9pKNQ/QIwWfbfs4ltgmFl3MD177SNTkve3BwGQ==}
+    deprecated: 'Please upgrade to latest, formidable@v2 or formidable@v3! Check these notes: https://bit.ly/2ZEqIau'
     dev: false
 
   /forwarded@0.2.0:
@@ -12661,6 +12701,11 @@ packages:
     engines: {node: '>= 8'}
     dev: true
 
+  /methods@1.1.2:
+    resolution: {integrity: sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==}
+    engines: {node: '>= 0.6'}
+    dev: false
+
   /metro-babel-transformer@0.83.3:
     resolution: {integrity: sha512-1vxlvj2yY24ES1O5RsSIvg4a4WeL7PFXgKOHvXTXiW0deLvQr28ExXj6LjwCCDZ4YZLhq6HddLpZnX4dEdSq5g==}
     engines: {node: '>=20.19.4'}
@@ -12914,6 +12959,12 @@ packages:
   /mime@1.6.0:
     resolution: {integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==}
     engines: {node: '>=4'}
+    hasBin: true
+    dev: false
+
+  /mime@2.6.0:
+    resolution: {integrity: sha512-USPkMeET31rOMiarsBNIHZKLGgvKc/LrjofAnBlOttf5ajRvqiRA8QsenbcooctK6d6Ts6aqZXBA+XbkKthiQg==}
+    engines: {node: '>=4.0.0'}
     hasBin: true
     dev: false
 
@@ -13260,7 +13311,6 @@ packages:
   /object-inspect@1.13.4:
     resolution: {integrity: sha512-W67iLl4J2EXEGTbfeHCffrjDfitvLANg0UlX3wFUUSTx92KXRFegMHUVgSqE+wvhAbi4WqjGg9czysTV2Epbew==}
     engines: {node: '>= 0.4'}
-    dev: true
 
   /object-is@1.1.6:
     resolution: {integrity: sha512-F8cZ+KfGlSGi09lJT7/Nd6KJZ9ygtvYC0/UYYLI9nmQKLMnydpB9yvbv9K1uSkEu7FU9vYPmVwLg328tX+ot3Q==}
@@ -14266,6 +14316,13 @@ packages:
       yargs: 15.4.1
     dev: false
 
+  /qs@6.14.0:
+    resolution: {integrity: sha512-YWWTjgABSKcvs/nWBi9PycY/JiPJqOD4JA6o9Sej2AtvSGarXxKC3OQSk4pAarbdQlKAh5D4FCQkJNkW+GAn3w==}
+    engines: {node: '>=0.6'}
+    dependencies:
+      side-channel: 1.1.0
+    dev: false
+
   /query-string@7.1.3:
     resolution: {integrity: sha512-hh2WYhq4fi8+b+/2Kg9CEge4fDPvHS534aOOvOZeQ3+Vf2mCFsaFBYj0i+iXcAq6I9Vzp5fjMFBlONvayDC1qg==}
     engines: {node: '>=6'}
@@ -14274,6 +14331,12 @@ packages:
       filter-obj: 1.1.0
       split-on-first: 1.1.0
       strict-uri-encode: 2.0.0
+    dev: false
+
+  /querystring@0.2.1:
+    resolution: {integrity: sha512-wkvS7mL/JMugcup3/rMitHmd9ecIGd2lhFhK9N3UUQ450h66d1r3Y9nvXzQAW1Lq+wyx61k/1pfKS5KuKiyEbg==}
+    engines: {node: '>=0.4.x'}
+    deprecated: The querystring API is considered Legacy. new code should use the URLSearchParams API instead.
     dev: false
 
   /queue-microtask@1.2.3:
@@ -15004,7 +15067,6 @@ packages:
     dependencies:
       es-errors: 1.3.0
       object-inspect: 1.13.4
-    dev: true
 
   /side-channel-map@1.0.1:
     resolution: {integrity: sha512-VCjCNfgMsby3tTdo02nbjtM/ewra6jPHmpThenkTYh8pG9ucZ/1P8So4u4FGBek/BjpOVsDCMoLA/iuBKIFXRA==}
@@ -15014,7 +15076,6 @@ packages:
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
       object-inspect: 1.13.4
-    dev: true
 
   /side-channel-weakmap@1.0.2:
     resolution: {integrity: sha512-WPS/HvHQTYnHisLo9McqBHOJk2FkHO/tlpvldyrnem4aeQp4hai3gythswg6p01oSoTl58rcpiFAjF2br2Ak2A==}
@@ -15025,7 +15086,6 @@ packages:
       get-intrinsic: 1.3.0
       object-inspect: 1.13.4
       side-channel-map: 1.0.1
-    dev: true
 
   /side-channel@1.1.0:
     resolution: {integrity: sha512-ZX99e6tRweoUXqR+VBrslhda51Nh5MTQwou5tnUDgbtyM0dBgmhEDtWGP/xbKn6hqfPRHujUNwz5fy/wbbhnpw==}
@@ -15036,7 +15096,6 @@ packages:
       side-channel-list: 1.0.0
       side-channel-map: 1.0.1
       side-channel-weakmap: 1.0.2
-    dev: true
 
   /signal-exit@3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
@@ -15393,6 +15452,26 @@ packages:
       tinyglobby: 0.2.15
       ts-interface-checker: 0.1.13
     dev: true
+
+  /superagent@5.3.1:
+    resolution: {integrity: sha512-wjJ/MoTid2/RuGCOFtlacyGNxN9QLMgcpYLDQlWFIhhdJ93kNscFonGvrpAHSCVjRVj++DGCglocF7Aej1KHvQ==}
+    engines: {node: '>= 7.0.0'}
+    deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
+    dependencies:
+      component-emitter: 1.3.1
+      cookiejar: 2.1.4
+      debug: 4.4.3(supports-color@8.1.1)
+      fast-safe-stringify: 2.1.1
+      form-data: 3.0.4
+      formidable: 1.2.6
+      methods: 1.1.2
+      mime: 2.6.0
+      qs: 6.14.0
+      readable-stream: 3.6.2
+      semver: 7.7.3
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
 
   /superstruct@0.15.5:
     resolution: {integrity: sha512-4AOeU+P5UuE/4nOUkmcQdW5y7i9ndt1cQd/3iUe+LTz3RxESf/W/5lg4B74HbDMMv8PHnPnGCQFH45kBcrQYoQ==}

@@ -21,6 +21,8 @@
     "@subra/config": "workspace:*",
     "@subra/utils": "workspace:*",
     "@trpc/server": "^10.45.0",
+    "amazon-paapi": "^1.0.7",
+    "axios": "^1.6.5",
     "bip39": "^3.1.0",
     "bs58": "^6.0.0",
     "bullmq": "^5.1.5",

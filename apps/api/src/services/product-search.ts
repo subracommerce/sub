@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { scraperService } from "./scraper";
+import { amazonAPIService } from "./amazon-api";
+import { ebayAPIService } from "./ebay-api";
 import crypto from "crypto";
 
 // Product schema
@@ -33,11 +34,11 @@ export type SearchResult = z.infer<typeof searchResultSchema>;
 
 /**
  * ProductSearchService
- * Handles product search with real web scraping
+ * Handles product search with real marketplace APIs
  */
 export class ProductSearchService {
   /**
-   * Search products across marketplaces using real scraping
+   * Search products across marketplaces using real APIs
    */
   async searchProducts(
     query: string,
@@ -48,49 +49,89 @@ export class ProductSearchService {
 
     console.log(`🔍 Searching for "${query}" across ${marketplaces.join(", ")}`);
 
-    try {
-      // Use real web scraping
-      const scrapedProducts = await scraperService.scrapeAll(query, marketplaces);
-      
-      // If scraping returned no products, use mock data
-      if (!scrapedProducts || scrapedProducts.length === 0) {
-        console.warn(`⚠️ Scraping returned 0 products, using mock data fallback`);
-        return this.getMockSearchResult(query, marketplaces, maxResults, startTime);
+    const allProducts: Product[] = [];
+    const resultsPerMarketplace = Math.ceil(maxResults / marketplaces.length);
+
+    // Try each marketplace API
+    for (const marketplace of marketplaces) {
+      try {
+        if (marketplace === "amazon" && amazonAPIService.isAvailable()) {
+          const amazonProducts = await amazonAPIService.searchProducts(
+            query,
+            resultsPerMarketplace
+          );
+
+          // Transform Amazon products to common Product format
+          allProducts.push(
+            ...amazonProducts.map((p) => ({
+              id: p.asin,
+              name: p.title,
+              description: p.description,
+              price: p.price,
+              currency: p.currency,
+              marketplace: "amazon",
+              url: p.url,
+              imageUrl: p.imageUrl,
+              rating: p.rating,
+              reviews: p.reviews,
+              inStock: p.inStock,
+              seller: p.brand || "Amazon",
+            }))
+          );
+        } else if (marketplace === "ebay" && ebayAPIService.isAvailable()) {
+          const ebayProducts = await ebayAPIService.searchProducts(
+            query,
+            resultsPerMarketplace
+          );
+
+          // Transform eBay products to common Product format
+          allProducts.push(
+            ...ebayProducts.map((p) => ({
+              id: p.itemId,
+              name: p.title,
+              description: `${p.condition || "Good"} condition${
+                p.isAuction ? " - Auction" : ""
+              }`,
+              price: p.price,
+              currency: p.currency,
+              marketplace: "ebay",
+              url: p.url,
+              imageUrl: p.imageUrl,
+              rating: p.sellerRating ? p.sellerRating / 20 : undefined, // Convert 0-100 to 0-5
+              reviews: undefined,
+              inStock: true,
+              seller: p.seller,
+            }))
+          );
+        }
+      } catch (error: any) {
+        console.error(`❌ ${marketplace} API error:`, error.message);
+        // Continue with other marketplaces
       }
-      
-      // Transform scraped data to Product format
-      const products: Product[] = scrapedProducts.map((p) => ({
-        id: crypto.randomUUID(),
-        name: p.title,
-        description: p.description || `${p.title} from ${p.marketplace}`,
-        price: p.price,
-        currency: "USD",
-        marketplace: p.marketplace,
-        url: p.productUrl,
-        imageUrl: p.imageUrl || undefined,
-        rating: p.rating || undefined,
-        reviews: p.reviews || undefined,
-        inStock: true,
-        seller: p.marketplace === "amazon" ? "Amazon" : "eBay Seller",
-      })).slice(0, maxResults);
+    }
 
-      const searchTime = Date.now() - startTime;
-
-      console.log(`✅ Found ${products.length} real products in ${searchTime}ms`);
-
-      return {
-        query,
-        products,
-        totalResults: products.length,
-        searchTime,
-        marketplaces,
-      };
-    } catch (error: any) {
-      console.error(`❌ Scraping failed, using fallback mock data:`, error.message);
-      
-      // Fallback to mock data if scraping fails
+    // If no results from any API, use mock data
+    if (allProducts.length === 0) {
+      console.warn(
+        `⚠️ No API results found for "${query}", using mock data fallback`
+      );
       return this.getMockSearchResult(query, marketplaces, maxResults, startTime);
     }
+
+    const searchTime = Date.now() - startTime;
+    const products = allProducts.slice(0, maxResults);
+
+    console.log(
+      `✅ Found ${products.length} real products from ${marketplaces.join(", ")} in ${searchTime}ms`
+    );
+
+    return {
+      query,
+      products,
+      totalResults: products.length,
+      searchTime,
+      marketplaces,
+    };
   }
 
   /**
