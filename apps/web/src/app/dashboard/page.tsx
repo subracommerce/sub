@@ -1,10 +1,26 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateAgentDialog } from "@/components/create-agent-dialog";
-import { Shield, Bot, TrendingUp, CheckCircle, LogOut } from "lucide-react";
+import { Shield, Bot, TrendingUp, CheckCircle, LogOut, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
+  const [showCreateAgent, setShowCreateAgent] = useState(false);
+  const router = useRouter();
+
+  const handleAgentCreated = () => {
+    setShowCreateAgent(false);
+    // Refresh agents list or show success message
+  };
+
+  const handleGoBack = () => {
+    router.push("/");
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -17,7 +33,16 @@ export default function DashboardPage() {
             </div>
           </Link>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={handleGoBack}
+              variant="outline" 
+              className="border-2" 
+              size="sm"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Home
+            </Button>
             <Link href="/auth/login">
               <Button variant="outline" className="border-2 border-gray-900" size="sm">
                 <LogOut className="mr-2 h-4 w-4" />
@@ -82,12 +107,14 @@ export default function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <CreateAgentDialog>
-                <Button className="w-full bg-gray-900 hover:bg-black text-white border-2 border-gray-900 hover:scale-105 transition-all" size="lg">
-                  <Bot className="mr-2 h-5 w-5" />
-                  Create Agent
-                </Button>
-              </CreateAgentDialog>
+              <Button 
+                onClick={() => setShowCreateAgent(true)}
+                className="w-full bg-gray-900 hover:bg-black text-white border-2 border-gray-900 hover:scale-105 transition-all" 
+                size="lg"
+              >
+                <Bot className="mr-2 h-5 w-5" />
+                Create Agent
+              </Button>
             </CardContent>
           </Card>
 
@@ -131,15 +158,23 @@ export default function DashboardPage() {
             <Bot className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No Agents Yet</h3>
             <p className="text-gray-600 mb-6">Create your first AI agent to get started</p>
-            <CreateAgentDialog>
-              <Button className="bg-gray-900 hover:bg-black text-white border-2 border-gray-900 hover:scale-105 transition-all">
-                <Bot className="mr-2 h-5 w-5" />
-                Deploy Agent
-              </Button>
-            </CreateAgentDialog>
+            <Button 
+              onClick={() => setShowCreateAgent(true)}
+              className="bg-gray-900 hover:bg-black text-white border-2 border-gray-900 hover:scale-105 transition-all"
+            >
+              <Bot className="mr-2 h-5 w-5" />
+              Deploy Agent
+            </Button>
           </CardContent>
         </Card>
       </div>
+
+      {/* Create Agent Dialog */}
+      <CreateAgentDialog 
+        open={showCreateAgent} 
+        onOpenChange={setShowCreateAgent}
+        onSuccess={handleAgentCreated}
+      />
     </div>
   );
 }

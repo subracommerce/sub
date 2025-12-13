@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, CheckCircle, Loader2, AlertCircle, Wallet as WalletIcon } from "lucide-react";
+import { Shield, CheckCircle, Loader2, AlertCircle, Wallet as WalletIcon, ArrowLeft, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import bs58 from "bs58";
 import Link from "next/link";
@@ -29,15 +29,12 @@ export default function WalletAuthPage() {
     const init = async () => {
       console.log('🔒 Initializing - clearing wallet selection');
       
-      // Force disconnect any existing connection
       if (connected) {
         await disconnect();
       }
       
-      // Clear wallet selection
       select(null);
       
-      // Clear localStorage cache
       if (typeof window !== 'undefined') {
         localStorage.removeItem('walletName');
       }
@@ -57,16 +54,12 @@ export default function WalletAuthPage() {
     const authenticateAfterConnection = async () => {
       if (connected && publicKey && signMessage && !hasAttemptedAuth.current && status === "connecting") {
         console.log('✅ Wallet connected! Requesting signature...');
-        console.log('   Wallet:', wallet?.adapter?.name);
-        console.log('   Address:', publicKey.toBase58());
         
         hasAttemptedAuth.current = true;
         setStatus("authenticating");
         setError(null);
 
         try {
-          // Get nonce
-          console.log('📡 Getting nonce...');
           const nonceResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/nonce`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -80,7 +73,6 @@ export default function WalletAuthPage() {
           const { data: { nonce } } = await nonceResponse.json();
           console.log('✅ Nonce received');
 
-          // Request signature
           const message = `Sign in to SUBRA\n\nWallet: ${publicKey.toBase58()}\nNonce: ${nonce}\nTimestamp: ${new Date().toISOString()}\n\nThis proves you own this wallet.\nNo gas fees.`;
           const encodedMessage = new TextEncoder().encode(message);
 
@@ -90,8 +82,6 @@ export default function WalletAuthPage() {
           
           console.log('✅ Signature received!');
           
-          // Verify
-          console.log('🔍 Verifying...');
           const authResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/verify`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -126,7 +116,6 @@ export default function WalletAuthPage() {
         } catch (error: any) {
           console.error("❌ Authentication failed:", error);
           
-          // Disconnect and reset
           await disconnect();
           select(null);
           hasAttemptedAuth.current = false;
@@ -144,7 +133,7 @@ export default function WalletAuthPage() {
     authenticateAfterConnection();
   }, [connected, publicKey, signMessage, status, wallet, disconnect, select, setAuth, router, toast]);
 
-  // Detect when wallet connects (to show which wallet)
+  // Detect when wallet connects
   useEffect(() => {
     if (connected && status === "idle") {
       console.log('🔌 Wallet connected, moving to connecting state');
@@ -165,15 +154,43 @@ export default function WalletAuthPage() {
     console.log('👆 Opening wallet selection modal');
     setError(null);
     hasAttemptedAuth.current = false;
-    
-    // Open the wallet selection modal
     setVisible(true);
+  };
+
+  const handleCancel = async () => {
+    console.log('❌ User cancelled');
+    
+    try {
+      await disconnect();
+      select(null);
+    } catch (e) {
+      console.error('Disconnect error:', e);
+    }
+    
+    setStatus("idle");
+    setError(null);
+    hasAttemptedAuth.current = false;
+  };
+
+  const handleGoBack = () => {
+    router.back();
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white relative overflow-hidden p-4">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:3rem_3rem] animate-grid-slow" />
       <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-green-500/10 to-blue-500/10 rounded-full blur-3xl animate-float-1" />
+
+      {/* Back Button - Top Left */}
+      <Button
+        onClick={handleGoBack}
+        variant="outline"
+        className="absolute top-4 left-4 z-20 border-2 hover:bg-gray-100"
+        size="sm"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Button>
 
       <Card className="w-full max-w-md border-2 border-gray-200 shadow-2xl relative z-10 bg-white">
         <CardHeader className="text-center">
@@ -240,6 +257,14 @@ export default function WalletAuthPage() {
                   Waiting for wallet popup...
                 </p>
               </div>
+              <Button 
+                onClick={handleCancel}
+                variant="outline"
+                className="mt-4 border-2"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Cancel
+              </Button>
             </div>
           )}
 
@@ -255,6 +280,14 @@ export default function WalletAuthPage() {
                   Please sign the message to continue
                 </p>
               </div>
+              <Button 
+                onClick={handleCancel}
+                variant="outline"
+                className="mt-4 border-2"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Cancel
+              </Button>
             </div>
           )}
 
