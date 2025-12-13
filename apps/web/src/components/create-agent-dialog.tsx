@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
-import { WalletGate } from "./wallet-gate";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CreateAgentDialogProps {
   open: boolean;
@@ -28,11 +29,22 @@ export function CreateAgentDialog({ open, onOpenChange, onSuccess }: CreateAgent
   const [type, setType] = useState("explorer");
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if user has a wallet
+    if (!user?.hasWallet) {
+      toast({
+        title: "Wallet Required",
+        description: "Please create a wallet first to deploy agents",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
@@ -51,6 +63,10 @@ export function CreateAgentDialog({ open, onOpenChange, onSuccess }: CreateAgent
         setName("");
         setType("explorer");
         setDescription("");
+        toast({
+          title: "Agent Created!",
+          description: `${name} is ready to start working`,
+        });
         onSuccess();
       } else {
         toast({
@@ -72,73 +88,86 @@ export function CreateAgentDialog({ open, onOpenChange, onSuccess }: CreateAgent
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Create New AI Agent</DialogTitle>
+          <DialogTitle className="text-2xl">Create New AI Agent</DialogTitle>
           <DialogDescription>
             Choose an agent type and give it a name to get started
           </DialogDescription>
         </DialogHeader>
 
-        <WalletGate>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Agent Name</Label>
-              <Input
-                id="name"
-                placeholder="My Shopping Assistant"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
+        {!user?.hasWallet && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              You need to create a wallet first to deploy AI agents
+            </AlertDescription>
+          </Alert>
+        )}
 
-            <div className="space-y-2">
-              <Label htmlFor="type">Agent Type</Label>
-              <Select value={type} onValueChange={setType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select agent type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {agentTypes.map((agentType) => (
-                    <SelectItem key={agentType.value} value={agentType.value}>
-                      <div>
-                        <div className="font-medium">{agentType.label}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {agentType.description}
-                        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Agent Name</Label>
+            <Input
+              id="name"
+              placeholder="My Shopping Assistant"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              disabled={!user?.hasWallet}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="type">Agent Type</Label>
+            <Select value={type} onValueChange={setType} disabled={!user?.hasWallet}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select agent type" />
+              </SelectTrigger>
+              <SelectContent>
+                {agentTypes.map((agentType) => (
+                  <SelectItem key={agentType.value} value={agentType.value}>
+                    <div>
+                      <div className="font-medium">{agentType.label}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {agentType.description}
                       </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description (Optional)</Label>
-              <Input
-                id="description"
-                placeholder="Describe what this agent will do..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description (Optional)</Label>
+            <Input
+              id="description"
+              placeholder="Describe what this agent will do..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              disabled={!user?.hasWallet}
+            />
+          </div>
 
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading} className="flex-1">
-                {isLoading ? "Creating..." : "Create Agent"}
-              </Button>
-            </div>
-          </form>
-        </WalletGate>
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="flex-1 border-2"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isLoading || !user?.hasWallet} 
+              className="flex-1 bg-gray-900 hover:bg-black"
+            >
+              {isLoading ? "Creating..." : "Create Agent"}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
