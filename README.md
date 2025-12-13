@@ -190,7 +190,7 @@ subra/
 
 ### AI
 - **OpenAI GPT-5.1** (Primary model)
-- **LangChain** (Agent orchestration)
+- **Agent Orchestration** (Custom framework)
 - **Vector Store** (RAG for memory)
 
 ### ZK Privacy
