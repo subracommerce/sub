@@ -42,6 +42,17 @@ export default function AgentChatPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       
+      if (response.status === 401) {
+        // Token expired or invalid
+        toast({
+          title: "Session Expired",
+          description: "Please sign in again",
+          variant: "destructive",
+        });
+        router.push("/auth/login");
+        return;
+      }
+      
       if (!response.ok) throw new Error("Failed to load agent");
       
       const data = await response.json();
@@ -58,11 +69,14 @@ export default function AgentChatPage() {
         ]);
       }
     } catch (error: any) {
+      console.error("Failed to load agent:", error);
       toast({
         title: "Error",
-        description: "Failed to load agent",
+        description: "Failed to load agent. Please try again.",
         variant: "destructive",
       });
+      // Redirect to dashboard after error
+      setTimeout(() => router.push("/dashboard"), 2000);
     }
   };
 
