@@ -7,7 +7,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Wallet, CheckCircle, XCircle, ArrowLeft, X, Shield, Bot, Zap, ShoppingCart, ArrowLeftRight, Package, Lock } from "lucide-react";
+import { Loader2, Wallet, CheckCircle, XCircle, ArrowLeft, X, Shield, Bot, Zap, ShoppingCart, ArrowLeftRight, Package } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
 import bs58 from "bs58";
@@ -16,7 +16,7 @@ type WalletAuthStep = "select" | "authenticating" | "success" | "error";
 
 export default function WalletAuthPage() {
   const router = useRouter();
-  const { publicKey, signMessage, connected, disconnect, wallet, select, connecting } = useWallet();
+  const { publicKey, signMessage, connected, disconnect, wallet, select } = useWallet();
   const { setAuth } = useAuthStore();
   const { toast } = useToast();
 
@@ -43,7 +43,7 @@ export default function WalletAuthPage() {
     hasAttemptedConnectRef.current = false;
   }, [disconnect, select, connected]);
 
-  // Main authentication flow
+  // Main authentication flow - SIMPLIFIED
   const connectAndAuthenticate = useCallback(async () => {
     if (isAuthenticatingRef.current || !wallet?.adapter) return;
 
@@ -56,40 +56,26 @@ export default function WalletAuthPage() {
       if (!connected) {
         console.log('🔌 Connecting wallet...');
         await wallet.adapter.connect();
-        await new Promise(resolve => setTimeout(resolve, 800)); // Wait for wallet to be ready
+        // Give wallet time to initialize
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      // Step 2: Verify wallet is unlocked and ready
-      console.log('🔍 Checking wallet state...');
-      console.log('   - Connected:', connected);
-      console.log('   - PublicKey:', !!publicKey);
-      console.log('   - SignMessage:', !!signMessage);
-
-      if (!publicKey) {
-        throw new Error("Wallet connected but no public key available. Please make sure your wallet is unlocked and try again.");
+      // Step 2: Wait for publicKey and signMessage to be available
+      let retries = 0;
+      while ((!publicKey || !signMessage) && retries < 5) {
+        console.log(`⏳ Waiting for wallet to be ready... (attempt ${retries + 1})`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        retries++;
       }
 
-      if (!signMessage) {
-        throw new Error("Wallet doesn't support message signing. Please use a different wallet or make sure your wallet is unlocked.");
+      if (!publicKey || !signMessage) {
+        throw new Error("Unable to access wallet. Please make sure your wallet is unlocked and try again.");
       }
 
-      // Step 3: Test signMessage availability (some wallets report it exists but it doesn't work when locked)
-      console.log('🧪 Testing signMessage...');
-      try {
-        // Try to access signMessage - if wallet is locked, this will fail
-        const testMessage = new TextEncoder().encode("test");
-        // We don't actually sign, just check if the function is callable
-        if (typeof signMessage !== 'function') {
-          throw new Error("SignMessage is not a function");
-        }
-      } catch (e) {
-        console.error('SignMessage test failed:', e);
-        throw new Error("Wallet is locked or not ready. Please unlock your wallet and try again.");
-      }
+      console.log('✅ Wallet ready!');
+      console.log('📡 Requesting nonce...');
 
-      console.log('✅ Wallet ready, requesting nonce...');
-
-      // Step 4: Request Nonce
+      // Step 3: Request Nonce
       const nonceResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/nonce`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -107,15 +93,15 @@ export default function WalletAuthPage() {
         `Sign this message to authenticate with SUBRA\n\nWallet: ${publicKey.toBase58()}\nNonce: ${nonceData.data.nonce}\nTimestamp: ${new Date().toISOString()}\n\nThis signature will not cost any gas fees.`
       );
 
-      // Step 5: Request Signature (this will trigger the popup)
-      console.log('📝 Requesting signature - POPUP SHOULD APPEAR NOW!');
+      // Step 4: Request Signature - this will trigger the popup
+      console.log('📝 Requesting signature...');
       const signature = await signMessage(message);
       const signatureBase58 = bs58.encode(signature);
 
       console.log('✅ Signature received');
 
-      // Step 6: Verify Signature
-      console.log('🔍 Verifying signature with backend...');
+      // Step 5: Verify Signature
+      console.log('🔍 Verifying signature...');
       const verifyResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/wallet/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -136,7 +122,10 @@ export default function WalletAuthPage() {
 
       setAuth(verifyData.data.user, verifyData.data.token);
       setStep("success");
-      toast({ title: "Authentication Successful!", description: "Redirecting to dashboard..." });
+      toast({ 
+        title: "Authentication Successful!", 
+        description: "Redirecting to dashboard..." 
+      });
       
       setTimeout(() => {
         router.push("/dashboard");
@@ -147,12 +136,8 @@ export default function WalletAuthPage() {
       // Provide user-friendly error messages
       let userError = err.message || "Authentication failed";
       
-      if (userError.includes("User rejected")) {
+      if (userError.includes("User rejected") || userError.includes("rejected")) {
         userError = "You rejected the signature request. Please try again and approve the signature.";
-      } else if (userError.includes("locked") || userError.includes("not ready")) {
-        userError = "Your wallet appears to be locked. Please unlock your wallet extension and try again.";
-      } else if (userError.includes("signMessage")) {
-        userError = "Unable to request signature. Please make sure your wallet is unlocked.";
       }
       
       setError(userError);
@@ -235,15 +220,6 @@ export default function WalletAuthPage() {
 
                 {step === "select" && (
                   <div className="flex flex-col items-center space-y-6 animate-fade-in-up">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-gray-700">
-                      <div className="flex items-start gap-3">
-                        <Lock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <p className="font-semibold text-blue-900 mb-1">Before connecting:</p>
-                          <p>Please make sure your wallet extension is <strong>unlocked</strong> and ready to sign messages.</p>
-                        </div>
-                      </div>
-                    </div>
                     <p className="text-gray-600 text-center">
                       Select your Solana wallet to continue
                     </p>
@@ -262,13 +238,8 @@ export default function WalletAuthPage() {
                     <Loader2 className="h-12 w-12 animate-spin text-gray-900" />
                     <p className="text-xl font-bold text-gray-900">Authenticating...</p>
                     <p className="text-gray-600 text-center text-sm">
-                      Please approve the signature request in your wallet
+                      Please approve the signature request in your wallet popup
                     </p>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600">
-                      <p className="text-center">
-                        <strong>Note:</strong> If your wallet doesn't pop up, it might be locked. Please unlock it and try again.
-                      </p>
-                    </div>
                     <Button
                       onClick={() => {
                         disconnect();
@@ -298,14 +269,6 @@ export default function WalletAuthPage() {
                     <XCircle className="h-16 w-16 text-red-600" />
                     <p className="text-3xl font-bold text-gray-900">Failed</p>
                     <p className="text-gray-600 text-center">{error}</p>
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-gray-700 w-full">
-                      <p className="font-semibold text-yellow-900 mb-2">💡 Troubleshooting:</p>
-                      <ul className="list-disc list-inside space-y-1 text-yellow-900">
-                        <li>Make sure your wallet extension is unlocked</li>
-                        <li>Check if your wallet supports Solana</li>
-                        <li>Try refreshing the page and connecting again</li>
-                      </ul>
-                    </div>
                     <Button
                       onClick={() => {
                         setStep("select");
