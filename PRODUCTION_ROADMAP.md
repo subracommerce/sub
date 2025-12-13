@@ -1,742 +1,791 @@
-# 🟣 SUBRA Production Roadmap - Solana Native
+# 🚀 SUBRA Production Roadmap - Autonomous AI Commerce Platform
 
-**Built on Solana. Powered by AI. The Future of Autonomous Commerce.**
+**Vision:** AI agents that autonomously search, compare, negotiate, and execute on-chain transactions with cryptographic proof and zero-knowledge verification.
 
----
-
-## 🌟 Why Solana?
-
-SUBRA is **100% Solana-native** because:
-
-- ⚡ **65,000 TPS**: AI agents need speed, not waiting for blocks
-- 💰 **$0.00025/tx**: Agents can make hundreds of transactions affordably
-- 🔐 **Battle-tested**: $40B+ TVL proves security
-- 📱 **Mobile-first**: Saga phone + mobile wallet adapter
-- 🎯 **Perfect for AI**: Fast, cheap, scalable for autonomous commerce
-
-**Later:** We can add Ethereum, Polygon, and other chains. **Now:** We dominate Solana.
+**Built on Solana. Powered by AI. Secured by Zero-Knowledge Proofs.**
 
 ---
 
-## 📍 Where You Are Now (Day 1)
+## 🎯 Core Mission (From Original Vision)
 
-✅ **Complete Solana-Native Platform**
-- 4 Anchor programs (Rust smart contracts)
-- Solana wallet integration (Phantom, Solflare, Torus)
-- SPL token support (USDC, SOL)
-- 4 AI agent types
-- Complete API (20+ endpoints)
-- Beautiful Next.js UI
-- Comprehensive documentation
+SUBRA is an **autonomous AI commerce system** where:
 
-**Current State:** Local development, ready for Solana devnet deployment
+1. **AI Agents** autonomously search products across marketplaces
+2. **AI Agents** compare prices and negotiate deals
+3. **AI Agents** execute purchases with cryptographic proof
+4. **AI Agents** track orders and verify delivery
+5. **AI Agents** interact with each other (agent-to-agent commerce)
+6. **Everything** is verified on-chain with zero-knowledge proofs
+
+**Not just blockchain transactions. Not just DeFi. This is AI-powered autonomous commerce.**
 
 ---
 
-## 🎯 Phase 1: Solana Integration (Week 1-2)
+## 📍 Current Status (Day 1)
 
-### Priority 1: Deploy Solana Programs
+✅ **What's Working:**
+- Embedded wallet creation (password-protected)
+- External wallet connection (Phantom, Solflare)
+- Email/password registration
+- Dashboard with agent management
+- Agent creation (4 types: Explorer, Negotiator, Executor, Tracker)
+- Beautiful futuristic UI with animations
+- Complete API infrastructure
+- PostgreSQL + Prisma ORM
+- Redis for caching
+- JWT authentication
 
-**1.1 Install Solana Toolchain**
+🚧 **Known Issues:**
+- Phantom wallet connects without popup when locked (fixing)
+- Agent execution logic not yet implemented
+- Marketplace integration pending
+- ZK proof generation pending
 
-```bash
-# Install Rust
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+---
 
-# Install Solana CLI
-sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+## 🗓️ Phase 1: Foundation & Security (Week 1-2) ✅ CURRENT
 
-# Install Anchor
-cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
-avm install latest
-avm use latest
+### ✅ 1.1 Authentication & Wallet System
+- [x] Embedded wallet creation (BIP39, Ed25519)
+- [x] External wallet connection (nonce-based)
+- [x] Email/password registration
+- [x] JWT authentication
+- [x] Secure signature verification
+- [ ] **FIX: Phantom wallet false connection**
+- [ ] Wallet recovery flow
+- [ ] Multi-wallet support
+- [ ] Hardware wallet integration (Ledger)
 
-# Create wallet
-solana-keygen new --outfile ~/.config/solana/id.json
+### ✅ 1.2 Core Infrastructure
+- [x] Monorepo setup (Turborepo)
+- [x] Next.js 15 frontend
+- [x] Fastify backend
+- [x] PostgreSQL database
+- [x] Redis caching
+- [x] Prisma ORM
+- [x] TypeScript throughout
 
-# Get devnet SOL
-solana config set --url devnet
-solana airdrop 2
+### 🔄 1.3 Agent Management
+- [x] Agent creation UI
+- [x] Agent types (Explorer, Negotiator, Executor, Tracker)
+- [x] Agent storage in database
+- [ ] Agent activation/deactivation
+- [ ] Agent configuration UI
+- [ ] Agent skill management
+- [ ] Agent wallet creation (per-agent wallets)
+
+**Timeline:** Completed  
+**Blockers:** None
+
+---
+
+## 🛒 Phase 2: Marketplace Integration (Week 3-4)
+
+### 2.1 Product Search & Discovery
+**Goal:** Agents can search products across multiple marketplaces
+
+**Features:**
+- [ ] API integrations (Amazon, eBay, Shopify, WooCommerce)
+- [ ] Web scraping service (Puppeteer/Playwright)
+- [ ] Product data normalization
+- [ ] Price comparison engine
+- [ ] Product database (Elasticsearch for search)
+- [ ] Real-time price tracking
+- [ ] Product categorization (AI-powered)
+
+**Tech Stack:**
+- Puppeteer/Playwright for scraping
+- Elasticsearch for product search
+- OpenAI for categorization
+- BullMQ for job queues
+
+### 2.2 Price Negotiation Engine
+**Goal:** Agents negotiate best prices
+
+**Features:**
+- [ ] Historical price data
+- [ ] Price prediction ML model
+- [ ] Automated offer/counteroffer system
+- [ ] Multi-marketplace bidding
+- [ ] Deal evaluation algorithm
+- [ ] Savings calculator
+
+### 2.3 Purchase Execution
+**Goal:** Agents autonomously complete purchases
+
+**Features:**
+- [ ] Checkout automation
+- [ ] Payment processing (crypto → fiat bridge)
+- [ ] Order confirmation
+- [ ] Transaction receipts
+- [ ] Refund handling
+
+**Integrations:**
+- [ ] Solana Pay for crypto payments
+- [ ] Stripe for fiat payments
+- [ ] MoonPay for crypto on/off ramp
+- [ ] Circle USDC integration
+
+**Timeline:** 2 weeks  
+**Blockers:** Marketplace API access, compliance
+
+---
+
+## 🤖 Phase 3: AI Agent Intelligence (Week 5-6)
+
+### 3.1 Agent Skills System
+**Goal:** Agents learn and improve over time
+
+**Features:**
+- [ ] Skill tree system
+- [ ] Machine learning model per agent
+- [ ] Behavioral patterns recognition
+- [ ] User preference learning
+- [ ] Context awareness
+- [ ] Decision-making AI (GPT-5.1 integration)
+
+### 3.2 Natural Language Interface
+**Goal:** Chat with your agents
+
+**Features:**
+- [ ] Real-time chat with agents
+- [ ] Voice commands (Whisper API)
+- [ ] Multi-language support
+- [ ] Intent recognition
+- [ ] Task delegation via chat
+- [ ] Agent status updates in natural language
+
+### 3.3 Advanced Agent Behaviors
+**Goal:** Agents become truly autonomous
+
+**Features:**
+- [ ] Budget management
+- [ ] Risk assessment
+- [ ] Priority optimization
+- [ ] Multi-step workflows
+- [ ] Conditional logic
+- [ ] Time-based triggers
+- [ ] Event-based triggers
+
+**Example Workflows:**
+```
+"Buy iPhone 15 Pro Max when price drops below $1000"
+"Find best deal on running shoes, budget $200, prefer Nike"
+"Track my Amazon order and notify me when shipped"
+"Compare prices for MacBook Pro M3 across 10 stores"
 ```
 
-**1.2 Deploy to Devnet**
+**Timeline:** 2 weeks  
+**Blockers:** OpenAI API access, training data
 
+---
+
+## 🛍️ Phase 4: **Dropshipping & Agent Commerce** (Week 7-8) 🆕
+
+### 4.1 Dropshipping Capabilities
+**Goal:** Agents can dropship products autonomously
+
+**Features:**
+- [ ] **Supplier Integration**
+  - AliExpress API integration
+  - Alibaba supplier connections
+  - CJ Dropshipping integration
+  - Spocket integration
+  - Wholesale supplier database
+
+- [ ] **Product Sourcing**
+  - Automated product discovery
+  - Profit margin calculator
+  - Supplier reliability scoring
+  - Shipping time estimator
+  - Inventory availability checker
+
+- [ ] **Order Fulfillment**
+  - Automated order placement to suppliers
+  - Order tracking across suppliers
+  - Customer communication automation
+  - Return/refund handling
+  - Quality control alerts
+
+- [ ] **Store Management**
+  - Multi-store support (Shopify, WooCommerce, custom)
+  - Product listing automation
+  - Price optimization (dynamic pricing)
+  - Inventory synchronization
+  - Analytics dashboard
+
+- [ ] **Agent Strategies**
+  - Find trending products
+  - Calculate optimal pricing
+  - Monitor competitor prices
+  - Adjust margins automatically
+  - Handle customer service
+
+**Example Use Cases:**
+```
+"Agent finds trending phone case on TikTok"
+→ Agent sources from AliExpress at $2
+→ Agent lists on Shopify at $19.99
+→ Customer orders
+→ Agent places order to supplier
+→ Agent tracks shipment
+→ Agent handles customer service
+→ Profit: $15/unit
+```
+
+### 4.2 **Agent-to-Agent Payments (x402 Protocol)** 🆕
+**Goal:** Agents can pay each other for services
+
+**Features:**
+- [ ] **x402 Protocol Integration**
+  - HTTP status code 402 (Payment Required)
+  - Machine-to-machine payments
+  - Micropayment support
+  - Pay-per-use API access
+  - Automated billing
+
+- [ ] **Agent Marketplace**
+  - Agents can list services
+  - Agents can hire other agents
+  - Service discovery
+  - Reputation system
+  - Dispute resolution
+
+- [ ] **Payment Rails**
+  - Solana SPL tokens (USDC, SOL)
+  - Lightning Network integration
+  - Streaming payments
+  - Escrow system
+  - Automatic settlement
+
+- [ ] **Use Cases**
+  - Agent A hires Agent B for data scraping
+  - Agent C pays Agent D for price analysis
+  - Agent E subscribes to Agent F's API
+  - Agent G buys product photos from Agent H
+
+**Example Flow:**
+```
+Explorer Agent needs price data
+→ Sends x402 request to Price Oracle Agent
+→ Price Oracle responds: "402 Payment Required: 0.01 USDC"
+→ Explorer Agent sends payment
+→ Price Oracle provides data
+→ Transaction recorded on Solana
+→ Both agents continue autonomously
+```
+
+### 4.3 Agent Economy
+**Goal:** Create a thriving agent-to-agent economy
+
+**Features:**
+- [ ] Agent service marketplace
+- [ ] Agent reputation scores
+- [ ] Agent earnings dashboard
+- [ ] Agent spending analytics
+- [ ] Agent collaboration protocols
+- [ ] Agent referral system
+
+**Timeline:** 2 weeks  
+**Blockers:** x402 spec implementation, supplier API access
+
+---
+
+## 🔐 Phase 5: Zero-Knowledge Proofs (Week 9-10)
+
+### 5.1 ZK Circuit Development
+**Goal:** Generate cryptographic proofs for all transactions
+
+**Features:**
+- [ ] zkSpendProof (prove spending without revealing amount)
+- [ ] zkReceiptProof (prove purchase without revealing details)
+- [ ] zkIdentityProof (prove ownership without revealing identity)
+- [ ] Circuit compilation (Noir)
+- [ ] Proof generation service
+- [ ] Proof verification on-chain
+
+**Circuits to Build:**
+```rust
+// zkSpendProof.noir
+fn verify_spend(
+    public_commitment: Field,
+    private_amount: Field,
+    private_recipient: Field
+) -> bool
+
+// zkReceiptProof.noir
+fn verify_receipt(
+    public_tx_hash: Field,
+    private_product: Field,
+    private_price: Field
+) -> bool
+```
+
+### 5.2 On-Chain Verification
+**Goal:** Store proofs on Solana
+
+**Features:**
+- [ ] Solana program for ZK verification
+- [ ] Proof storage optimization
+- [ ] Batch verification
+- [ ] Proof explorer UI
+- [ ] Verification API
+
+### 5.3 Privacy Features
+**Goal:** Private commerce
+
+**Features:**
+- [ ] Anonymous purchases
+- [ ] Hidden transaction amounts
+- [ ] Private agent wallets
+- [ ] Stealth addresses
+- [ ] Private product wishlists
+
+**Timeline:** 2 weeks  
+**Blockers:** Noir expertise, Solana ZK support
+
+---
+
+## ⚡ Phase 6: Solana Integration (Week 11-12)
+
+### 6.1 Smart Contract Deployment
+**Goal:** Deploy Anchor programs to Solana
+
+**Programs:**
+- [ ] **AgentWallet**: Per-agent wallet management
+- [ ] **Marketplace**: On-chain product listings
+- [ ] **Escrow**: Secure payment holding
+- [ ] **Reputation**: Agent reputation system
+
+**Deployment:**
 ```bash
-cd apps/solana-programs
-
-# Build all programs
-anchor build
-
-# Deploy
+# Devnet first
+solana config set --url devnet
 anchor deploy
 
-# Save program IDs (you'll see output like):
-# Program Id: Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS
-```
-
-**1.3 Update Frontend**
-
-```bash
-# apps/web/.env.local
-NEXT_PUBLIC_SOLANA_NETWORK=devnet
-NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
-NEXT_PUBLIC_AGENT_WALLET_PROGRAM_ID=YOUR_DEPLOYED_ID
-NEXT_PUBLIC_MARKETPLACE_PROGRAM_ID=YOUR_DEPLOYED_ID
-```
-
-**Cost:** FREE (devnet), ~10-15 SOL for mainnet (~$2,000)
-
----
-
-### Priority 2: SPL Token Integration
-
-**2.1 Add USDC Support**
-
-```typescript
-// packages/sdk/src/solana/usdc.ts
-import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
-
-export class USDCIntegration {
-  // USDC mint address on Solana
-  USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-  
-  async transferUSDC(amount: number, recipient: PublicKey) {
-    // Transfer USDC SPL tokens
-  }
-  
-  async getBalance(wallet: PublicKey) {
-    // Get USDC balance
-  }
-}
-```
-
-**2.2 Add SOL Native Payments**
-
-```typescript
-// packages/sdk/src/solana/payments.ts
-import { SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
-
-export class SolanaPayments {
-  async transferSOL(amount: number, recipient: PublicKey) {
-    const lamports = amount * LAMPORTS_PER_SOL;
-    // Transfer native SOL
-  }
-}
-```
-
-**Supported Tokens:**
-- ✅ SOL (native)
-- ✅ USDC (EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v)
-- ✅ USDT (Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB)
-- ✅ Custom SPL tokens (add later)
-
----
-
-### Priority 3: Real Product Search APIs
-
-**3.1 Integrate Search APIs**
-
-```bash
-# Sign up for APIs
-- SerpAPI: https://serpapi.com (free tier: 100/month)
-- ScraperAPI: https://scraperapi.com (free tier: 1000/month)
-```
-
-```typescript
-// apps/agents/src/skills/search.ts
-import { SerpApi } from 'serpapi';
-
-export async function searchProducts(query: string) {
-  const results = await serpApi.search({
-    engine: 'google_shopping',
-    q: query,
-    location: 'United States',
-  });
-  
-  return results.shopping_results.map(item => ({
-    title: item.title,
-    price: item.price,
-    link: item.link,
-    source: item.source,
-  }));
-}
-```
-
-**Cost:** ~$50-100/month for APIs
-
----
-
-### Priority 4: Solana Wallet Experience
-
-**4.1 Improve Wallet Connection**
-
-```typescript
-// apps/web/src/components/wallet-button.tsx
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-
-export function ConnectWallet() {
-  return (
-    <WalletMultiButton className="!bg-gradient-to-r from-purple-600 to-blue-600">
-      Connect Solana Wallet
-    </WalletMultiButton>
-  );
-}
-```
-
-**4.2 Add Wallet Features**
-- Show SOL balance
-- Show USDC balance
-- Show recent transactions
-- Transaction history with Solana Explorer links
-
----
-
-## 🚀 Phase 2: Production Deploy (Week 3-4)
-
-### Deploy Infrastructure
-
-**Backend API:**
-```bash
-# Deploy to Railway (Solana-optimized)
-railway login
-railway init
-railway up
-
-# Environment variables
-DATABASE_URL=postgresql://...
-REDIS_URL=redis://...
-SOLANA_RPC_URL=https://solana-mainnet.g.alchemy.com/v2/YOUR_KEY
-```
-
-**Recommended RPC Providers:**
-- Helius: https://helius.dev (best for Solana)
-- QuickNode: https://quicknode.com
-- Alchemy: https://alchemy.com/solana
-
-**Cost:** 
-- Railway API: $5-20/month
-- RPC provider: $50-200/month (worth it for reliability)
-
----
-
-**Frontend:**
-```bash
-# Deploy to Vercel
-vercel login
-vercel --prod
-
-# Environment variables
-NEXT_PUBLIC_SOLANA_NETWORK=mainnet-beta
-NEXT_PUBLIC_SOLANA_RPC_URL=https://...
-NEXT_PUBLIC_API_URL=https://api.subra.app
-```
-
-**Cost:** FREE (Vercel hobby tier is perfect)
-
----
-
-**Database:**
-```bash
-# Neon.tech (Serverless Postgres)
-# Or Supabase (includes auth)
-
-# Both have generous free tiers
-# ~$25/month for production scale
-```
-
----
-
-### Deploy Solana Programs to Mainnet
-
-**⚠️ CRITICAL: Security Audit First!**
-
-```bash
-# Get security audit (MANDATORY for mainnet)
-# Recommended firms:
-- OtterSec: https://osec.io
-- Neodyme: https://neodyme.io
-- Sec3: https://sec3.dev
-
-# Cost: $10,000-30,000
-# Worth every penny to avoid hacks
-```
-
-**After Audit:**
-```bash
-# Switch to mainnet
+# Then mainnet
 solana config set --url mainnet-beta
-
-# Deploy (YOU NEED ~15 SOL = ~$3,000)
-cd apps/solana-programs
-anchor build
 anchor deploy
-
-# SAVE YOUR PROGRAM IDS!
-# Write them down, store securely
 ```
 
----
+### 6.2 SPL Token Integration
+**Goal:** Native USDC and SOL support
 
-## 💰 Phase 3: Monetization (Month 2)
+**Features:**
+- [ ] USDC payments
+- [ ] SOL payments
+- [ ] Token swaps (Jupiter)
+- [ ] Multi-token support
+- [ ] Token bridging
 
-### Revenue Model (Solana-Native)
+### 6.3 Solana Pay Integration
+**Goal:** Seamless crypto payments
 
-**1. Transaction Fees (1-2%)**
+**Features:**
+- [ ] QR code payments
+- [ ] Request payments
+- [ ] Payment confirmations
+- [ ] Transaction history
+- [ ] Refund processing
 
-```rust
-// In your marketplace program
-pub fn execute_purchase(ctx: Context<Purchase>, amount: u64) -> Result<()> {
-    // 1% platform fee
-    let fee = amount / 100;
-    let seller_amount = amount - fee;
-    
-    // Transfer USDC to seller
-    transfer_spl_tokens(&ctx, seller_amount, seller)?;
-    
-    // Transfer fee to treasury
-    transfer_spl_tokens(&ctx, fee, treasury)?;
-    
-    Ok(())
-}
-```
-
-**Revenue Potential:**
-- 1000 transactions/day @ $100 average = $100k/day volume
-- 1% fee = $1,000/day = $30k/month
-- 2% fee = $2,000/day = $60k/month
+**Timeline:** 2 weeks  
+**Cost:** ~10-15 SOL (~$2,000) for mainnet deployment
 
 ---
 
-**2. Agent Staking (Stake $SUBRA token)**
+## 🌐 Phase 7: Production Infrastructure (Week 13-14)
 
-```rust
-pub fn list_agent(ctx: Context<ListAgent>, stake_amount: u64) -> Result<()> {
-    require!(stake_amount >= MINIMUM_STAKE, ErrorCode::InsufficientStake);
-    
-    // Lock tokens in vault
-    transfer_to_vault(&ctx, stake_amount)?;
-    
-    Ok(())
-}
-```
+### 7.1 Backend Scaling
+**Goal:** Handle 1000s of concurrent agents
 
-**Tiers:**
-- Basic: 100 $SUBRA (~$100)
-- Pro: 1,000 $SUBRA (~$1,000)
-- Enterprise: 10,000 $SUBRA (~$10,000)
+**Features:**
+- [ ] Kubernetes deployment
+- [ ] Load balancing
+- [ ] Auto-scaling
+- [ ] Redis cluster
+- [ ] PostgreSQL replication
+- [ ] CDN integration (Cloudflare)
 
-**Revenue from Staking:**
-- 1000 agents staked average 500 tokens = 500,000 tokens locked
-- You can earn yield on locked tokens
-- Or create your own token economics
+### 7.2 Monitoring & Observability
+**Goal:** Know what's happening
 
----
+**Features:**
+- [ ] Datadog integration
+- [ ] Error tracking (Sentry)
+- [ ] Performance monitoring (New Relic)
+- [ ] Log aggregation (Elasticsearch)
+- [ ] Alerting (PagerDuty)
+- [ ] Uptime monitoring (Pingdom)
 
-**3. Premium Features (Pay in SOL/USDC)**
+### 7.3 Security Hardening
+**Goal:** Production-grade security
 
-```typescript
-export const PRICING = {
-  BASIC: 0, // Free
-  PRO: 0.5, // 0.5 SOL/month (~$100)
-  ENTERPRISE: 2, // 2 SOL/month (~$400)
-};
-```
+**Features:**
+- [ ] Rate limiting per user
+- [ ] DDoS protection
+- [ ] WAF (Web Application Firewall)
+- [ ] Penetration testing
+- [ ] Security audit
+- [ ] Bug bounty program
 
-**Premium Features:**
-- Priority agent execution
-- Advanced analytics
-- API access
-- Custom agent training
-- White-label solution
+**Timeline:** 2 weeks  
+**Cost:** ~$500/month for infrastructure
 
 ---
 
-**4. Create $SUBRA Token (Optional)**
+## 📱 Phase 8: Mobile & Extensions (Week 15-16)
 
-```bash
-# Create SPL token for your platform
-spl-token create-token
-spl-token create-account <TOKEN_ADDRESS>
-spl-token mint <TOKEN_ADDRESS> 1000000000
+### 8.1 Mobile Apps
+**Goal:** iOS and Android apps
 
-# List on Jupiter, Raydium
-# Marketing: "The token for AI commerce on Solana"
-```
+**Features:**
+- [ ] React Native app
+- [ ] Push notifications
+- [ ] Face ID / Touch ID
+- [ ] Mobile wallet integration
+- [ ] Chat with agents
+- [ ] Order tracking
 
-**Tokenomics:**
-- Total Supply: 1B tokens
-- Staking: 40%
-- Team: 20% (4-year vest)
-- Community: 30%
-- Liquidity: 10%
+### 8.2 Browser Extensions
+**Goal:** Shop anywhere with your agent
 
-**Token Utility:**
-- Stake to list agents
-- Governance votes
-- Fee discounts
-- Rewards for early users
+**Features:**
+- [ ] Chrome extension
+- [ ] Firefox extension
+- [ ] Price comparison overlay
+- [ ] Agent assistant sidebar
+- [ ] One-click purchases
+- [ ] Auto-coupon finder
 
----
+### 8.3 Desktop App
+**Goal:** Native desktop experience
 
-## 📊 Phase 4: Growth & Scale (Month 3-6)
+**Features:**
+- [ ] Electron app (Mac, Windows, Linux)
+- [ ] System tray integration
+- [ ] Desktop notifications
+- [ ] Offline mode
+- [ ] Local agent processing
 
-### Month 3: Launch & Marketing
-
-**Week 1-2: Soft Launch**
-- Deploy to mainnet
-- Onboard 10 beta users
-- Fix any bugs
-- Gather feedback
-
-**Week 3: Community Building**
-- Create Discord server
-- Start Twitter account
-- Begin daily content
-- Engage with Solana community
-
-**Week 4: Public Launch**
-- Product Hunt launch
-- Twitter announcement
-- Reddit posts (/r/solana, /r/cryptocurrency)
-- Reach out to Solana influencers
-
-**Content Strategy:**
-```markdown
-Daily Twitter threads:
-- "How I saved $500 using AI agents on Solana"
-- "Behind the scenes: Building on Solana"
-- "Agent spotlight: Meet our top performers"
-
-Weekly blog posts:
-- Technical deep dives
-- User success stories
-- Platform updates
-
-YouTube videos:
-- Tutorial: How to use SUBRA
-- Developer docs: Build your own agent
-- Demo: Watch AI shop for you
-```
+**Timeline:** 2 weeks  
+**Blockers:** App store approvals (3-7 days)
 
 ---
 
-### Month 4: Partnerships
+## 🎨 Phase 9: Advanced Features (Week 17-20)
 
-**Solana Ecosystem:**
-- Apply for Solana Foundation grant
-- Partner with Solana Mobile (Saga phone)
-- Integrate with Solana Pay
-- List on Solana ecosystem directory
+### 9.1 Social Features
+- [ ] Agent sharing
+- [ ] Community marketplace
+- [ ] Agent leaderboards
+- [ ] User profiles
+- [ ] Social login (Google, Twitter)
+- [ ] Referral program
 
-**Payment Partners:**
-- Partner with Phantom wallet
-- Integrate with Solflare
-- Work with USDC issuer (Circle)
-- Partner with Solana pay processors
+### 9.2 Analytics & Insights
+- [ ] Savings dashboard
+- [ ] Agent performance metrics
+- [ ] Market trends
+- [ ] Price predictions
+- [ ] Spending insights
+- [ ] ROI calculator
 
-**Merchant Partners:**
-- Onboard first 10 merchants
-- Create affiliate program
-- B2B outreach for enterprise
+### 9.3 Advanced Automation
+- [ ] Subscription management
+- [ ] Recurring purchases
+- [ ] Price alerts
+- [ ] Inventory alerts
+- [ ] Deal notifications
+- [ ] Smart recommendations
 
----
-
-### Month 5-6: Scale
-
-**Technical:**
-- Optimize RPC usage (use Geyser)
-- Implement caching layers
-- Add more agent types
-- Mobile app development
-
-**Business:**
-- Hire first team member
-- Reach 1000 active users
-- Process $1M+ in transactions
-- Achieve $10k MRR
+**Timeline:** 4 weeks
 
 ---
 
-## 🎯 7-Day Solana Quickstart Plan
+## 🚀 Phase 10: Launch & Growth (Week 21+)
 
-### Day 1 (Today): Setup Solana
+### 10.1 Beta Launch
+- [ ] Invite-only beta (100 users)
+- [ ] Feedback collection
+- [ ] Bug fixing
+- [ ] Performance optimization
+- [ ] User onboarding improvements
 
-```bash
-# 1. Install Solana toolchain (30 min)
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+### 10.2 Public Launch
+- [ ] Product Hunt launch
+- [ ] Twitter/X announcement
+- [ ] Blog post
+- [ ] Press release
+- [ ] Influencer partnerships
+- [ ] Paid advertising
 
-# 2. Install Anchor (15 min)
-cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
-avm install latest && avm use latest
+### 10.3 Growth Metrics
+**Target:**
+- 1,000 users in Month 1
+- 10,000 users in Month 3
+- 100,000 users in Month 6
 
-# 3. Create wallet & get SOL (10 min)
-solana-keygen new
-solana config set --url devnet
-solana airdrop 2
+**Monetization:**
+- Free tier: 1 agent, 10 tasks/month
+- Pro tier: $9/month, unlimited agents, unlimited tasks
+- Enterprise: Custom pricing
 
-# 4. Test connection (5 min)
-solana balance
-anchor --version
-```
+### 10.4 Token Launch (Optional)
+- [ ] $SUBRA token design
+- [ ] Tokenomics
+- [ ] Agent staking
+- [ ] Governance
+- [ ] Liquidity pools
+- [ ] DEX listing
 
-**Goal:** Solana dev environment ready ✅
-
----
-
-### Day 2: Deploy Programs
-
-```bash
-# 1. Build programs (20 min)
-cd apps/solana-programs
-anchor build
-
-# 2. Deploy to devnet (15 min)
-anchor deploy
-
-# 3. Test programs (30 min)
-anchor test
-
-# 4. Update frontend with program IDs (15 min)
-# Copy program IDs to .env.local
-```
-
-**Goal:** Smart contracts live on devnet ✅
+**Timeline:** Ongoing
 
 ---
 
-### Day 3: Frontend Integration
+## 📊 Success Metrics
 
-```bash
-# 1. Test Phantom wallet connection (30 min)
-# Open http://localhost:3000
-# Connect wallet
-# Create agent
+### Technical Metrics
+- [ ] 99.9% uptime
+- [ ] <100ms API response time
+- [ ] <2s page load time
+- [ ] 0 security vulnerabilities
+- [ ] 1000+ agents deployed
+- [ ] 10,000+ tasks completed
 
-# 2. Test SOL transfers (30 min)
-# Send test SOL between accounts
+### Business Metrics
+- [ ] $100K ARR (Annual Recurring Revenue)
+- [ ] 10,000 MAU (Monthly Active Users)
+- [ ] $1M GMV (Gross Merchandise Volume)
+- [ ] 80% user retention
+- [ ] 4.5+ App Store rating
 
-# 3. Test USDC (if available on devnet) (30 min)
-# Or skip to mainnet later
-
-# 4. Polish UI/UX (30 min)
-# Fix any bugs
-# Improve wallet flow
-```
-
-**Goal:** Full wallet integration working ✅
-
----
-
-### Day 4: Real APIs
-
-```bash
-# 1. Sign up for SerpAPI (15 min)
-# https://serpapi.com
-
-# 2. Integrate product search (1 hour)
-# Update agent skills with real API
-
-# 3. Test end-to-end flow (45 min)
-# User → Agent → Search → Results
-
-# 4. Add error handling (30 min)
-```
-
-**Goal:** Real product search working ✅
+### Agent Metrics
+- [ ] Average savings per user: $50/month
+- [ ] Average agent tasks: 20/month
+- [ ] Agent success rate: 85%+
+- [ ] Response time: <5 seconds
 
 ---
 
-### Day 5: Polish & Test
+## 💰 Budget & Resources
 
-```bash
-# 1. Add loading states (30 min)
-# 2. Add error messages (30 min)
-# 3. Improve agent responses (1 hour)
-# 4. Test all features (1 hour)
-# 5. Fix bugs (variable)
-```
+### Development Costs
+- **Developers:** 2-3 full-stack ($150K-$300K/year)
+- **AI/ML Engineer:** 1 ($120K/year)
+- **Designer:** 1 ($80K/year)
+- **DevOps:** 1 part-time ($40K/year)
 
-**Goal:** Production-ready user experience ✅
+### Infrastructure Costs
+- **Hosting:** $500-$1,000/month (AWS/GCP)
+- **Solana programs:** $2,000 (one-time deployment)
+- **APIs:** $200-$500/month (OpenAI, marketplaces)
+- **Monitoring:** $200/month
 
----
+### Marketing Costs
+- **Paid ads:** $5,000-$10,000/month
+- **Content creation:** $2,000/month
+- **PR/Partnerships:** $3,000/month
 
-### Day 6: Deploy to Production
-
-```bash
-# 1. Deploy API to Railway (30 min)
-railway init && railway up
-
-# 2. Deploy frontend to Vercel (15 min)
-vercel --prod
-
-# 3. Setup custom domain (30 min)
-# Buy subra.app or similar
-# Point DNS to Vercel
-
-# 4. Test production (1 hour)
-# Full end-to-end test on production
-```
-
-**Goal:** Live on the internet ✅
+**Total Year 1:** ~$400K-$600K
 
 ---
 
-### Day 7: Launch Prep
+## 🎯 Key Differentiators
 
-```bash
-# 1. Create marketing materials (2 hours)
-# - Screenshots
-# - Demo video
-# - Product Hunt description
-# - Twitter announcement
+### What Makes SUBRA Unique?
 
-# 2. Setup social media (1 hour)
-# - Twitter account
-# - Discord server
-# - Website analytics
+1. **Autonomous AI Agents**
+   - Not just tools, actual autonomous agents
+   - Learn and improve over time
+   - Make decisions independently
 
-# 3. Prepare launch (1 hour)
-# - Schedule Product Hunt
-# - Draft tweets
-# - Prepare for traffic
-```
+2. **Zero-Knowledge Proofs**
+   - Private commerce
+   - Cryptographic verification
+   - No trust required
 
-**Goal:** Ready to launch publicly ✅
+3. **Solana-Native**
+   - 65,000 TPS
+   - $0.00025 per transaction
+   - Fast finality (400ms)
 
----
+4. **Agent-to-Agent Economy** 🆕
+   - Agents pay agents (x402)
+   - Machine-to-machine commerce
+   - Decentralized agent marketplace
 
-## 🎊 Success Metrics
+5. **Dropshipping Automation** 🆕
+   - Fully automated dropshipping
+   - Product sourcing to fulfillment
+   - Multi-store management
 
-### Month 1:
-- ✅ Deployed on Solana devnet
-- ✅ 10 beta users
-- ✅ 100 test transactions
-- ✅ Working product
-
-### Month 2:
-- 🎯 Deployed on Solana mainnet
-- 🎯 100 active users
-- 🎯 $10,000 transaction volume
-- 🎯 First revenue
-
-### Month 3:
-- 🎯 500 active users
-- 🎯 $100,000 transaction volume
-- 🎯 $1,000 MRR
-- 🎯 First partnerships
-
-### Month 6:
-- 🎯 2,000 active users
-- 🎯 $1,000,000 transaction volume
-- 🎯 $10,000 MRR
-- 🎯 Profitable
-
-### Year 1:
-- 🎯 10,000+ users
-- 🎯 $10M+ transaction volume
-- 🎯 $100k MRR
-- 🎯 Raise seed round or stay bootstrapped
+6. **Full-Stack Solution**
+   - Frontend, backend, blockchain, AI
+   - Mobile, web, extensions
+   - Complete ecosystem
 
 ---
 
-## 🔮 Future: Multi-Chain (Year 2+)
+## 🔮 Future Vision (Year 2+)
 
-Once you dominate Solana, expand to:
+### Advanced Features
+- [ ] Multi-chain support (Ethereum, Polygon, BSC)
+- [ ] DAO governance
+- [ ] Agent NFTs (tradeable agents)
+- [ ] Agent staking
+- [ ] Cross-platform agents
+- [ ] AI agent marketplace
+- [ ] Agent collaboration protocols
+- [ ] Decentralized agent training
+- [ ] Agent insurance
+- [ ] Agent legal framework
 
-### Ethereum Integration
-- Deploy EVM contracts
-- Add MetaMask support
-- Support ETH, USDC on Ethereum
+### New Verticals
+- [ ] Real estate agents
+- [ ] Travel booking agents
+- [ ] Investment agents
+- [ ] Healthcare agents
+- [ ] Education agents
+- [ ] Gaming agents
 
-### Other Chains
-- Polygon (low fees)
-- Arbitrum (L2 scaling)
-- Base (Coinbase's L2)
-- Avalanche
-
-**Strategy:** Start with Solana, add chains based on user demand.
-
----
-
-## 💡 Why This Will Work
-
-### Market Timing
-- ✅ AI is hot (ChatGPT, GPT-5)
-- ✅ Crypto is recovering (bull market)
-- ✅ Solana is growing (Saga phone, Solana Pay)
-- ✅ E-commerce is huge ($5T market)
-
-### Technical Edge
-- ✅ Built on fastest blockchain (Solana)
-- ✅ Using best AI models (GPT-5.1)
-- ✅ Modern stack (Next.js, Anchor)
-- ✅ First-mover advantage in AI × Solana commerce
-
-### Business Model
-- ✅ Multiple revenue streams
-- ✅ Network effects (more agents = more value)
-- ✅ Defensible (hard to copy full stack)
-- ✅ Scalable (software margins)
+### Global Expansion
+- [ ] Multi-language support (50+ languages)
+- [ ] Local payment methods
+- [ ] Regional marketplaces
+- [ ] Local regulations compliance
+- [ ] Global agent network
 
 ---
 
-## 🆘 Quick Reference
+## 🚨 Risks & Mitigation
 
-### Key Commands
+### Technical Risks
+- **Blockchain congestion:** Use Solana (65K TPS)
+- **API rate limits:** Build scraping fallback
+- **AI hallucinations:** Human-in-the-loop for critical decisions
+- **Security breaches:** Regular audits, bug bounties
 
-```bash
-# Solana
-solana balance
-solana airdrop 2
-solana-keygen pubkey ~/.config/solana/id.json
+### Business Risks
+- **Marketplace bans:** Diversify across 10+ platforms
+- **Regulation:** Legal counsel, compliance team
+- **Competition:** First-mover advantage, unique features
+- **User adoption:** Free tier, aggressive marketing
 
-# Anchor
-anchor build
-anchor deploy
-anchor test
-
-# Project
-pnpm install
-pnpm dev
-pnpm build
-
-# Deploy
-railway up
-vercel --prod
-```
-
-### Important Links
-
-- Solana Docs: https://docs.solana.com/
-- Anchor Book: https://book.anchor-lang.com/
-- Solana Explorer: https://explorer.solana.com/
-- Phantom Wallet: https://phantom.app/
-- Helius RPC: https://helius.dev/
-
-### Support
-
-- Solana Discord: https://discord.gg/solana
-- Anchor Discord: https://discord.gg/anchorlang
-- Twitter: @solana
-- Reddit: /r/solana
+### Operational Risks
+- **Scaling issues:** Kubernetes, auto-scaling
+- **Downtime:** 99.9% SLA, redundancy
+- **Team attrition:** Stock options, good culture
+- **Funding:** Revenue from Day 1, profitable by Month 6
 
 ---
 
-## 🎉 You're Ready!
+## 📝 Next Immediate Steps (This Week)
 
-You have everything you need to build the next big thing on Solana:
+### High Priority
+1. ✅ Fix Phantom wallet false connection
+2. ✅ Complete wallet connection testing
+3. [ ] Implement agent activation logic
+4. [ ] Build agent chat interface
+5. [ ] Connect agents to task execution
 
-✅ Complete Anchor programs  
-✅ Solana wallet integration  
-✅ SPL token support (SOL, USDC)  
-✅ AI agent infrastructure  
-✅ Beautiful UI  
-✅ Clear roadmap  
-✅ Monetization strategy  
+### Medium Priority
+6. [ ] Add marketplace API integrations (start with 1-2)
+7. [ ] Build product search service
+8. [ ] Implement price comparison
+9. [ ] Create agent configuration UI
 
-**Now go ship it!** 🚀🟣
+### Low Priority
+10. [ ] Documentation updates
+11. [ ] Unit tests
+12. [ ] Integration tests
+13. [ ] Performance optimization
 
 ---
 
-**P.S.** Remember: Start with Solana, dominate the ecosystem, then expand. Focus beats everything.
+## 📚 Resources & Documentation
+
+### Technical Documentation
+- `/SOLANA_SETUP.md` - Solana deployment guide
+- `/WALLET_GUIDE.md` - Wallet integration guide
+- `/TEST_WALLET_CONNECTION.md` - Testing guide
+- `/QUICKSTART.md` - Development setup
+- `/apps/circuits/README.md` - ZK circuits guide
+
+### External Resources
+- [Solana Docs](https://docs.solana.com/)
+- [Anchor Book](https://book.anchor-lang.com/)
+- [Noir Documentation](https://noir-lang.org/)
+- [OpenAI API](https://platform.openai.com/docs)
+- [x402 Protocol Spec](https://github.com/interledger/rfcs/tree/master/0402-payment-required)
+
+---
+
+## ✅ Alignment with Original Vision
+
+**Original Prompt:** *"AI agents that autonomously search, compare, negotiate, and execute on-chain transactions with cryptographic proof and zero-knowledge verification"*
+
+**This Roadmap Delivers:**
+
+✅ **Autonomous AI Agents**
+- Explorer, Negotiator, Executor, Tracker agents
+- Agent-to-agent commerce (x402)
+- Dropshipping automation
+- Machine learning & improvement
+
+✅ **Search & Compare**
+- Multi-marketplace integration
+- Price comparison engine
+- Product discovery AI
+
+✅ **Negotiate**
+- Automated negotiation
+- Historical price data
+- ML price prediction
+
+✅ **Execute On-Chain**
+- Solana smart contracts
+- SPL token payments (USDC, SOL)
+- Solana Pay integration
+
+✅ **Cryptographic Proof**
+- Zero-knowledge circuits
+- zkSpendProof, zkReceiptProof
+- On-chain verification
+
+✅ **Zero-Knowledge Verification**
+- Noir circuit compilation
+- Privacy-preserving commerce
+- Verifiable but private
+
+**Plus Additional Value:**
+- 🆕 Dropshipping capabilities
+- 🆕 Agent-to-agent payments (x402)
+- 🆕 Agent marketplace economy
+- 🆕 Multi-wallet support
+- 🆕 Beautiful futuristic UI
+
+---
+
+## 🎯 Remember: This is About AI Agent Commerce
+
+This is **NOT:**
+- Just another DeFi protocol
+- Just another NFT marketplace
+- Just another blockchain project
+- Just another AI chatbot
+
+This **IS:**
+- Autonomous AI agents doing real commerce
+- Machine-to-machine economy
+- Private, verifiable transactions
+- Future of shopping
+- Agent-powered dropshipping
+- Decentralized agent collaboration
+
+**Stay focused on the mission:** Build the best autonomous AI commerce platform in the world.
+
+---
+
+**Last Updated:** December 13, 2025  
+**Status:** Phase 1 Complete, Moving to Phase 2  
+**Next Milestone:** Marketplace Integration (2 weeks)

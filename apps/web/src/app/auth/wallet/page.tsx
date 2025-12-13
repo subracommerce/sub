@@ -32,12 +32,31 @@ export default function WalletAuthPage() {
     }
   }, [connected, step]);
 
-  // Auto-proceed to sign step when wallet connects
+  // Auto-proceed to sign step when wallet connects (with validation)
   useEffect(() => {
-    if (connected && publicKey && step === "connect") {
-      setStep("sign");
-    }
-  }, [connected, publicKey, step]);
+    const validateWalletConnection = async () => {
+      if (connected && publicKey && step === "connect") {
+        try {
+          // Test if wallet is actually accessible (not locked)
+          if (!signMessage) {
+            console.warn("Wallet connected but signMessage not available");
+            setError("Wallet is locked. Please unlock your wallet and try again.");
+            disconnect();
+            return;
+          }
+          
+          // Proceed to sign step
+          setStep("sign");
+        } catch (error) {
+          console.error("Wallet validation error:", error);
+          setError("Failed to validate wallet connection. Please try again.");
+          disconnect();
+        }
+      }
+    };
+    
+    validateWalletConnection();
+  }, [connected, publicKey, signMessage, disconnect, step]);
 
   const handleSignAndAuthenticate = async () => {
     if (!publicKey || !signMessage) {
